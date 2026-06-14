@@ -71,16 +71,13 @@ function makeMarker(capital: Capital, radius: number) {
 export function createExplorationOverlay(globe: GlobeRenderer, elements: OverlayElements): ExplorationOverlay {
   const markerObjects = capitals.map((capital) => ({ capital, ...makeMarker(capital, globe.radius) }));
   markerObjects.forEach(({ marker, ring, hitArea }) => {
-    globe.markerGroup.add(marker, ring, hitArea);
-    globe.pickables.push(marker, ring, hitArea);
+    globe.addMarkerObjects(marker, ring, hitArea);
   });
 
   let showAll = false;
   let explorationMode = false;
   let earthReady = false;
   let selected: Capital | null = null;
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2(99, 99);
 
   function visibleData() {
     if (!explorationMode || !earthReady) return [];
@@ -138,7 +135,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
 
   function syncUi() {
     const canShowMarkers = explorationMode && earthReady;
-    globe.markerGroup.visible = canShowMarkers;
+    globe.setMarkerLayerVisible(canShowMarkers);
     markerObjects.forEach(({ capital, marker, ring, hitArea }) => {
       const visible = canShowMarkers && (showAll || capital.tier === 'highlight');
       marker.visible = visible;
@@ -169,22 +166,14 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     if ((!canShowMarkers || (selected && !data.includes(selected))) && selected) showCard(null);
   }
 
-  function updatePointer(event: PointerEvent) {
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
-    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-  }
-
   function pick(event: PointerEvent, commit = false) {
     if (!earthReady || !explorationMode) {
       document.body.style.cursor = '';
       return;
     }
-    updatePointer(event);
-    raycaster.setFromCamera(pointer, globe.camera);
-    const hit = raycaster.intersectObjects(globe.pickables.filter((o) => o.visible), false)[0];
+    const hit = globe.pickVisibleObject(event, event.currentTarget as HTMLElement);
     document.body.style.cursor = hit ? 'pointer' : '';
-    if (hit && commit) showCard(hit.object.userData.capital as Capital);
+    if (hit && commit) showCard(hit.userData.capital as Capital);
   }
 
   function setExplorationMode(enabled: boolean) {

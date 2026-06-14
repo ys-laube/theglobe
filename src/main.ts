@@ -108,9 +108,7 @@ canvas.addEventListener('pointermove', (event) => {
     const dy = event.clientY - lastY;
     movedDistance = Math.max(movedDistance, Math.hypot(event.clientX - downX, event.clientY - downY));
     if (movedDistance > 6) {
-      globe.globeGroup.rotation.y += dx * 0.006;
-      globe.globeGroup.rotation.x += dy * 0.0035;
-      globe.globeGroup.rotation.x = THREE.MathUtils.clamp(globe.globeGroup.rotation.x, -0.75, 0.75);
+      globe.rotateBy(dx * 0.006, dy * 0.0035);
       velocityX = dx * 0.00018;
       velocityY = dy * 0.00008;
     }
@@ -150,17 +148,11 @@ globe.loadEarth();
 function animate() {
   requestAnimationFrame(animate);
   if (!isDragging) {
-    globe.globeGroup.rotation.y += velocityX;
-    globe.globeGroup.rotation.x += velocityY;
+    globe.drift(velocityX, velocityY);
     velocityX = THREE.MathUtils.lerp(velocityX, 0.0016, 0.006);
     velocityY *= 0.96;
   }
-  globe.markerGroup.children.forEach((child, index) => {
-    if (child.type === 'Mesh' && child.visible && child.userData.capital) {
-      const s = 1 + Math.sin(performance.now() * 0.002 + index) * 0.045;
-      child.scale.setScalar(s);
-    }
-  });
+  globe.animateMarkers(performance.now());
   globe.render();
 }
 animate();

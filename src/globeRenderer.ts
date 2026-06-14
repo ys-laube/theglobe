@@ -10,13 +10,13 @@ type StateMeta = {
 type StateListener = (state: GlobeRuntimeState, message: string, attribution: string, meta?: StateMeta) => void;
 
 export type GlobeRenderer = {
-  scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
-  renderer: THREE.WebGLRenderer;
-  globeGroup: THREE.Group;
-  markerGroup: THREE.Group;
-  pickables: THREE.Object3D[];
   radius: number;
+  addMarkerObjects: (...objects: THREE.Object3D[]) => void;
+  setMarkerLayerVisible: (visible: boolean) => void;
+  pickVisibleObject: (event: PointerEvent, target: HTMLElement) => THREE.Object3D | null;
+  rotateBy: (deltaY: number, deltaX: number) => void;
+  drift: (velocityY: number, velocityX: number) => void;
+  animateMarkers: (now: number) => void;
   resize: () => void;
   render: () => void;
   loadEarth: () => Promise<void>;
@@ -163,6 +163,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const markerGroup = new THREE.Group();
   markerGroup.visible = false;
   globeGroup.add(markerGroup);
+  const pickables: THREE.Object3D[] = [];
 
   const lights = [
     new THREE.AmbientLight('#8fb6ff', 0.72),
@@ -238,13 +239,41 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   }
 
   return {
-    scene,
-    camera,
-    renderer,
-    globeGroup,
-    markerGroup,
-    pickables: [],
     radius,
+    addMarkerObjects: (...objects) => {
+      markerGroup.add(...objects);
+      pickables.push(...objects);
+    },
+    setMarkerLayerVisible: (visible) => {
+      markerGroup.visible = visible;
+    },
+    pickVisibleObject: (event, target) => {
+      const rect = target.getBoundingClientRect();
+      const pointer = new THREE.Vector2(
+        ((event.clientX - rect.left) / rect.width) * 2 - 1,
+        -((event.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(pointer, camera);
+      return raycaster.intersectObjects(pickables.filter((object) => object.visible), false)[0]?.object ?? null;
+    },
+    rotateBy: (deltaY, deltaX) => {
+      globeGroup.rotation.y += deltaY;
+      globeGroup.rotation.x += deltaX;
+      globeGroup.rotation.x = THREE.MathUtils.clamp(globeGroup.rotation.x, -0.75, 0.75);
+    },
+    drift: (velocityY, velocityX) => {
+      globeGroup.rotation.y += velocityY;
+      globeGroup.rotation.x += velocityX;
+    },
+    animateMarkers: (now) => {
+      markerGroup.children.forEach((child, index) => {
+        if (child.type === 'Mesh' && child.visible && child.userData.capital) {
+          const s = 1 + Math.sin(now * 0.002 + index) * 0.045;
+          child.scale.setScalar(s);
+        }
+      });
+    },
     resize,
     render: () => renderer.render(scene, camera),
     loadEarth,
