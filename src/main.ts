@@ -56,6 +56,14 @@ const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
 const attribution = document.querySelector<HTMLElement>('[data-attribution]')!;
 
+function updateQaState() {
+  (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
+    state: globe.getState(),
+    explorationMode: overlay.getExplorationMode(),
+    forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
+  };
+}
+
 const globe = createGlobeRenderer(canvas, stage);
 const overlay = createExplorationOverlay(globe, {
   card: document.querySelector<HTMLElement>('.city-card')!,
@@ -72,11 +80,7 @@ globe.onStateChange((state, message, credit) => {
   stateCopy.textContent = message;
   attribution.textContent = credit;
   overlay.updateState(state);
-  (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
-    state,
-    explorationMode: overlay.getExplorationMode(),
-    forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
-  };
+  updateQaState();
 });
 
 let isDragging = false;
@@ -132,6 +136,8 @@ canvas.addEventListener('pointerleave', () => {
 });
 
 startButton.addEventListener('click', () => stage.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+explorationButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
+tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
 
 function resize() {
   globe.resize();

@@ -105,7 +105,16 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
   backdrop-filter: blur(14px);
   pointer-events: none;
 }
-.earth-status { top: 1rem; display: flex; gap: 0.5rem; align-items: center; white-space: nowrap; }
+.earth-status {
+  top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 2rem);
+  text-align: center;
+  white-space: normal;
+}
 .earth-status strong { color: #f8fafc; text-transform: capitalize; }
 .hint { bottom: 1rem; white-space: nowrap; }
 .globe-stage[data-earth-state="earth-ready"] .earth-status,
