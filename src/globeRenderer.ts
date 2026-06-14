@@ -3,7 +3,11 @@ import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, shouldForce
 
 export type GlobeRuntimeState = 'boot' | 'loading-earth' | 'earth-ready' | 'fallback-earth' | 'asset-enhancement-ready';
 
-type StateListener = (state: GlobeRuntimeState, message: string, attribution: string) => void;
+type StateMeta = {
+  failureReason?: string;
+};
+
+type StateListener = (state: GlobeRuntimeState, message: string, attribution: string, meta?: StateMeta) => void;
 
 export type GlobeRenderer = {
   scene: THREE.Scene;
@@ -173,14 +177,17 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   let state: GlobeRuntimeState = 'boot';
   let stateMessage = 'Preparing the globe.';
   let attribution = EARTH_ASSETS.day.attribution;
+  let failureReason: string | undefined;
 
-  function emit(nextState: GlobeRuntimeState, message: string, nextAttribution = attribution) {
+  function emit(nextState: GlobeRuntimeState, message: string, nextAttribution = attribution, meta: StateMeta = {}) {
     state = nextState;
     stateMessage = message;
     attribution = nextAttribution;
+    failureReason = meta.failureReason;
     host.dataset.earthState = state;
-    listeners.forEach((listener) => listener(state, stateMessage, attribution));
-    window.dispatchEvent(new CustomEvent('globe-state-change', { detail: { state, message, attribution } }));
+    const detail = { state, message, attribution, failureReason };
+    listeners.forEach((listener) => listener(state, stateMessage, attribution, detail));
+    window.dispatchEvent(new CustomEvent('globe-state-change', { detail }));
   }
 
   async function loadEarth() {
@@ -197,11 +204,12 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeMaterial.needsUpdate = true;
       emit('earth-ready', 'Real Earth imagery loaded. Exploration is ready when you are.', EARTH_ASSETS.day.attribution);
     } catch (error) {
+      const reason = error instanceof Error ? error.message : 'Unknown Earth texture load failure';
       globeMaterial.map = makeFallbackEarthTexture();
       globeMaterial.color.set('#ffffff');
       globeMaterial.emissiveIntensity = 0.10;
       globeMaterial.needsUpdate = true;
-      emit('fallback-earth', 'High-resolution imagery is unavailable, so a designed fallback Earth is active.', FALLBACK_ATTRIBUTION);
+      emit('fallback-earth', 'High-resolution imagery is unavailable, so a designed fallback Earth is active.', FALLBACK_ATTRIBUTION, { failureReason: reason });
     }
 
     Promise.allSettled([

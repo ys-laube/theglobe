@@ -23,6 +23,25 @@ type OverlayElements = {
 };
 
 const readyStates: GlobeRuntimeState[] = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'];
+const safeAccentPattern = /^#[0-9a-f]{6}$/i;
+
+function safeAccent(accent: string) {
+  return safeAccentPattern.test(accent) ? accent : '#60a5fa';
+}
+
+function safeExternalUrl(url: string) {
+  const parsed = new URL(url);
+  if (parsed.protocol !== 'https:') throw new Error(`Unsupported city link protocol: ${parsed.protocol}`);
+  return parsed.toString();
+}
+
+function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, tagName: K, text: string, className?: string) {
+  const element = document.createElement(tagName);
+  element.textContent = text;
+  if (className) element.className = className;
+  parent.append(element);
+  return element;
+}
 
 function makeMarker(capital: Capital, radius: number) {
   const marker = new THREE.Mesh(
@@ -70,25 +89,51 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
 
   function showCard(capital: Capital | null) {
     selected = capital;
+    elements.card.replaceChildren();
     if (!capital) {
       elements.card.dataset.empty = 'true';
-      elements.card.innerHTML = `<div class="card-art"><span>🌍</span></div><div class="card-copy"><p class="card-kicker">Exploration</p><h2>탐험 모드를 켜면 도시가 나타나요</h2><p>처음에는 지구의 표면과 분위기를 충분히 느끼고, 준비되면 수도의 이야기를 열어보세요.</p></div>`;
+      const art = document.createElement('div');
+      art.className = 'card-art';
+      appendText(art, 'span', '🌍');
+      const copy = document.createElement('div');
+      copy.className = 'card-copy';
+      appendText(copy, 'p', 'Exploration', 'card-kicker');
+      appendText(copy, 'h2', '탐험 모드를 켜면 도시가 나타나요');
+      appendText(copy, 'p', '처음에는 지구의 표면과 분위기를 충분히 느끼고, 준비되면 수도의 이야기를 열어보세요.');
+      elements.card.append(art, copy);
       return;
     }
     elements.card.dataset.empty = 'false';
-    elements.card.style.setProperty('--accent', capital.accent);
-    elements.card.innerHTML = `
-      <div class="card-art" style="--accent:${capital.accent}"><span>${capital.city.slice(0, 1)}</span></div>
-      <div class="card-copy">
-        <p class="card-kicker">${capital.region} · ${capital.country}</p>
-        <h2>${capital.city}</h2>
-        <p>${capital.note}</p>
-        <dl>
-          <div><dt>Landmark</dt><dd>${capital.landmark}</dd></div>
-          <div><dt>Food</dt><dd>${capital.food}</dd></div>
-        </dl>
-        <a href="${capital.link}" target="_blank" rel="noreferrer">더 알아보기 ↗</a>
-      </div>`;
+    const accent = safeAccent(capital.accent);
+    elements.card.style.setProperty('--accent', accent);
+    const art = document.createElement('div');
+    art.className = 'card-art';
+    art.style.setProperty('--accent', accent);
+    appendText(art, 'span', capital.city.slice(0, 1));
+
+    const copy = document.createElement('div');
+    copy.className = 'card-copy';
+    appendText(copy, 'p', `${capital.region} · ${capital.country}`, 'card-kicker');
+    appendText(copy, 'h2', capital.city);
+    appendText(copy, 'p', capital.note);
+
+    const details = document.createElement('dl');
+    [
+      ['Landmark', capital.landmark],
+      ['Food', capital.food],
+    ].forEach(([label, value]) => {
+      const row = document.createElement('div');
+      appendText(row, 'dt', label);
+      appendText(row, 'dd', value);
+      details.append(row);
+    });
+    copy.append(details);
+
+    const link = appendText(copy, 'a', '더 알아보기 ↗');
+    link.href = safeExternalUrl(capital.link);
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    elements.card.append(art, copy);
   }
 
   function syncUi() {
@@ -102,6 +147,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     });
 
     const data = visibleData();
+    elements.card.hidden = !canShowMarkers;
+    elements.card.setAttribute('aria-hidden', String(!canShowMarkers));
     elements.visibleCount.textContent = String(data.length);
     elements.tierTitle.textContent = !earthReady ? 'Earth loading' : explorationMode ? (showAll ? 'World capitals' : 'Premium highlights') : 'Earth-first gift mode';
     elements.tierCopy.textContent = !earthReady
@@ -114,7 +161,11 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.tierButton.textContent = showAll ? '하이라이트만 보기' : '더 많은 수도 보기';
     elements.tierButton.disabled = !canShowMarkers;
     const byRegion = [...new Set(data.map((c) => c.region))];
-    elements.regionList.innerHTML = byRegion.map((region) => `<span>${region}</span>`).join('');
+    elements.regionList.replaceChildren(...byRegion.map((region) => {
+      const chip = document.createElement('span');
+      chip.textContent = region;
+      return chip;
+    }));
     if ((!canShowMarkers || (selected && !data.includes(selected))) && selected) showCard(null);
   }
 

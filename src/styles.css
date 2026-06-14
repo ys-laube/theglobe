@@ -135,6 +135,8 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
   pointer-events: none;
   transition: opacity 220ms ease, transform 220ms ease;
 }
+.city-card[hidden] { display: none; }
+.city-card:not([hidden]) { pointer-events: auto; }
 .globe-stage[data-earth-state="earth-ready"] .city-card,
 .globe-stage[data-earth-state="fallback-earth"] .city-card,
 .globe-stage[data-earth-state="asset-enhancement-ready"] .city-card {
