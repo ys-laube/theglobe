@@ -24,12 +24,26 @@ type OverlayData = {
 };
 
 type RegionId =
+  | 'kr-korea-overview'
   | 'kr-seoul'
   | 'kr-busan'
-  | 'kr-busan-haeundae'
-  | 'kr-seoul'
-  | 'kr-seoul-mapo'
+  | 'kr-daegu'
+  | 'kr-incheon'
+  | 'kr-gwangju'
+  | 'kr-daejeon'
+  | 'kr-ulsan'
+  | 'kr-sejong'
+  | 'kr-gyeonggi'
+  | 'kr-gangwon'
+  | 'kr-chungbuk'
+  | 'kr-chungnam'
+  | 'kr-jeonbuk'
+  | 'kr-jeonnam'
+  | 'kr-gyeongbuk'
   | 'kr-gyeongnam'
+  | 'kr-jeju'
+  | 'kr-busan-haeundae'
+  | 'kr-seoul-mapo'
   | 'kr-gyeongnam-gimhae'
   | 'kr-gimhae-bonghwang';
 
@@ -61,38 +75,60 @@ type CreateOptions = {
   onClose?: () => void;
 };
 
+const firstLevelRegionOrder = [
+  'kr-seoul',
+  'kr-busan',
+  'kr-daegu',
+  'kr-incheon',
+  'kr-gwangju',
+  'kr-daejeon',
+  'kr-ulsan',
+  'kr-sejong',
+  'kr-gyeonggi',
+  'kr-gangwon',
+  'kr-chungbuk',
+  'kr-chungnam',
+  'kr-jeonbuk',
+  'kr-jeonnam',
+  'kr-gyeongbuk',
+  'kr-gyeongnam',
+  'kr-jeju',
+] as const satisfies readonly RegionId[];
+
 const routeNodes: Record<RegionId, RouteNode> = {
-  'kr-seoul': {
-    id: 'kr-seoul',
+  'kr-korea-overview': {
+    id: 'kr-korea-overview',
     label: '대한민국',
-    next: ['kr-busan', 'kr-seoul', 'kr-gyeongnam'],
+    next: firstLevelRegionOrder,
   },
-  'kr-busan': {
-    id: 'kr-busan',
-    label: '부산광역시',
-    next: ['kr-busan-haeundae'],
-  },
+  'kr-seoul': { id: 'kr-seoul', label: '서울특별시', next: ['kr-seoul-mapo'] },
+  'kr-busan': { id: 'kr-busan', label: '부산광역시', next: ['kr-busan-haeundae'] },
+  'kr-daegu': { id: 'kr-daegu', label: '대구광역시', next: [] },
+  'kr-incheon': { id: 'kr-incheon', label: '인천광역시', next: [] },
+  'kr-gwangju': { id: 'kr-gwangju', label: '광주광역시', next: [] },
+  'kr-daejeon': { id: 'kr-daejeon', label: '대전광역시', next: [] },
+  'kr-ulsan': { id: 'kr-ulsan', label: '울산광역시', next: [] },
+  'kr-sejong': { id: 'kr-sejong', label: '세종특별자치시', next: [] },
+  'kr-gyeonggi': { id: 'kr-gyeonggi', label: '경기도', next: [] },
+  'kr-gangwon': { id: 'kr-gangwon', label: '강원특별자치도', next: [] },
+  'kr-chungbuk': { id: 'kr-chungbuk', label: '충청북도', next: [] },
+  'kr-chungnam': { id: 'kr-chungnam', label: '충청남도', next: [] },
+  'kr-jeonbuk': { id: 'kr-jeonbuk', label: '전북특별자치도', next: [] },
+  'kr-jeonnam': { id: 'kr-jeonnam', label: '전라남도', next: [] },
+  'kr-gyeongbuk': { id: 'kr-gyeongbuk', label: '경상북도', next: [] },
+  'kr-gyeongnam': { id: 'kr-gyeongnam', label: '경상남도', next: ['kr-gyeongnam-gimhae'] },
+  'kr-jeju': { id: 'kr-jeju', label: '제주특별자치도', next: [] },
   'kr-busan-haeundae': {
     id: 'kr-busan-haeundae',
     label: '해운대구',
     next: [],
     households: ['sister', 'parents'],
   },
-  'kr-seoul': {
-    id: 'kr-seoul',
-    label: '서울특별시',
-    next: ['kr-seoul-mapo'],
-  },
   'kr-seoul-mapo': {
     id: 'kr-seoul-mapo',
     label: '마포구',
     next: [],
     households: ['brother'],
-  },
-  'kr-gyeongnam': {
-    id: 'kr-gyeongnam',
-    label: '경상남도',
-    next: ['kr-gyeongnam-gimhae'],
   },
   'kr-gyeongnam-gimhae': {
     id: 'kr-gyeongnam-gimhae',
@@ -115,12 +151,9 @@ const householdMarkers: readonly { readonly householdId: HouseholdId; readonly r
 ];
 
 const regionOrder: RegionId[] = [
-  'kr-seoul',
-  'kr-busan',
+  ...firstLevelRegionOrder,
   'kr-busan-haeundae',
-  'kr-seoul',
   'kr-seoul-mapo',
-  'kr-gyeongnam',
   'kr-gyeongnam-gimhae',
   'kr-gimhae-bonghwang',
 ];
@@ -156,7 +189,7 @@ function householdById(id: HouseholdId) {
 
 export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: CreateOptions): KoreaFamilyOverlay {
   let openState = false;
-  let selectedRegion: RegionId = 'kr-seoul';
+  let selectedRegion: RegionId = 'kr-korea-overview';
   let selectedHousehold: HouseholdId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
@@ -209,18 +242,18 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function renderHeader() {
     header.replaceChildren();
     const copy = document.createElement('div');
-    appendText(copy, 'p', 'Family map in Korea', 'map-kicker');
+    appendText(copy, 'p', 'Official static Korea family map', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '지구 위 한국에서 시작해, 가족이 서로를 기억하는 자리까지 천천히 확대됩니다.');
+    appendText(copy, 'p', '공공데이터/VWorld 경계 데이터셋 메타데이터를 문서화한 정적 17개 광역 행정구역 안내에서 가족이 있는 자리까지 확대됩니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');
     rootButton.type = 'button';
     rootButton.textContent = '대한민국';
-    rootButton.disabled = selectedRegion === 'kr-seoul';
-    rootButton.addEventListener('click', () => setRegion('kr-seoul'));
+    rootButton.disabled = selectedRegion === 'kr-korea-overview';
+    rootButton.addEventListener('click', () => setRegion('kr-korea-overview'));
     breadcrumbs.append(rootButton);
-    if (selectedRegion !== 'kr-seoul') {
+    if (selectedRegion !== 'kr-korea-overview') {
       const current = appendText(breadcrumbs, 'span', `› ${routeNodes[selectedRegion].label}`);
       current.setAttribute('aria-current', 'page');
     }
@@ -366,8 +399,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       return;
     }
 
-    appendText(routePanel, 'p', 'Next stop', 'map-kicker');
-    appendText(routePanel, 'h3', '가족이 있는 지역으로 한 단계 더 들어가기');
+    if (!node.next.length) {
+      appendText(routePanel, 'p', 'Official static region', 'map-kicker');
+      appendText(routePanel, 'h3', `${node.label} 경계 가이드`);
+      appendText(routePanel, 'p', '공식 공공데이터/VWorld 경계 데이터셋 메타데이터를 기준으로 문서화한 정적 SVG 안내 영역입니다. 가족 목적지가 있는 지역만 다음 단계로 확대됩니다.');
+      return;
+    }
+
+    appendText(routePanel, 'p', selectedRegion === 'kr-korea-overview' ? '17 first-level regions' : 'Next stop', 'map-kicker');
+    appendText(routePanel, 'h3', selectedRegion === 'kr-korea-overview' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
     const choices = document.createElement('div');
     choices.className = 'route-choice-grid';
     node.next.forEach((nextId) => {
