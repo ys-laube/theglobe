@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "verify:data": "node scripts/verify-boundary-data.mjs",
+    "smoke:korea": "node scripts/smoke-korea-family-map.mjs",
+    "verify": "npm run typecheck && npm run verify:data && npm run build",
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0"
   },

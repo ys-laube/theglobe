@@ -334,7 +334,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
     const links = document.createElement('div');
     links.className = 'band-link-grid';
     if (unlockedHousehold === household.id) {
-      nameGateState = 'unlocked';
       feedback.textContent = '확인되었습니다. 가족 밴드 초대 링크를 선택하세요.';
       getHouseholdLinks(household.id).forEach((slot) => {
         const link = document.createElement('a');

@@ -6,6 +6,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const boundaries = JSON.parse(await readFile(join(root, 'src/mapData/koreaFamilyBoundaries.json'), 'utf8'));
 const provenance = JSON.parse(await readFile(join(root, 'src/mapData/boundaryProvenance.json'), 'utf8'));
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
+const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
+const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -59,13 +61,40 @@ assert(worldBorders.sourceUrl.includes('natural-earth-vector'), 'world border so
 assert(worldBorders.lineCoordinateOrder === 'lat-lng', 'world border line coordinate order must be lat-lng');
 assert(Array.isArray(worldBorders.lines) && worldBorders.lines.length >= 150, 'world border asset must include broad country line coverage');
 assert(worldBorders.lineCount === worldBorders.lines.length, 'world border lineCount must match lines length');
-for (const line of worldBorders.lines.slice(0, 20)) {
-  assert(Array.isArray(line) && line.length >= 2, 'sampled world border lines must have at least two points');
-  for (const point of line.slice(0, 4)) {
+assert(worldBorders.lines.length <= 320, 'world border line count must stay inside the static app budget');
+assert(Buffer.byteLength(worldBordersRaw, 'utf8') <= 220_000, 'world border JSON must stay below the static raw-size budget');
+let worldBorderPointCount = 0;
+for (const line of worldBorders.lines) {
+  assert(Array.isArray(line) && line.length >= 2, 'world border lines must have at least two points');
+  worldBorderPointCount += line.length;
+  for (const point of line) {
     const [lat, lng] = point;
     assert(Number.isFinite(lat) && lat >= -90 && lat <= 90, 'world border latitude must be finite and valid');
     assert(Number.isFinite(lng) && lng >= -180 && lng <= 180, 'world border longitude must be finite and valid');
   }
 }
+assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
-console.log('PASS boundary data/provenance validation');
+const expectedHouseholds = {
+  parents: { names: ['한봉수', '이은주'], slots: 2 },
+  sister: { names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3 },
+  brother: { names: ['한동석', '김혜리', '한진주'], slots: 1 },
+  home: { names: ['한영석', '서혜빈', '한은하'], slots: 1 },
+};
+
+for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
+  assert(householdConfigSource.includes(`id: '${householdId}'`), `missing household config for ${householdId}`);
+  for (const name of expectation.names) {
+    assert(householdConfigSource.includes(`'${name}'`), `missing accepted name ${name} for ${householdId}`);
+  }
+  const slotMatches = householdConfigSource.match(new RegExp(`householdId: '${householdId}'`, 'g')) ?? [];
+  assert(slotMatches.length === expectation.slots, `${householdId} must have ${expectation.slots} Naver Band slot(s)`);
+}
+
+const placeholderMatches = householdConfigSource.match(/placeholderHref: 'https:\/\/band\.us\/band\/[^']+'/g) ?? [];
+const statusMatches = householdConfigSource.match(/, status: 'placeholder' }/g) ?? [];
+assert(placeholderMatches.length === 7, 'household config must expose exactly 7 band.us placeholder links');
+assert(statusMatches.length === 7, 'all household link slots must remain placeholder status until real URLs are supplied');
+assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
+
+console.log('PASS boundary/provenance/household validation');

@@ -38,15 +38,17 @@ npm run preview
 
 ## Verification notes
 
-For G001 documentation/test evidence, run:
+For full local verification, run:
 
 ```bash
-npm exec tsc -- --noEmit
-npm run build
+npm run verify
 ```
 
-This project currently has no dedicated `test` or `lint` npm script, so the
-build command is the available end-to-end static verification path.
+This runs TypeScript checking, bundled boundary/provenance validation, and the
+production Vite build. The app has no backend, login, or live API dependency.
+On macOS with Google Chrome installed, run `npm run smoke:korea` after a build
+to exercise the Korea → Busan → Haeundae → household name-gate path in headless
+Chrome.
 
 ## Shareable URL
 
