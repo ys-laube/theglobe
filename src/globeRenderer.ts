@@ -26,6 +26,7 @@ export type GlobeRenderer = {
   getViewMode: () => GlobeViewMode;
   onViewChange: (listener: ViewListener) => void;
   pickVisibleObject: (event: PointerEvent, target: HTMLElement) => THREE.Object3D | null;
+  projectLocation: (lat: number, lng: number, target: HTMLElement) => { clientX: number; clientY: number; visible: boolean } | null;
   rotateBy: (deltaY: number, deltaX: number) => void;
   drift: (velocityY: number, velocityX: number) => void;
   animateMarkers: (now: number) => void;
@@ -181,7 +182,7 @@ function makeKoreaHotspot() {
   aura.userData.koreaHotspot = true;
 
   const hitArea = new THREE.Mesh(
-    new THREE.SphereGeometry(0.19, 20, 20),
+    new THREE.SphereGeometry(0.105, 20, 20),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   );
   hitArea.position.copy(position);
@@ -392,7 +393,21 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       );
       const raycaster = new THREE.Raycaster();
       raycaster.setFromCamera(pointer, camera);
-      return raycaster.intersectObjects(pickables.filter((object) => object.visible), false)[0]?.object ?? null;
+      const intersections = raycaster.intersectObjects(pickables.filter((object) => object.visible), false);
+      return intersections.find((intersection) => intersection.object.userData.capital)?.object ?? intersections[0]?.object ?? null;
+    },
+    projectLocation: (lat, lng, target) => {
+      const rect = target.getBoundingClientRect();
+      const world = latLngToVector(lat, lng, radius + 0.045).applyMatrix4(globeGroup.matrixWorld);
+      const normal = latLngToVector(lat, lng, 1).applyEuler(globeGroup.rotation).normalize();
+      const cameraDirection = camera.position.clone().sub(world).normalize();
+      const visible = normal.dot(cameraDirection) > 0;
+      const projected = world.clone().project(camera);
+      return {
+        clientX: rect.left + ((projected.x + 1) / 2) * rect.width,
+        clientY: rect.top + ((1 - projected.y) / 2) * rect.height,
+        visible,
+      };
     },
     rotateBy: (deltaY, deltaX) => {
       focusRotation = null;

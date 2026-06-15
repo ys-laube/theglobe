@@ -89,6 +89,8 @@ function updateQaState() {
 }
 
 const globe = createGlobeRenderer(canvas, stage);
+(window as Window & { __GLOBE_QA_PROJECT_LOCATION__?: (lat: number, lng: number) => { clientX: number; clientY: number; visible: boolean } | null }).__GLOBE_QA_PROJECT_LOCATION__ = (lat: number, lng: number) => globe.projectLocation(lat, lng, canvas);
+
 const overlay = createExplorationOverlay(globe, {
   card: document.querySelector<HTMLElement>('.city-card')!,
   explorationButton,

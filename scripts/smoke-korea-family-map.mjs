@@ -170,6 +170,23 @@ try {
         const listFocusRotationDeltaY = Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y);
         const selectedCityFromQa = window.__GLOBE_QA__?.selectedCity;
 
+        const canvas = document.querySelector('#globe');
+        const clickProjectedCity = async (cityId, lat, lng, label) => {
+          const button = document.querySelector('[data-action=\"focus-city\"][data-city-id=\"' + cityId + '\"]');
+          button?.click();
+          await waitFor(() => window.__GLOBE_QA__?.selectedCityId === cityId, label + ' selected from list');
+          let point = null;
+          await waitFor(() => {
+            point = window.__GLOBE_QA_PROJECT_LOCATION__?.(lat, lng) ?? null;
+            return point?.visible === true && Number.isFinite(point.clientX) && Number.isFinite(point.clientY);
+          }, label + ' projected on visible globe');
+          canvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: point.clientX, clientY: point.clientY, pointerId: 77, pointerType: 'mouse' }));
+          await waitFor(() => window.__GLOBE_QA__?.selectedCityId === cityId && window.__GLOBE_QA__?.viewMode === 'earth', label + ' marker click priority');
+          return document.querySelector('.city-card h2')?.textContent?.trim();
+        };
+        const seoulMarkerCardTitle = await clickProjectedCity('top100-seoul', 37.5665, 126.978, 'Seoul');
+        const jejuMarkerCardTitle = await clickProjectedCity('top100-jeju', 33.4996, 126.5312, 'Jeju');
+
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
@@ -212,6 +229,8 @@ try {
           focusedCityCardLink,
           listFocusRotationDeltaY,
           selectedCityFromQa,
+          seoulMarkerCardTitle,
+          jejuMarkerCardTitle,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
           cityCardPresent: Boolean(document.querySelector('.city-card')),
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
@@ -262,6 +281,8 @@ try {
   if (result.focusedCityCardTitle !== '1. Hong Kong') throw new Error(`Expected existing detail card to open Hong Kong, found ${result.focusedCityCardTitle}`);
   if (!result.focusedCityCardKicker?.includes('#1')) throw new Error(`Expected card kicker to include TOP100 rank, found ${result.focusedCityCardKicker}`);
   if (!result.focusedCityCardLink?.startsWith('https://')) throw new Error(`Expected focused card HTTPS link, found ${result.focusedCityCardLink}`);
+  if (result.seoulMarkerCardTitle !== '24. Seoul') throw new Error(`Expected Seoul marker click to keep TOP100 city priority, found ${result.seoulMarkerCardTitle}`);
+  if (result.jejuMarkerCardTitle !== '87. Jeju') throw new Error(`Expected Jeju marker click to keep TOP100 city priority, found ${result.jejuMarkerCardTitle}`);
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
   if (result.rotationDeltaY <= 0.006) throw new Error(`Expected globe auto-rotation, delta=${result.rotationDeltaY}`);
