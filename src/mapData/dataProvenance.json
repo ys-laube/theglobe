@@ -9,9 +9,9 @@
     "summary": "All core city, boundary, TOP100, and household data must be bundled as static assets. No live data service is required for the app experience."
   },
   "koreaBoundaries": {
-    "committedAssetId": "korea-family-boundaries-stylized-v1",
-    "committedProvenanceId": "korea-family-boundary-provenance-v1",
-    "sourceLock": "project-owned-stylized-now-official-shp-candidate-for-future-snapshot",
+    "committedAssetId": "korea-official-static-family-boundaries-v2",
+    "committedProvenanceId": "korea-official-static-boundary-provenance-v2",
+    "sourceLock": "molit-vworld-official-static-boundary-guide",
     "requiredFamilyTargets": [
       "서울특별시/마포구",
       "부산광역시/해운대구",
@@ -40,30 +40,7 @@
       "non-commercial-no-derivatives-census-boundaries",
       "live-map-tiles-or-client-api"
     ],
-    "sourceClassification": "documented-guide",
-    "officialFirstLevelRegionContract": {
-      "expectedCount": 17,
-      "expectedRegionsKo": [
-        "서울특별시",
-        "부산광역시",
-        "대구광역시",
-        "인천광역시",
-        "광주광역시",
-        "대전광역시",
-        "울산광역시",
-        "세종특별자치시",
-        "경기도",
-        "강원특별자치도",
-        "충청북도",
-        "충청남도",
-        "전북특별자치도",
-        "전라남도",
-        "경상북도",
-        "경상남도",
-        "제주특별자치도"
-      ],
-      "sourceMetadataException": "Committed documented-guide overlay has route-only family geometry; official-derived replacements must include all 17 first-level Korea regions unless source metadata explicitly documents a different administrative level."
-    }
+    "expectedFirstLevelRegionCount": 17
   },
   "capitals": {
     "sourceLock": "wikidata-query-service-static-snapshot",
