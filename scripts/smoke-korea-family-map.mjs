@@ -118,6 +118,7 @@ try {
         };
         const readyStates = new Set(['earth-ready', 'fallback-earth', 'asset-enhancement-ready']);
         await waitFor(() => readyStates.has(window.__GLOBE_QA__?.state), 'earth ready state');
+        const initialRotationX = window.__GLOBE_QA__?.globeRotation?.x;
         const initialRotationY = window.__GLOBE_QA__?.globeRotation?.y;
         await waitFor(
           () => Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? initialRotationY) - initialRotationY) > 0.006,
@@ -176,7 +177,11 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-stylized', 'Busan tier');
         await clickButtonByStrong('해운대구');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae-stylized', 'Haeundae tier');
+        const koreaRegionCount = document.querySelectorAll('.korea-region').length;
+        const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label')).filter(Boolean);
         const householdMarkerCount = document.querySelectorAll('.household-marker').length;
+        const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+        const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
         await clickButtonByStrong('건희민하찬희네');
         await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === 'sister', 'sister household');
         const input = document.querySelector('.name-gate input');
@@ -215,8 +220,12 @@ try {
           weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
           weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
+          koreaRegionCount,
+          koreaRegionLabels,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           householdMarkerCount,
+          householdMarkerLabels,
+          routeChoiceLabels,
           selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
           nameGateState: window.__GLOBE_QA__?.nameGateState,
           linkCount: links.length,
@@ -259,8 +268,15 @@ try {
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
   if (result.selectedRegion !== 'kr-busan-haeundae-stylized') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
+  if (result.koreaRegionCount < 8) throw new Error(`Expected Korea boundary layer to render at least 8 regions, found ${result.koreaRegionCount}`);
+  for (const requiredRegionLabel of ['대한민국', '부산광역시', '해운대구']) {
+    if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
+  }
   if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
   if (result.householdMarkerCount !== 4) throw new Error(`Expected 4 glowing household markers, found ${result.householdMarkerCount}`);
+  for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
+    if (!result.householdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected household marker label ${requiredHouseholdLabel}, found ${result.householdMarkerLabels?.join(', ')}`);
+  }
   if (result.selectedHousehold !== 'sister') throw new Error(`Expected sister household, found ${result.selectedHousehold}`);
   if (result.nameGateState !== 'unlocked') throw new Error(`Expected unlocked name gate, found ${result.nameGateState}`);
   if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links, found ${result.linkCount}`);
