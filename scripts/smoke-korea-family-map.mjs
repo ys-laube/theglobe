@@ -182,6 +182,8 @@ try {
           koreaOverlayOpen: window.__GLOBE_QA__?.koreaOverlayOpen,
           viewMode: window.__GLOBE_QA__?.viewMode,
           selectedRegion: window.__GLOBE_QA__?.selectedRegion,
+          weatherMode: window.__GLOBE_QA__?.weatherMode,
+          weatherCardText: document.querySelector('[data-weather-card]')?.textContent ?? '',
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           householdMarkerCount,
@@ -210,6 +212,8 @@ try {
   if (result.count !== '100') throw new Error(`Expected 100 TOP100 cities, found ${result.count}`);
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
+  if (result.weatherMode !== 'simulated') throw new Error(`Expected simulated weather default, found ${result.weatherMode}`);
+  if (!result.weatherCardText.includes('Simulated weather ambience')) throw new Error('Expected simulated weather disclosure in the panel');
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');

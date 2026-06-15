@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
 const policySource = await readFile(join(root, 'src/weatherPolicy.ts'), 'utf8');
+const ambienceSource = await readFile(join(root, 'src/weatherAmbience.ts'), 'utf8');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -33,5 +34,15 @@ assert(policySource.includes("return liveAvailable ? 'live' : weatherPolicy.fall
 assert(!/api[_-]?key\s*[:=]\s*['\"][^'\"]+/i.test(policySource), 'weather policy must not include client API keys');
 assert(!policySource.includes('fetch('), 'weather policy must not perform live fetches directly');
 assert(!policySource.includes('import.meta.env'), 'weather policy must not read client env secrets');
+
+assert(ambienceSource.includes('api.open-meteo.com/v1/forecast'), 'weather ambience must use the approved Open-Meteo no-key endpoint only');
+assert(ambienceSource.includes('liveRequested()'), 'live weather must be explicitly opt-in from URL state');
+assert(ambienceSource.includes("weather === 'live' || weather === 'auto'"), 'live weather must be limited to ?weather=live or ?weather=auto');
+assert(ambienceSource.includes('liveTimeoutMs = 1800'), 'live weather must stay non-blocking with a short timeout');
+assert(ambienceSource.includes('apply(state);'), 'weather ambience must render simulated state before any live fetch');
+assert(ambienceSource.includes("cache: 'no-store'"), 'live weather fetch must not create stale runtime data assumptions');
+assert(ambienceSource.includes('resolveWeatherMode({ liveEnabled: true, liveAvailable: false })'), 'live weather failures must resolve through the policy fallback');
+assert(!/api[_-]?key/i.test(ambienceSource), 'weather ambience must not include or request API keys');
+assert(!ambienceSource.includes('import.meta.env'), 'weather ambience must not read client env secrets');
 
 console.log('PASS weather policy validation (simulated default, optional no-key live, graceful fallback)');
