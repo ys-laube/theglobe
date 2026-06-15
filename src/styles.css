@@ -187,3 +187,120 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   dl { grid-template-columns: 1fr; }
   .earth-status, .hint { width: calc(100% - 2rem); justify-content: center; text-align: center; white-space: normal; }
 }
+
+.korea-map-host[hidden] { display: none; }
+.korea-map-overlay {
+  position: absolute;
+  inset: 1rem;
+  z-index: 8;
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1.1fr);
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.20);
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(125, 211, 252, 0.20), transparent 18rem),
+    radial-gradient(circle at 80% 15%, rgba(192, 132, 252, 0.18), transparent 20rem),
+    linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.86));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px);
+}
+.korea-map-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.korea-map-header h2 { margin: 0; font-size: clamp(1.8rem, 4vw, 3.5rem); letter-spacing: -0.05em; }
+.korea-map-header p { margin: 0.35rem 0 0; color: #dbeafe; line-height: 1.55; }
+.map-kicker {
+  margin: 0 0 0.4rem !important;
+  color: #bae6fd !important;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.korea-breadcrumbs { display: flex; gap: 0.45rem; align-items: center; flex-wrap: wrap; margin-top: 0.8rem; }
+.korea-breadcrumbs button {
+  min-height: 34px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(125, 211, 252, 0.12);
+  border: 1px solid rgba(125, 211, 252, 0.22);
+}
+.korea-breadcrumbs span { color: #e0f2fe; font-size: 0.9rem; }
+.korea-close { white-space: nowrap; }
+.korea-map-canvas {
+  min-height: 320px;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(226, 232, 240, 0.14);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.14), transparent 42%),
+    linear-gradient(160deg, rgba(15, 23, 42, 0.72), rgba(2, 6, 23, 0.74));
+  overflow: hidden;
+}
+.korea-map-canvas svg { width: 100%; height: 100%; min-height: 320px; display: block; }
+.korea-region {
+  fill: rgba(96, 165, 250, 0.12);
+  stroke: rgba(226, 232, 240, 0.35);
+  stroke-width: 0.38;
+  vector-effect: non-scaling-stroke;
+  transition: fill 180ms ease, stroke 180ms ease, filter 180ms ease;
+}
+.korea-region.is-selected {
+  fill: rgba(125, 211, 252, 0.28);
+  stroke: rgba(255, 255, 255, 0.78);
+  filter: drop-shadow(0 0 0.9rem rgba(125, 211, 252, 0.35));
+}
+.korea-region.is-next {
+  fill: rgba(192, 132, 252, 0.28);
+  stroke: rgba(233, 213, 255, 0.9);
+  cursor: pointer;
+}
+.korea-region.is-next:hover { fill: rgba(216, 180, 254, 0.42); }
+.korea-region.has-households { fill: rgba(250, 204, 21, 0.24); stroke: rgba(254, 240, 138, 0.9); }
+.korea-map-label {
+  fill: #f8fafc;
+  font-size: 3.2px;
+  font-weight: 800;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgba(2, 6, 23, 0.85);
+  stroke-width: 0.9;
+  pointer-events: none;
+}
+.korea-route-panel {
+  border-radius: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.38));
+  border: 1px solid rgba(226, 232, 240, 0.14);
+  align-self: stretch;
+}
+.korea-route-panel h3 { margin: 0 0 0.7rem; font-size: 1.35rem; }
+.korea-route-panel p { color: #cbd5e1; line-height: 1.6; }
+.route-choice-grid, .household-card-grid { display: grid; gap: 0.75rem; }
+.route-choice, .household-card {
+  width: 100%;
+  min-height: auto;
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  border-radius: 1.1rem;
+  padding: 0.95rem;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(226, 232, 240, 0.14);
+}
+.route-choice strong, .household-card strong { font-size: 1.1rem; }
+.route-choice span, .household-card span { color: #bfdbfe; }
+.household-card em { color: #fde68a; font-style: normal; font-size: 0.86rem; }
+.accepted-name-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0; }
+.accepted-name-chips span { padding: 0.42rem 0.62rem; border-radius: 999px; background: rgba(250, 204, 21, 0.12); color: #fef3c7; }
+
+@media (max-width: 780px) {
+  .korea-map-overlay { grid-template-columns: 1fr; overflow-y: auto; }
+  .korea-map-header { flex-direction: column; }
+  .korea-close { width: 100%; }
+}

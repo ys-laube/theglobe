@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { capitals } from './capitals';
 import { createExplorationOverlay } from './explorationOverlay';
 import { createGlobeRenderer } from './globeRenderer';
+import { createKoreaFamilyOverlay, type KoreaFamilyOverlay } from './koreaFamilyOverlay';
 import './styles.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -29,6 +30,7 @@ app.innerHTML = `
       </div>
       <div class="hint">드래그해서 지구를 돌리고, Korea family map은 별도 버튼으로 열어보세요</div>
       <article class="city-card" data-empty="true" aria-live="polite"></article>
+      <section class="korea-map-host" aria-label="한국 가족 지도"></section>
     </section>
 
     <aside class="panel" aria-label="탐색 상태">
@@ -57,18 +59,20 @@ const tierButton = document.querySelector<HTMLButtonElement>('[data-action="togg
 const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
 const attribution = document.querySelector<HTMLElement>('[data-attribution]')!;
+const koreaMapHost = document.querySelector<HTMLElement>('.korea-map-host')!;
 
 let koreaFamilyEntryRequested = false;
+let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
 
 function updateQaState() {
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     explorationMode: overlay.getExplorationMode(),
     koreaFamilyEntryRequested,
-    koreaOverlayOpen: false,
-    koreaTier: null,
-    selectedRegion: null,
-    selectedHousehold: null,
+    koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
+    koreaTier: koreaFamilyOverlay?.getState().tier ?? null,
+    selectedRegion: koreaFamilyOverlay?.getState().selectedRegion ?? null,
+    selectedHousehold: koreaFamilyOverlay?.getState().selectedHousehold ?? null,
     forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
   };
 }
@@ -82,6 +86,11 @@ const overlay = createExplorationOverlay(globe, {
   tierCopy: document.querySelector<HTMLElement>('[data-tier-copy]')!,
   visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
   regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
+});
+
+koreaFamilyOverlay = createKoreaFamilyOverlay({
+  host: koreaMapHost,
+  onStateChange: updateQaState,
 });
 
 globe.onStateChange((state, message, credit) => {
@@ -148,8 +157,10 @@ tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
 koreaFamilyButton.addEventListener('click', () => {
   koreaFamilyEntryRequested = true;
   window.dispatchEvent(new CustomEvent('korea-family-map-request'));
+  koreaFamilyOverlay?.open();
   stateLabel.textContent = 'Korea family map';
-  stateCopy.textContent = '한국 가족 지도를 열 준비가 되었어요. 다음 단계에서 지도 오버레이가 연결됩니다.';
+  stateCopy.textContent = '한국 가족 지도가 열렸어요. 가족이 있는 지역을 따라 들어가 보세요.';
+  stage.scrollIntoView({ behavior: 'smooth', block: 'center' });
   updateQaState();
 });
 
