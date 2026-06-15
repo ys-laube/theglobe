@@ -56,6 +56,6 @@ The aggregate project gate `npm run verify` also runs this verifier before the p
 
 - No live map API calls.
 - No backend, auth, login, or secret key dependency.
-- No required runtime fetch for core capitals, TOP100, boundaries, household, or baseline weather data.
-- No route through the existing Seoul capital card for Korea family-map entry.
-- Existing city/capital content remains untouched until the city-data model task owns that edit.
+- No route through the existing Seoul capital card.
+- Existing city/capital content remains untouched.
+- Weather is optional static fallback copy only; no required live weather API, backend, auth, or runtime key.

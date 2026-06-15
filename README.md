@@ -39,6 +39,11 @@ Korea must be handled as its own family-map destination, not by reusing the
 existing Seoul city card. Existing city content should remain unchanged unless a
 separate city-content task explicitly owns that edit.
 
+Weather remains optional for G001. The static policy in `src/weatherPolicy.ts`
+allows only local fallback copy unless a future task explicitly approves a
+permissive, optional provider path. Do not make weather a required live API,
+backend, auth, or runtime-key dependency.
+
 ## Local development
 
 ```bash
