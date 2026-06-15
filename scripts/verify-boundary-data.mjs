@@ -21,7 +21,63 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-assert(boundaries.schemaVersion === 2, 'boundary schemaVersion must be 2 for G003 official/static overlay');
+
+const allowedBoundaryClassifications = new Set(['official-derived', 'documented-guide']);
+const expectedOfficialFirstLevelRegionsKo = [
+  '서울특별시',
+  '부산광역시',
+  '대구광역시',
+  '인천광역시',
+  '광주광역시',
+  '대전광역시',
+  '울산광역시',
+  '세종특별자치시',
+  '경기도',
+  '강원특별자치도',
+  '충청북도',
+  '충청남도',
+  '전북특별자치도',
+  '전라남도',
+  '경상북도',
+  '경상남도',
+  '제주특별자치도',
+];
+
+function assertSameMembers(actual, expected, message) {
+  assert(Array.isArray(actual), `${message}: actual value must be an array`);
+  const actualSorted = [...actual].sort();
+  const expectedSorted = [...expected].sort();
+  assert(JSON.stringify(actualSorted) === JSON.stringify(expectedSorted), message);
+}
+
+function assertDocumentedSourceClassification() {
+  assert(allowedBoundaryClassifications.has(boundaries.sourceClassification), 'boundary sourceClassification must be official-derived or documented-guide');
+  assert(provenance.committedAssetStrategy.sourceClassification === boundaries.sourceClassification, 'provenance sourceClassification must match boundary asset');
+  assert(dataProvenance.koreaBoundaries.sourceClassification === boundaries.sourceClassification, 'data provenance sourceClassification must match boundary asset');
+
+  assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document the expected 17 Korea first-level regions');
+  assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock the expected 17 Korea first-level regions');
+  assert(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary provenance must lock the expected 17 Korea first-level regions');
+  assertSameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedOfficialFirstLevelRegionsKo, 'boundary data must document the official Korea first-level region set');
+  assertSameMembers(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract.expectedRegionsKo, expectedOfficialFirstLevelRegionsKo, 'data provenance must document the official Korea first-level region set');
+  assertSameMembers(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy.expectedOfficialRegionsKo, expectedOfficialFirstLevelRegionsKo, 'boundary provenance must document the official Korea first-level region set');
+
+  if (boundaries.sourceClassification === 'official-derived') {
+    const firstLevelFeatures = boundaries.features.filter((feature) => feature.tier === 'province' || feature.tier === 'province-city' || feature.tier === 'metropolitan-city' || feature.tier === 'special-self-governing-city');
+    const firstLevelNames = firstLevelFeatures.map((feature) => feature.nameKo);
+    assert(firstLevelFeatures.length === 17, 'official-derived Korea boundary data must include exactly 17 first-level region features');
+    assertSameMembers(firstLevelNames, expectedOfficialFirstLevelRegionsKo, 'official-derived Korea boundary data must include the expected first-level region names');
+    assert(!boundaries.firstLevelRegionPolicy.sourceMetadataException, 'official-derived boundary data must not use a source-metadata exception to bypass 17-region coverage');
+  } else {
+    assert(boundaries.firstLevelRegionPolicy.sourceMetadataException?.includes('documented-guide'), 'documented-guide boundary data must carry a source-metadata exception');
+    assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract.sourceMetadataException?.includes('documented-guide'), 'data provenance must explain the documented-guide source-metadata exception');
+    assert(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy.currentException?.includes('documented-guide'), 'boundary provenance must explain the documented-guide exception');
+    assert(provenance.committedAssetStrategy.summary.includes('hand-authored'), 'documented-guide geometry must remain explicitly hand-authored');
+    assert(provenance.committedAssetStrategy.accuracyNotice.includes('Decorative navigation art only'), 'documented-guide geometry must retain decorative-only accuracy notice');
+  }
+}
+
+assert(boundaries.schemaVersion === 1, 'boundary schemaVersion must be 1');
 assert(boundaries.coordinateSystem === 'normalized-svg-0-100', 'boundary coordinate system must stay normalized and static');
 assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
 assert(boundaries.assetId === 'korea-official-static-family-boundaries-v2', 'G003 must use the official/static Korea overlay asset id');
@@ -40,24 +96,17 @@ for (const requiredConstraint of [
   assert(boundaries.usageConstraints.includes(requiredConstraint), `missing boundary usage constraint: ${requiredConstraint}`);
 }
 
-const firstLevelIds = new Set([
-  'kr-seoul',
-  'kr-busan',
-  'kr-daegu',
-  'kr-incheon',
-  'kr-gwangju',
-  'kr-daejeon',
-  'kr-ulsan',
-  'kr-sejong',
-  'kr-gyeonggi',
-  'kr-gangwon',
-  'kr-chungbuk',
-  'kr-chungnam',
-  'kr-jeonbuk',
-  'kr-jeonnam',
-  'kr-gyeongbuk',
-  'kr-gyeongnam',
-  'kr-jeju',
+assertDocumentedSourceClassification();
+
+const requiredIds = new Set([
+  'kr-country-stylized',
+  'kr-seoul-stylized',
+  'kr-seoul-mapo-stylized',
+  'kr-busan-stylized',
+  'kr-busan-haeundae-stylized',
+  'kr-gyeongnam-stylized',
+  'kr-gyeongnam-gimhae-stylized',
+  'kr-gimhae-bonghwang-stylized',
 ]);
 const familyTargetIds = new Set([
   'kr-seoul-mapo',
@@ -131,9 +180,24 @@ const expectedTerminalRegions = ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
 
-assert(provenance.committedAssetStrategy.status === 'official-source-documented-static', 'committed strategy must be official-source-documented-static');
-assert(provenance.committedAssetStrategy.summary.includes('17 first-level'), 'provenance must document the 17 first-level region snapshot');
-assert(provenance.committedAssetStrategy.accuracyNotice.includes('Static decorative guide only'), 'provenance must keep static-guide accuracy notice');
+const expectedFamilyTargets = new Map([
+  ['busan-haeundae', { terminalFeatureId: 'kr-busan-haeundae-stylized', pathKo: ['부산광역시', '해운대구'] }],
+  ['seoul-mapo', { terminalFeatureId: 'kr-seoul-mapo-stylized', pathKo: ['서울특별시', '마포구'] }],
+  ['gyeongnam-gimhae-bonghwang', { terminalFeatureId: 'kr-gimhae-bonghwang-stylized', pathKo: ['경상남도', '김해시', '봉황동'] }],
+]);
+assert(Array.isArray(boundaries.familyTargetCoverage), 'boundary data must declare explicit family target coverage');
+assert(boundaries.familyTargetCoverage.length === expectedFamilyTargets.size, 'boundary data must cover exactly the required family targets');
+for (const target of boundaries.familyTargetCoverage) {
+  const expected = expectedFamilyTargets.get(target.targetId);
+  assert(expected, `unexpected family target coverage id: ${target.targetId}`);
+  assert(target.terminalFeatureId === expected.terminalFeatureId, `${target.targetId} must terminate at ${expected.terminalFeatureId}`);
+  assert(JSON.stringify(target.pathKo) === JSON.stringify(expected.pathKo), `${target.targetId} must preserve Korean administrative path labels`);
+  assert(requiredIds.has(target.terminalFeatureId), `${target.targetId} terminal feature must be present in boundary features`);
+}
+
+assert(provenance.committedAssetStrategy.status === 'permissive-for-repository', 'committed strategy must be permissive-for-repository');
+assert(provenance.committedAssetStrategy.summary.includes('hand-authored'), 'provenance must document hand-authored committed geometry');
+assert(provenance.committedAssetStrategy.accuracyNotice.includes('Decorative navigation art only'), 'provenance must keep decorative-only accuracy notice');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'natural-earth-admin0-boundary-lines'), 'Natural Earth source candidate is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Committed Natural Earth world border provenance is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korean official legal-boundary source candidate is required');
