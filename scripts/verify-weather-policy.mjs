@@ -31,5 +31,7 @@ assert(policySource.includes('Live Open-Meteo weather'), 'live disclosure label 
 assert(policySource.includes('Weather unavailable; showing static ambience'), 'unavailable disclosure label is required');
 assert(policySource.includes("return liveAvailable ? 'live' : weatherPolicy.fallbackMode"), 'weather mode resolver must gracefully fallback on live failure');
 assert(!/api[_-]?key\s*[:=]\s*['\"][^'\"]+/i.test(policySource), 'weather policy must not include client API keys');
+assert(!policySource.includes('fetch('), 'weather policy must not perform live fetches directly');
+assert(!policySource.includes('import.meta.env'), 'weather policy must not read client env secrets');
 
 console.log('PASS weather policy validation (simulated default, optional no-key live, graceful fallback)');
