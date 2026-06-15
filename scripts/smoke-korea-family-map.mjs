@@ -153,6 +153,9 @@ try {
         const top100Title = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const toggleLabelAfter = top100Toggle?.textContent?.trim();
         const top100Count = document.querySelector('[data-visible-count]')?.textContent?.trim();
+        const top100GroupCount = document.querySelectorAll('[data-rank-group]').length;
+        const top100ListEntryCount = document.querySelectorAll('[data-rank-group] li[data-city-id]').length;
+        const top100RankGroups = [...document.querySelectorAll('[data-rank-group]')].map((group) => group.getAttribute('data-rank-group'));
 
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
@@ -181,6 +184,9 @@ try {
           top100Title,
           toggleLabelAfter,
           count: top100Count,
+          top100GroupCount,
+          top100ListEntryCount,
+          top100RankGroups,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
           cityCardPresent: Boolean(document.querySelector('.city-card')),
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
@@ -216,6 +222,10 @@ try {
   if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);
   if (result.count !== '100') throw new Error(`Expected 100 TOP100 cities, found ${result.count}`);
+  if (result.top100GroupCount !== 10) throw new Error(`Expected 10 TOP100 rank groups, found ${result.top100GroupCount}`);
+  if (result.top100ListEntryCount !== 100) throw new Error(`Expected 100 TOP100 list entries, found ${result.top100ListEntryCount}`);
+  const expectedRankGroups = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
+  if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected TOP100 rank groups ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
   if (result.rotationDeltaY <= 0.006) throw new Error(`Expected globe auto-rotation, delta=${result.rotationDeltaY}`);
