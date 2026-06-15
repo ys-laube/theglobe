@@ -17,8 +17,7 @@ lives in `src/mapData/worldCountryBorders.json`.
 
 The static data contract is locked in `src/mapData/dataProvenance.json` and
 validated by `npm run verify:data`: Korea boundary candidates are build-time
-public-data/VWorld static snapshots or documented metadata only, expanded capitals must exceed the legacy 33-entry
-list, TOP100 city data must contain exactly 100 contiguous ranked rows from
+public-data/VWorld static snapshots or documented metadata only, the capital dataset must contain the locked 194 sovereign-state capital markers, and TOP100 city data must contain exactly 100 contiguous ranked rows from
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
@@ -59,10 +58,8 @@ npm run verify
 This runs TypeScript checking, bundled boundary/provenance validation, and the
 production Vite build. The boundary/provenance step is `npm run verify:data`; it
 checks the static map JSON contracts, provenance exclusions, README provenance
-notes, forbidden runtime map/auth/API-key/weather source patterns, absence of a
-worker-created `.omx/ultragoal` directory, and that the aggregate `npm run verify`
-command still includes the data verification gate. The app has no backend, login dependency, or required live API dependency.
-On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, 17-region Korea map, Busan → Haeundae drilldown, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
+notes, forbidden runtime map/auth/API-key/weather source patterns, and that the aggregate `npm run verify` command still includes the data verification gate. The app has no backend, login dependency, or required live API dependency.
+On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, 17-region Korea map, Busan → Haeundae drilldown, Seoul/Jeju marker priority, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
 
 ## Shareable URL
 
@@ -71,10 +68,10 @@ Deploy this Vite app to any static host such as Vercel, Netlify, Cloudflare Page
 
 ## Current verification evidence
 
-Latest local G006 gate evidence should include:
+Latest local final gate evidence should include:
 
 - `npm run verify` — TypeScript, static data/provenance validators, production build.
-- `npm run smoke:korea` — production build plus headless Chrome smoke covering all-captals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, 17-region official/static overlay, Haeundae drilldown, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
+- `npm run smoke:korea` — production build plus headless Chrome smoke covering 194-capitals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, 17-region official/static overlay, Haeundae drilldown, Seoul/Jeju marker priority, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
 - `git diff --check` — whitespace/static diff hygiene.
 
 The current production bundle emits Vite's large-chunk warning because Three.js and static globe/map data are bundled client-side. This is noted as a performance follow-up, not a functional failure.

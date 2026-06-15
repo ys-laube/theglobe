@@ -4,13 +4,13 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 ## Canonical contract
 
-`dataProvenance.json` is the current source-of-truth contract for static app data. `cityData.json` is the bounded static city asset that satisfies the current capital/TOP100 model. It locks:
+`dataProvenance.json` is the current source-of-truth contract for static app data. `src/data/worldCapitals.json` and `src/data/top100Cities.json` are the bounded static city assets that satisfy the current capital/TOP100 model. It locks:
 
 - **Korea boundaries**: the committed app asset is `korea-official-static-family-boundaries-v2`, backed by `boundaryProvenance.json`. G003 uses a static normalized boundary-guide overlay documented from `국토교통부_일별법정구역정보 SHP` / VWorld legal-boundary metadata: 17 first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and Gyeongnam/Gimhae/Bonghwang family drilldowns. Never use live map APIs, GADM, or NC/ND census derivatives.
-- **Capitals**: the next generated capital dataset must use a documented Wikidata Query Service static snapshot, must include source/query/extraction/license metadata, and must exceed the legacy 33 curated entries.
+- **Capitals**: the committed dataset is `world-capitals-sovereign-states-static-2026-06-15`, containing 194 sovereign-states-only capital markers. It uses a documented build-time mledoze/countries independent ISO 3166-1 snapshot joined to a static capital-coordinate CSV, with no runtime query/API dependency.
 - **TOP100 cities**: the UI-facing ranked dataset must contain exactly 100 contiguous ranks. The locked exact-100 source is the public Euromonitor Top 100 City Destinations 2018 white paper (`2018-11-01`, 2017 international arrivals metric). Partial Agoda posts, incomplete previews, and Mastercard GDCI 2019 top-20-only tables are not enough for the exact-100 contract.
 
-`npm run verify:data` validates these provenance contracts, scans runtime source for forbidden map/auth/API-key/weather dependencies, guards against worker-created `.omx/ultragoal` mutation, and delegates to `scripts/verify-city-data.mjs` before downstream UI work can rely on the datasets.
+`npm run verify:data` validates these provenance contracts, scans runtime source for forbidden map/auth/API-key/weather dependencies, and delegates to `scripts/verify-city-data.mjs` before downstream UI work can rely on the datasets.
 
 ## Committed Korea geometry
 
@@ -36,7 +36,8 @@ Sources reviewed during implementation:
 - 국토교통부_일별법정구역정보: https://www.data.go.kr/data/15045881/fileData.do?recommendDataYn=Y
 - 법정구역경계_시군구: https://www.data.go.kr/data/28846482/linkedData.do
 - VWorld legal-boundary download surfaces: https://www.vworld.kr/dtmk/dtmk_ntads_s002.do
-- Wikidata Query Service: https://query.wikidata.org/
+- mledoze/countries: https://github.com/mledoze/countries
+- Capital latitude/longitude CSV: https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9
 - Euromonitor Top 100 City Destinations 2018: https://go.euromonitor.com/white-paper-travel-2018-100-cities
 - Mastercard Global Destination Cities Index 2019 top-20 corroborating source: https://www.mastercard.com/news/media/wexffu4b/gdci-global-report-final-1.pdf
 - southkorea/southkorea-maps fallback reference: https://github.com/southkorea/southkorea-maps
@@ -56,4 +57,4 @@ The aggregate project gate `npm run verify` also runs this verifier before the p
 - No live map API calls.
 - No backend, auth, login, or secret key dependency.
 - No route through the existing Seoul capital card.
-- Existing city/capital content remains untouched.
+- Capitals remain sovereign-states-only static data; no runtime capital/city API fetch.
