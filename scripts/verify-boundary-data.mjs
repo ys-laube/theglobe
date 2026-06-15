@@ -29,26 +29,6 @@ async function listFiles(path) {
 }
 
 
-async function pathExists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function listFiles(path) {
-  const entries = await readdir(path, { withFileTypes: true });
-  const files = [];
-  for (const entry of entries) {
-    const child = join(path, entry.name);
-    if (entry.isDirectory()) files.push(...await listFiles(child));
-    else files.push(child);
-  }
-  return files;
-}
-
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -228,26 +208,5 @@ for (const file of runtimeSourceFiles) {
 }
 assert(!runtimeSourceFiles.some((file) => file.replace(root + '/', '').startsWith('.omx/')), 'runtime source scan must not include .omx/ultragoal artifacts');
 
-
-const runtimeSourceFiles = [
-  join(root, 'index.html'),
-  join(root, 'package.json'),
-  ...(await listFiles(join(root, 'src'))).filter((file) => /\.(ts|tsx|js|jsx|css)$/.test(file)),
-];
-const forbiddenRuntimePatterns = [
-  { pattern: /fetch\s*\(/i, label: 'runtime fetch call' },
-  { pattern: /XMLHttpRequest/i, label: 'runtime XMLHttpRequest' },
-  { pattern: /open-?meteo|forecast|weather/i, label: 'weather/forecast runtime surface' },
-  { pattern: /api[_-]?key|apikey|secret[_-]?key|access[_-]?token/i, label: 'runtime API key or secret token surface' },
-  { pattern: /https?:\/\/(?:www\.)?(?:vworld\.kr|data\.go\.kr)|@?mapbox|google\.maps|kakao\.maps|naver\.maps/i, label: 'runtime map API/provider surface' },
-  { pattern: /\blogin\b|\bauth\b|oauth|firebase|supabase/i, label: 'runtime auth/login/backend surface' },
-];
-for (const file of runtimeSourceFiles) {
-  const source = await readFile(file, 'utf8');
-  for (const { pattern, label } of forbiddenRuntimePatterns) {
-    assert(!pattern.test(source), `${label} must not be introduced in runtime source: ${file.replace(root + '/', '')}`);
-  }
-}
-assert(!(await pathExists(join(root, '.omx/ultragoal'))), '.omx/ultragoal must not be created or mutated by worker verification');
 
 console.log('PASS boundary/provenance/household validation');
