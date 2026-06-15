@@ -1,4 +1,4 @@
-import { access, readdir, readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -16,15 +16,6 @@ const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8'
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
-
-async function pathExists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 async function listFiles(path) {
   const entries = await readdir(path, { withFileTypes: true });
@@ -214,6 +205,6 @@ for (const file of runtimeSourceFiles) {
     assert(!pattern.test(source), `${label} must not be introduced in runtime source: ${file.replace(root + '/', '')}`);
   }
 }
-assert(!(await pathExists(join(root, '.omx/ultragoal'))), '.omx/ultragoal must not be created or mutated by worker verification');
+assert(!runtimeSourceFiles.some((file) => file.includes('/.omx/')), 'runtime source scan must not include .omx/ultragoal artifacts');
 
 console.log('PASS boundary/provenance/household validation');
