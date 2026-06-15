@@ -546,7 +546,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
   closeButton.addEventListener('click', () => {
     openState = false;
-    selectedRegion = 'kr-country-stylized';
+    selectedRegion = 'kr-korea-overview';
     selectedHousehold = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
@@ -558,7 +558,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   return {
     open: () => {
       openState = true;
-      selectedRegion = 'kr-country-stylized';
+      selectedRegion = 'kr-korea-overview';
       selectedHousehold = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
