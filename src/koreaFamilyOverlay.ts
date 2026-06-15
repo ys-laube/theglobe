@@ -82,6 +82,26 @@ type CreateOptions = {
   onClose?: () => void;
 };
 
+const firstLevelRegionOrder = [
+  'kr-seoul',
+  'kr-busan',
+  'kr-daegu',
+  'kr-incheon',
+  'kr-gwangju',
+  'kr-daejeon',
+  'kr-ulsan',
+  'kr-sejong',
+  'kr-gyeonggi',
+  'kr-gangwon',
+  'kr-chungbuk',
+  'kr-chungnam',
+  'kr-jeonbuk',
+  'kr-jeonnam',
+  'kr-gyeongbuk',
+  'kr-gyeongnam',
+  'kr-jeju',
+] as const satisfies readonly RegionId[];
+
 const routeNodes: Record<RegionId, RouteNode> = {
   'kr-korea-overview': {
     id: 'kr-korea-overview',
