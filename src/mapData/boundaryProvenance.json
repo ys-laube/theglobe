@@ -35,15 +35,6 @@
       "licenseSummary": "Natural Earth describes its map data as public domain. The bundled asset extracts low-resolution line coordinates for decorative globe borders.",
       "permittedUseDecision": "Committed for static, non-live, decorative country border data outside the Korea family overlay.",
       "implementationNote": "Render as non-pickable GlobeRenderer-owned line geometry; do not use for political/legal boundary claims."
-    },
-    {
-      "id": "natural-earth-admin0-boundary-lines",
-      "name": "Natural Earth Admin 0 Boundary Lines / Countries",
-      "url": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/",
-      "publisher": "Natural Earth",
-      "licenseSummary": "Natural Earth describes its vector/raster map data as public domain.",
-      "permittedUseDecision": "Accepted only for lightweight world/country outlines; not the source for Korea subnational family overlay geometry.",
-      "implementationNote": "Use low-scale 1:110m or simplified derived linework for subtle non-pickable globe borders; avoid political/legal boundary claims."
     }
   ],
   "excludedSources": [
