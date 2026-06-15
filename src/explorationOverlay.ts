@@ -8,6 +8,7 @@ export type ExplorationOverlay = {
   getExplorationMode: () => boolean;
   setCityMode: (mode: CityExplorationMode) => void;
   getSelectedCity: () => Capital | null;
+  getLastFocus: () => { cityId: string; delta: number } | null;
   handlePointerMove: (event: PointerEvent, dragging: boolean) => void;
   handlePointerUp: (event: PointerEvent, movedDistance: number) => void;
   updateState: (state: GlobeRuntimeState) => void;
@@ -99,7 +100,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   let explorationMode = false;
   let earthReady = false;
   let selected: Capital | null = null;
-  let focused: Capital | null = null;
+  let lastFocus: { cityId: string; delta: number } | null = null;
 
   function visibleData() {
     if (!explorationMode || !earthReady) return [];
@@ -107,7 +108,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   }
 
   function emitSelectionChange() {
-    window.dispatchEvent(new CustomEvent('city-selection-change', { detail: selected }));
+    window.dispatchEvent(new CustomEvent('city-selection-change', { detail: { selected, lastFocus } }));
   }
 
   function showCard(capital: Capital | null) {
@@ -163,7 +164,9 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
 
   function focusCity(capital: Capital) {
     showCard(capital);
-    globe.focusLocation(capital.lat, capital.lng);
+    const focus = globe.focusLocation(capital.lat, capital.lng);
+    lastFocus = { cityId: capital.id, delta: focus.delta };
+    emitSelectionChange();
   }
 
   function syncUi() {
@@ -262,6 +265,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     setExplorationMode,
     getExplorationMode: () => explorationMode,
     getSelectedCity: () => selected,
+    getLastFocus: () => lastFocus,
     setCityMode: (mode) => {
       cityMode = mode;
       showCard(null);

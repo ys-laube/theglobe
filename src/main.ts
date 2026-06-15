@@ -59,12 +59,24 @@ let koreaFamilyEntryRequested = false;
 let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
 
 function updateQaState() {
+  const selectedCity = overlay.getSelectedCity();
+  const lastFocus = overlay.getLastFocus();
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
     globeRotation: globe.getRotation(),
     explorationMode: overlay.getExplorationMode(),
-    exploration: overlay.getQaState(),
+    selectedCity: selectedCity ? {
+      id: selectedCity.id,
+      city: selectedCity.city,
+      rank: selectedCity.rank ?? null,
+    } : null,
+    selectedCityId: selectedCity?.id ?? null,
+    selectedCityName: selectedCity?.city ?? null,
+    selectedCityRank: selectedCity?.rank ?? null,
+    selectedCityCardOpen: Boolean(selectedCity),
+    lastFocusedCityId: lastFocus?.cityId ?? null,
+    lastFocusRotationDelta: lastFocus?.delta ?? 0,
     koreaFamilyEntryRequested,
     koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
     koreaTier: koreaFamilyOverlay?.getState().tier ?? null,

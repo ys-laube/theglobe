@@ -22,7 +22,7 @@ export type GlobeRenderer = {
   setMarkerLayerVisible: (visible: boolean) => void;
   enableKoreaHotspot: (visible: boolean) => void;
   setKoreaFocus: (active: boolean) => void;
-  focusLocation: (lat: number, lng: number) => void;
+  focusLocation: (lat: number, lng: number) => { before: { x: number; y: number; z: number }; target: { x: number; y: number; z: number }; delta: number };
   getViewMode: () => GlobeViewMode;
   onViewChange: (listener: ViewListener) => void;
   pickVisibleObject: (event: PointerEvent, target: HTMLElement) => THREE.Object3D | null;
@@ -366,12 +366,19 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       emitView(active ? 'korea-focus' : 'earth');
     },
     focusLocation: (lat, lng) => {
+      const before = { x: globeGroup.rotation.x, y: globeGroup.rotation.y, z: globeGroup.rotation.z };
       focusRotation = new THREE.Euler(
         THREE.MathUtils.clamp(THREE.MathUtils.degToRad(lat), -0.72, 0.72),
         -Math.PI / 2 - THREE.MathUtils.degToRad(lng),
         earthRotation.z,
       );
       emitView('earth');
+      const target = { x: focusRotation.x, y: focusRotation.y, z: focusRotation.z };
+      return {
+        before,
+        target,
+        delta: Math.hypot(target.x - before.x, target.y - before.y, target.z - before.z),
+      };
     },
     getViewMode: () => viewMode,
     onViewChange: (listener) => {
