@@ -11,9 +11,9 @@ if (!app) throw new Error('Missing #app');
 app.innerHTML = `
   <main class="shell">
     <section class="hero" aria-label="선물 소개">
-      <p class="eyebrow">A real Earth for bigger dreams</p>
-      <h1>건희, 민하, 찬희에게</h1>
-      <p class="message">세상은 넓고, 너희가 닿을 곳은 더 넓다. 먼저 지구를 천천히 바라보고, 준비되면 도시의 빛을 하나씩 열어보자.</p>
+      <p class="eyebrow">A family constellation on Earth</p>
+      <h1><span class="script-title">Where every journey begins with family</span></h1>
+      <p class="message">Across oceans, cities, and time, our hearts always find the same light — home.</p>
       <div class="actions">
         <button class="primary" data-action="start">지구본 열기</button>
         <button class="ghost" data-action="korea-family">Korea family map</button>
@@ -37,7 +37,7 @@ app.innerHTML = `
       <div>
         <p class="panel-label">Discovery mode</p>
         <h2 data-tier-title>Earth-first gift mode</h2>
-        <p data-tier-copy>처음에는 건희, 민하, 찬희를 위한 진짜 지구 같은 인상을 먼저 보여줍니다.</p>
+        <p data-tier-copy>처음에는 가족 모두를 위한 진짜 지구 같은 첫인상을 보여줍니다.</p>
       </div>
       <div class="stats">
         <span><strong data-visible-count>0</strong> visible capitals</span>
@@ -73,6 +73,8 @@ function updateQaState() {
     koreaTier: koreaFamilyOverlay?.getState().tier ?? null,
     selectedRegion: koreaFamilyOverlay?.getState().selectedRegion ?? null,
     selectedHousehold: koreaFamilyOverlay?.getState().selectedHousehold ?? null,
+    nameGateState: koreaFamilyOverlay?.getState().nameGateState ?? 'closed',
+    unlockedLinkCount: koreaFamilyOverlay?.getState().unlockedLinkCount ?? 0,
     forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
   };
 }

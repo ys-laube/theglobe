@@ -1,6 +1,6 @@
 # The Globe
 
-A premium, shareable 3D globe gift for 건희, 민하, 찬희.
+A premium, shareable 3D globe gift for the whole family.
 
 ## Korea family map zoom data notes
 
@@ -11,10 +11,12 @@ production boundary source has not been approved. Do not add live map APIs,
 backend services, auth flows, or runtime API keys.
 
 The household configuration is intended to stay in one static file. Accepted
-family display names are `건희`, `민하`, and `찬희`; any seven Naver Band links
-should remain placeholders until the real share URLs are available. Replace each
-placeholder with an `https://band.us/...` URL only after confirming the target
-Band post/page, and keep empty slots inert rather than inventing links.
+family display names and the seven Naver Band link slots live in
+`src/householdConfig.ts`: 부모님네 has two placeholder Band slots, 누나네 has
+three, 형네 has one, and 우리집 has one. Replace each placeholder with an
+`https://band.us/...` URL only after confirming the target Band post/page, and
+keep empty slots inert rather than inventing links. The name gate is a light,
+client-only family cue; it is not authentication and does not store names.
 
 Korea must be handled as its own family-map destination, not by reusing the
 existing Seoul city card. Existing city content should remain unchanged unless a

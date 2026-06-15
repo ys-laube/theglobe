@@ -55,6 +55,18 @@ body::before {
 }
 
 h1 { margin: 0; font-size: clamp(2.5rem, 7vw, 5.8rem); line-height: 0.92; letter-spacing: -0.07em; }
+.script-title {
+  display: block;
+  font-family: "Snell Roundhand", "Apple Chancery", "Segoe Script", "Brush Script MT", cursive;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  background: linear-gradient(135deg, #fff7ed 0%, #e0f2fe 44%, #f5d0fe 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 24px 80px rgba(191, 219, 254, 0.16);
+}
 .message { margin: 1.25rem 0 0; color: #dbeafe; font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.7; }
 .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 2rem; }
 button, .card-copy a {
@@ -298,9 +310,82 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .household-card em { color: #fde68a; font-style: normal; font-size: 0.86rem; }
 .accepted-name-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.9rem 0; }
 .accepted-name-chips span { padding: 0.42rem 0.62rem; border-radius: 999px; background: rgba(250, 204, 21, 0.12); color: #fef3c7; }
+.name-gate {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+.name-gate label {
+  display: grid;
+  gap: 0.45rem;
+  color: #e0f2fe;
+  font-weight: 800;
+}
+.name-gate input {
+  min-height: 48px;
+  width: 100%;
+  border: 1px solid rgba(226, 232, 240, 0.18);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  color: #f8fafc;
+  background: rgba(2, 6, 23, 0.46);
+  outline: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+.name-gate input:focus {
+  border-color: rgba(125, 211, 252, 0.72);
+  box-shadow: 0 0 0 4px rgba(125, 211, 252, 0.14);
+  background: rgba(2, 6, 23, 0.72);
+}
+.name-gate-help,
+.name-gate-feedback {
+  margin: 0.15rem 0 0;
+  color: #bfdbfe;
+  font-size: 0.88rem;
+}
+.name-gate-feedback { color: #fde68a; }
+.band-link-grid {
+  display: grid;
+  gap: 0.7rem;
+  margin: 1rem 0;
+}
+.band-link {
+  display: grid;
+  gap: 0.2rem;
+  min-height: 48px;
+  border-radius: 1.05rem;
+  padding: 0.9rem 1rem;
+  color: #f8fafc;
+  text-decoration: none;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(250, 204, 21, 0.18), transparent 35%),
+    rgba(255, 255, 255, 0.085);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+.band-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(250, 204, 21, 0.48);
+  background: rgba(250, 204, 21, 0.12);
+}
+.band-link span {
+  color: #fde68a;
+  font-size: 0.84rem;
+}
 
 @media (max-width: 780px) {
-  .korea-map-overlay { grid-template-columns: 1fr; overflow-y: auto; }
+  .korea-map-overlay {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.85rem;
+  }
   .korea-map-header { flex-direction: column; }
   .korea-close { width: 100%; }
+  .korea-map-canvas,
+  .korea-map-canvas svg { min-height: 280px; }
+  .route-choice,
+  .household-card,
+  .band-link { min-height: 56px; }
 }

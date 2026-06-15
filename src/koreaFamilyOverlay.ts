@@ -1,5 +1,5 @@
 import koreaFamilyBoundaries from './mapData/koreaFamilyBoundaries.json';
-import { householdConfig, type Household, type HouseholdId } from './householdConfig';
+import { getHouseholdLinks, householdConfig, isAcceptedHouseholdName, type Household, type HouseholdId } from './householdConfig';
 
 type BoundaryFeature = {
   readonly id: string;
@@ -31,6 +31,8 @@ type OverlayState = {
   tier: string | null;
   selectedRegion: RegionId | null;
   selectedHousehold: HouseholdId | null;
+  nameGateState: 'closed' | 'locked' | 'invalid' | 'unlocked';
+  unlockedLinkCount: number;
 };
 
 type RouteNode = {
@@ -137,6 +139,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
   let openState = false;
   let selectedRegion: RegionId = 'kr-country-stylized';
   let selectedHousehold: HouseholdId | null = null;
+  let nameGateState: OverlayState['nameGateState'] = 'closed';
+  let unlockedHousehold: HouseholdId | null = null;
 
   const header = document.createElement('div');
   header.className = 'korea-map-header';
@@ -161,18 +165,24 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
       tier: openState ? routeNodes[selectedRegion].label : null,
       selectedRegion: openState ? selectedRegion : null,
       selectedHousehold,
+      nameGateState: openState ? nameGateState : 'closed',
+      unlockedLinkCount: openState && selectedHousehold && unlockedHousehold === selectedHousehold ? getHouseholdLinks(selectedHousehold).length : 0,
     };
   }
 
   function setRegion(region: RegionId) {
     selectedRegion = region;
     selectedHousehold = null;
+    nameGateState = 'closed';
+    unlockedHousehold = null;
     render();
     onStateChange();
   }
 
   function setHousehold(householdId: HouseholdId) {
     selectedHousehold = householdId;
+    nameGateState = 'locked';
+    unlockedHousehold = null;
     renderHouseholdDetail(householdById(householdId));
     onStateChange();
   }
@@ -289,17 +299,77 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
     routePanel.replaceChildren();
     appendText(routePanel, 'p', 'Selected family', 'map-kicker');
     appendText(routePanel, 'h3', household.label);
-    appendText(routePanel, 'p', `${household.locationLabel} · 이름 확인 단계는 다음 스토리에서 연결됩니다.`);
-    const names = document.createElement('div');
-    names.className = 'accepted-name-chips';
-    household.acceptedNames.forEach((name) => appendText(names, 'span', name));
-    routePanel.append(names);
+    appendText(routePanel, 'p', `${household.locationLabel} · 가족 이름을 한 번 확인하면 준비해 둔 네이버 밴드 초대 링크가 열립니다.`);
+
+    const gate = document.createElement('form');
+    gate.className = 'name-gate';
+    gate.setAttribute('aria-label', `${household.label} 가족 이름 확인`);
+
+    const label = document.createElement('label');
+    label.textContent = '가족 이름';
+    label.setAttribute('for', `name-gate-${household.id}`);
+    const input = document.createElement('input');
+    input.id = `name-gate-${household.id}`;
+    input.name = 'family-name';
+    input.type = 'text';
+    input.autocomplete = 'name';
+    input.placeholder = '예: 한유진';
+    input.setAttribute('aria-describedby', `name-gate-help-${household.id}`);
+    const help = appendText(gate, 'p', '로그인이나 개인정보 저장 없이, 이 화면에서만 가볍게 확인합니다.', 'name-gate-help');
+    help.id = `name-gate-help-${household.id}`;
+    const submit = document.createElement('button');
+    submit.type = 'submit';
+    submit.className = 'primary';
+    submit.textContent = '초대 링크 열기';
+    label.append(input);
+    gate.prepend(label);
+    gate.append(submit);
+
+    const feedback = document.createElement('p');
+    feedback.className = 'name-gate-feedback';
+    feedback.setAttribute('aria-live', 'polite');
+    if (nameGateState === 'invalid') feedback.textContent = '이름을 다시 확인해 주세요. 공백은 자동으로 무시됩니다.';
+    routePanel.append(gate, feedback);
+
+    const links = document.createElement('div');
+    links.className = 'band-link-grid';
+    if (unlockedHousehold === household.id) {
+      nameGateState = 'unlocked';
+      feedback.textContent = '확인되었습니다. 가족 밴드 초대 링크를 선택하세요.';
+      getHouseholdLinks(household.id).forEach((slot) => {
+        const link = document.createElement('a');
+        link.href = slot.placeholderHref;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.className = 'band-link';
+        appendText(link, 'strong', slot.label);
+        appendText(link, 'span', 'placeholder · 실제 링크로 교체 예정');
+        links.append(link);
+      });
+      routePanel.append(links);
+    }
+
+    gate.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (isAcceptedHouseholdName(household.id, input.value)) {
+        unlockedHousehold = household.id;
+        nameGateState = 'unlocked';
+      } else {
+        unlockedHousehold = null;
+        nameGateState = 'invalid';
+      }
+      renderHouseholdDetail(household);
+      onStateChange();
+    });
+
     const back = document.createElement('button');
     back.type = 'button';
     back.className = 'ghost wide';
     back.textContent = '다른 가족 카드 보기';
     back.addEventListener('click', () => {
       selectedHousehold = null;
+      nameGateState = 'closed';
+      unlockedHousehold = null;
       renderRoutePanel();
       onStateChange();
     });
@@ -319,6 +389,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
     openState = false;
     selectedRegion = 'kr-country-stylized';
     selectedHousehold = null;
+    nameGateState = 'closed';
+    unlockedHousehold = null;
     render();
     onStateChange();
   });
@@ -328,11 +400,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
       openState = true;
       selectedRegion = 'kr-country-stylized';
       selectedHousehold = null;
+      nameGateState = 'closed';
+      unlockedHousehold = null;
       render();
       onStateChange();
     },
     close: () => {
       openState = false;
+      nameGateState = 'closed';
+      unlockedHousehold = null;
       render();
       onStateChange();
     },
