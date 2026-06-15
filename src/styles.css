@@ -365,12 +365,12 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   left: 0.9rem;
   right: 0.9rem;
   bottom: 0.9rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(10rem, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.18rem 0.75rem;
   padding: 0.62rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 1.2rem;
   background: rgba(2, 6, 23, 0.64);
   border: 1px solid rgba(226, 232, 240, 0.16);
   color: #cbd5e1;
@@ -378,7 +378,8 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   backdrop-filter: blur(14px);
 }
 .korea-map-legend strong { color: #fef3c7; letter-spacing: 0.08em; text-transform: uppercase; }
-.korea-map-legend span { color: #bfdbfe; text-align: right; }
+.korea-map-legend span { color: #e0f2fe; text-align: right; font-weight: 800; }
+.korea-map-legend small { grid-column: 1 / -1; color: #bfdbfe; text-align: right; }
 .korea-route-panel {
   border-radius: 1.5rem;
   padding: 1rem;
@@ -478,7 +479,9 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .korea-close { width: 100%; }
   .korea-map-canvas,
   .korea-map-canvas svg { min-height: 280px; }
-  .korea-map-legend { position: static; margin: 0 0.75rem 0.75rem; border-radius: 1rem; align-items: flex-start; flex-direction: column; }
+  .korea-map-legend { position: static; grid-template-columns: 1fr; margin: 0 0.75rem 0.75rem; border-radius: 1rem; }
+  .korea-map-legend span,
+  .korea-map-legend small { text-align: left; }
   .route-choice,
   .household-card,
   .band-link { min-height: 56px; }

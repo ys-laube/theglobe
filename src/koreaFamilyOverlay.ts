@@ -188,6 +188,13 @@ function routePath(segment: FamilyRouteSegment) {
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
+function selectedRouteSummary(region: RegionId) {
+  const node = routeNodes[region];
+  if (region === 'kr-country-stylized') return '17-region static overview · choose a family route';
+  if (node.households?.length) return `${node.label} family target · cards and markers ready`;
+  return `${node.label} route highlighted · continue the drilldown`;
+}
+
 function householdById(id: HouseholdId) {
   const household = householdConfig.households.find((candidate) => candidate.id === id);
   if (!household) throw new Error(`Missing household config: ${id}`);
@@ -396,7 +403,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const legend = document.createElement('div');
     legend.className = 'korea-map-legend';
     appendText(legend, 'strong', 'Static family overlay');
-    appendText(legend, 'span', 'Bundled geometry · no live map API · decorative navigation');
+    appendText(legend, 'span', selectedRouteSummary(selectedRegion));
+    appendText(legend, 'small', 'Bundled geometry · no live map API · decorative navigation');
     mapMount.append(svg, legend);
   }
 
