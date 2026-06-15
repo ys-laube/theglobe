@@ -164,12 +164,13 @@ assert(dataProvenance.capitals.currentLegacyCount === 33, 'capital source lock m
 assert(dataProvenance.capitals.minimumBundledCount > dataProvenance.capitals.currentLegacyCount, 'capital contract must require expansion beyond legacy entries');
 assert(dataProvenance.capitals.approvedSources.some((source) => source.id === 'wikidata-query-service-capitals'), 'capital source lock must include Wikidata Query Service');
 
-assert(dataProvenance.top100Cities.sourceLock === 'mastercard-global-destination-cities-index-2019-public-report', 'TOP100 source lock must be Mastercard GDCI public report');
+assert(dataProvenance.top100Cities.sourceLock === 'euromonitor-top100-city-destinations-2018', 'TOP100 source lock must be Euromonitor Top 100 City Destinations 2018');
 assert(dataProvenance.top100Cities.requiredCount === 100, 'TOP100 contract must require exactly 100 cities');
 assert(dataProvenance.top100Cities.requiredRanks === '1-100-contiguous', 'TOP100 contract must require ranks 1-100');
-assert(dataProvenance.top100Cities.rankingDate === '2019-09-04', 'TOP100 ranking date must be locked');
-assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'mastercard-gdci-2019-global-report'), 'TOP100 source lock must include Mastercard GDCI report');
+assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking date must be locked');
+assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 City Destinations 2018');
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
+assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
 
 assert(dataProvenance.weather.baselineMode === 'simulated-static', 'weather baseline must be simulated/static');
 assert(dataProvenance.weather.liveEnhancement === 'optional-open-meteo-no-key-only', 'weather live enhancement must be optional Open-Meteo no-key only');

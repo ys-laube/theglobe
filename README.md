@@ -23,8 +23,8 @@ only optional no-key Open-Meteo enhancement plus fallback disclosure.
 The static data contract is locked in `src/mapData/dataProvenance.json` and
 validated by `npm run verify:data`: Korea boundary candidates are build-time
 public-data snapshots only, expanded capitals must exceed the legacy 33-entry
-list, TOP100 city data must contain exactly 100 contiguous ranked rows with
-source/ranking-date/license notes, and weather starts as simulated/static with
+list, TOP100 city data must contain exactly 100 contiguous ranked rows from
+the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes, and weather starts as simulated/static with
 only optional no-key Open-Meteo enhancement plus fallback disclosure.
 
 The household configuration is intended to stay in one static file. Accepted
