@@ -34,6 +34,7 @@ export type GlobeRenderer = {
   onStateChange: (listener: StateListener) => void;
   getState: () => GlobeRuntimeState;
   getRotation: () => { x: number; y: number; z: number };
+  focusLatLng: (lat: number, lng: number) => void;
 };
 
 const radius = 2;
@@ -273,6 +274,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const koreaCameraZ = 4.25;
   const earthRotation = new THREE.Euler(globeGroup.rotation.x, globeGroup.rotation.y, globeGroup.rotation.z);
   const koreaRotation = new THREE.Euler(0.48, 2.5, 0.02);
+  let focusedEarthRotation: THREE.Euler | null = null;
   let stateMessage = 'Preparing the globe.';
   let attribution = EARTH_ASSETS.day.attribution;
   let failureReason: string | undefined;
@@ -380,14 +382,24 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeGroup.rotation.x = THREE.MathUtils.clamp(globeGroup.rotation.x, -0.75, 0.75);
     },
     drift: (velocityY, velocityX) => {
+      if (focusedEarthRotation) return;
       globeGroup.rotation.y += velocityY;
       globeGroup.rotation.x += velocityX;
+    },
+    focusLatLng: (lat, lng) => {
+      const targetX = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(lat) * 0.82, -0.75, 0.75);
+      const targetY = THREE.MathUtils.degToRad(-lng) - Math.PI / 2;
+      focusedEarthRotation = new THREE.Euler(targetX, targetY, earthRotation.z);
     },
     animateMarkers: (now) => {
       if (viewMode === 'korea-focus') {
         globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, koreaRotation.x, 0.055);
         globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, koreaRotation.y, 0.055);
         globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, koreaRotation.z, 0.055);
+      } else if (focusedEarthRotation) {
+        globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, focusedEarthRotation.x, 0.09);
+        globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, focusedEarthRotation.y, 0.09);
+        globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, focusedEarthRotation.z, 0.09);
       } else {
         globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, earthRotation.z, 0.055);
       }
