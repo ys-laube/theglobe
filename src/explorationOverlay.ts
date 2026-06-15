@@ -7,6 +7,7 @@ export type ExplorationOverlay = {
   setExplorationMode: (enabled: boolean) => void;
   getExplorationMode: () => boolean;
   setCityMode: (mode: CityExplorationMode) => void;
+  getSelectedCity: () => Capital | null;
   handlePointerMove: (event: PointerEvent, dragging: boolean) => void;
   handlePointerUp: (event: PointerEvent, movedDistance: number) => void;
   updateState: (state: GlobeRuntimeState) => void;
@@ -105,12 +106,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     return markerObjects.filter(({ capital }) => capital.mode === cityMode).map(({ capital }) => capital);
   }
 
-  function selectCity(capital: Capital | null, focusGlobe = false) {
-    if (capital && focusGlobe) {
-      focused = capital;
-      globe.focusLatLng(capital.lat, capital.lng);
-    }
-    showCard(capital);
+  function emitSelectionChange() {
+    window.dispatchEvent(new CustomEvent('city-selection-change', { detail: selected }));
   }
 
   function showCard(capital: Capital | null) {
@@ -127,6 +124,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       appendText(copy, 'h2', '탐험 모드를 켜면 도시가 나타나요');
       appendText(copy, 'p', '처음에는 지구의 표면과 분위기를 충분히 느끼고, 준비되면 수도의 이야기를 열어보세요.');
       elements.card.append(art, copy);
+      emitSelectionChange();
       return;
     }
     elements.card.dataset.empty = 'false';
@@ -160,6 +158,12 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     link.target = '_blank';
     link.rel = 'noreferrer';
     elements.card.append(art, copy);
+    emitSelectionChange();
+  }
+
+  function focusCity(capital: Capital) {
+    showCard(capital);
+    globe.focusLocation(capital.lat, capital.lng);
   }
 
   function syncUi() {
@@ -200,11 +204,15 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
         const list = document.createElement('ol');
         group.forEach((capital) => {
           const item = document.createElement('li');
+          item.dataset.cityId = capital.id;
           const button = document.createElement('button');
           button.type = 'button';
+          button.className = 'rank-city-button';
+          button.dataset.action = 'focus-city';
           button.dataset.cityId = capital.id;
-          button.textContent = `${capital.rank}. ${capital.city}`;
-          button.addEventListener('click', () => selectCity(capital, true));
+          appendText(button, 'span', `${capital.rank}. ${capital.city}`, 'rank-city');
+          appendText(button, 'span', capital.country, 'rank-country');
+          button.addEventListener('click', () => focusCity(capital));
           item.append(button);
           list.append(item);
         });
@@ -251,6 +259,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   return {
     setExplorationMode,
     getExplorationMode: () => explorationMode,
+    getSelectedCity: () => selected,
     setCityMode: (mode) => {
       cityMode = mode;
       showCard(null);

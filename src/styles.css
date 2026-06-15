@@ -201,6 +201,17 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .rank-group h3 { margin: 0 0 0.55rem; color: #bfdbfe; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .rank-group ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.35rem; }
 .rank-group li { color: #e2e8f0; font-size: 0.82rem; line-height: 1.35; }
+.rank-city-button {
+  width: 100%;
+  min-height: 0;
+  display: block;
+  text-align: left;
+  border-radius: 0.75rem;
+  padding: 0.38rem 0.48rem;
+  background: transparent;
+  color: inherit;
+}
+.rank-city-button:hover, .rank-city-button:focus-visible { background: rgba(125, 211, 252, 0.12); transform: none; outline: 1px solid rgba(125, 211, 252, 0.38); }
 .rank-city { font-weight: 800; }
 .rank-country { display: block; color: #94a3b8; font-size: 0.75rem; }
 .asset-note { margin-top: 1rem; font-size: 0.76rem; color: #94a3b8; }

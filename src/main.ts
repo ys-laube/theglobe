@@ -64,6 +64,11 @@ function updateQaState() {
     viewMode: globe.getViewMode(),
     globeRotation: globe.getRotation(),
     explorationMode: overlay.getExplorationMode(),
+    selectedCity: overlay.getSelectedCity() ? {
+      id: overlay.getSelectedCity()?.id,
+      city: overlay.getSelectedCity()?.city,
+      rank: overlay.getSelectedCity()?.rank ?? null,
+    } : null,
     koreaFamilyEntryRequested,
     koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
     koreaTier: koreaFamilyOverlay?.getState().tier ?? null,
@@ -176,6 +181,7 @@ canvas.addEventListener('pointerleave', () => {
 startButton.addEventListener('click', () => stage.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 explorationButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
 tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
+window.addEventListener('city-selection-change', () => window.setTimeout(updateQaState, 0));
 
 function resize() {
   globe.resize();

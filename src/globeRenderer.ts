@@ -22,6 +22,7 @@ export type GlobeRenderer = {
   setMarkerLayerVisible: (visible: boolean) => void;
   enableKoreaHotspot: (visible: boolean) => void;
   setKoreaFocus: (active: boolean) => void;
+  focusLocation: (lat: number, lng: number) => void;
   getViewMode: () => GlobeViewMode;
   onViewChange: (listener: ViewListener) => void;
   pickVisibleObject: (event: PointerEvent, target: HTMLElement) => THREE.Object3D | null;
@@ -274,7 +275,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const koreaCameraZ = 4.25;
   const earthRotation = new THREE.Euler(globeGroup.rotation.x, globeGroup.rotation.y, globeGroup.rotation.z);
   const koreaRotation = new THREE.Euler(0.48, 2.5, 0.02);
-  let focusedEarthRotation: THREE.Euler | null = null;
+  let focusRotation: THREE.Euler | null = null;
   let stateMessage = 'Preparing the globe.';
   let attribution = EARTH_ASSETS.day.attribution;
   let failureReason: string | undefined;
@@ -360,7 +361,18 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     enableKoreaHotspot: (visible) => {
       koreaHotspot.visible = visible && ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state) && viewMode === 'earth';
     },
-    setKoreaFocus: (active) => emitView(active ? 'korea-focus' : 'earth'),
+    setKoreaFocus: (active) => {
+      if (active) focusRotation = null;
+      emitView(active ? 'korea-focus' : 'earth');
+    },
+    focusLocation: (lat, lng) => {
+      focusRotation = new THREE.Euler(
+        THREE.MathUtils.clamp(THREE.MathUtils.degToRad(lat), -0.72, 0.72),
+        -Math.PI / 2 - THREE.MathUtils.degToRad(lng),
+        earthRotation.z,
+      );
+      emitView('earth');
+    },
     getViewMode: () => viewMode,
     onViewChange: (listener) => {
       viewListeners.push(listener);
@@ -377,6 +389,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       return raycaster.intersectObjects(pickables.filter((object) => object.visible), false)[0]?.object ?? null;
     },
     rotateBy: (deltaY, deltaX) => {
+      focusRotation = null;
       globeGroup.rotation.y += deltaY;
       globeGroup.rotation.x += deltaX;
       globeGroup.rotation.x = THREE.MathUtils.clamp(globeGroup.rotation.x, -0.75, 0.75);
@@ -396,10 +409,10 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, koreaRotation.x, 0.055);
         globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, koreaRotation.y, 0.055);
         globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, koreaRotation.z, 0.055);
-      } else if (focusedEarthRotation) {
-        globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, focusedEarthRotation.x, 0.09);
-        globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, focusedEarthRotation.y, 0.09);
-        globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, focusedEarthRotation.z, 0.09);
+      } else if (focusRotation) {
+        globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, focusRotation.x, 0.075);
+        globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, focusRotation.y, 0.075);
+        globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, focusRotation.z, 0.075);
       } else {
         globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, earthRotation.z, 0.055);
       }
