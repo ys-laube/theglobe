@@ -992,7 +992,7 @@
         "부산광역시",
         "해운대구"
       ],
-      "terminalFeatureId": "kr-busan-haeundae-stylized"
+      "terminalFeatureId": "kr-busan-haeundae"
     },
     {
       "targetId": "seoul-mapo",
@@ -1000,7 +1000,7 @@
         "서울특별시",
         "마포구"
       ],
-      "terminalFeatureId": "kr-seoul-mapo-stylized"
+      "terminalFeatureId": "kr-seoul-mapo"
     },
     {
       "targetId": "gyeongnam-gimhae-bonghwang",
@@ -1009,7 +1009,7 @@
         "김해시",
         "봉황동"
       ],
-      "terminalFeatureId": "kr-gimhae-bonghwang-stylized"
+      "terminalFeatureId": "kr-gimhae-bonghwang"
     }
   ]
 }

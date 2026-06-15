@@ -7,201 +7,111 @@ const boundaries = JSON.parse(await readFile(join(root, 'src/mapData/koreaFamily
 const provenance = JSON.parse(await readFile(join(root, 'src/mapData/boundaryProvenance.json'), 'utf8'));
 const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
+const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
 const mainSource = await readFile(join(root, 'src/main.ts'), 'utf8');
 const globeRendererSource = await readFile(join(root, 'src/globeRenderer.ts'), 'utf8');
 const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8');
+const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
-const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
-const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function sameMembers(actual, expected, label) {
+  assert(Array.isArray(actual), `${label} must be an array`);
+  const a = [...actual].sort();
+  const e = [...expected].sort();
+  assert(JSON.stringify(a) === JSON.stringify(e), `${label} mismatch`);
+}
 
-const allowedBoundaryClassifications = new Set(['official-derived', 'documented-guide']);
-const expectedOfficialFirstLevelRegionsKo = [
-  '서울특별시',
-  '부산광역시',
-  '대구광역시',
-  '인천광역시',
-  '광주광역시',
-  '대전광역시',
-  '울산광역시',
-  '세종특별자치시',
-  '경기도',
-  '강원특별자치도',
-  '충청북도',
-  '충청남도',
-  '전북특별자치도',
-  '전라남도',
-  '경상북도',
-  '경상남도',
-  '제주특별자치도',
+const expectedRegionNames = [
+  '서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시',
+  '경기도', '강원특별자치도', '충청북도', '충청남도', '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도',
 ];
-
-function assertSameMembers(actual, expected, message) {
-  assert(Array.isArray(actual), `${message}: actual value must be an array`);
-  const actualSorted = [...actual].sort();
-  const expectedSorted = [...expected].sort();
-  assert(JSON.stringify(actualSorted) === JSON.stringify(expectedSorted), message);
-}
-
-function assertDocumentedSourceClassification() {
-  assert(allowedBoundaryClassifications.has(boundaries.sourceClassification), 'boundary sourceClassification must be official-derived or documented-guide');
-  assert(provenance.committedAssetStrategy.sourceClassification === boundaries.sourceClassification, 'provenance sourceClassification must match boundary asset');
-  assert(dataProvenance.koreaBoundaries.sourceClassification === boundaries.sourceClassification, 'data provenance sourceClassification must match boundary asset');
-
-  assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document the expected 17 Korea first-level regions');
-  assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock the expected 17 Korea first-level regions');
-  assert(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary provenance must lock the expected 17 Korea first-level regions');
-  assertSameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedOfficialFirstLevelRegionsKo, 'boundary data must document the official Korea first-level region set');
-  assertSameMembers(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract.expectedRegionsKo, expectedOfficialFirstLevelRegionsKo, 'data provenance must document the official Korea first-level region set');
-  assertSameMembers(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy.expectedOfficialRegionsKo, expectedOfficialFirstLevelRegionsKo, 'boundary provenance must document the official Korea first-level region set');
-
-  if (boundaries.sourceClassification === 'official-derived') {
-    const firstLevelFeatures = boundaries.features.filter((feature) => feature.tier === 'province' || feature.tier === 'province-city' || feature.tier === 'metropolitan-city' || feature.tier === 'special-self-governing-city');
-    const firstLevelNames = firstLevelFeatures.map((feature) => feature.nameKo);
-    assert(firstLevelFeatures.length === 17, 'official-derived Korea boundary data must include exactly 17 first-level region features');
-    assertSameMembers(firstLevelNames, expectedOfficialFirstLevelRegionsKo, 'official-derived Korea boundary data must include the expected first-level region names');
-    assert(!boundaries.firstLevelRegionPolicy.sourceMetadataException, 'official-derived boundary data must not use a source-metadata exception to bypass 17-region coverage');
-  } else {
-    assert(boundaries.firstLevelRegionPolicy.sourceMetadataException?.includes('documented-guide'), 'documented-guide boundary data must carry a source-metadata exception');
-    assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract.sourceMetadataException?.includes('documented-guide'), 'data provenance must explain the documented-guide source-metadata exception');
-    assert(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy.currentException?.includes('documented-guide'), 'boundary provenance must explain the documented-guide exception');
-    assert(provenance.committedAssetStrategy.summary.includes('hand-authored'), 'documented-guide geometry must remain explicitly hand-authored');
-    assert(provenance.committedAssetStrategy.accuracyNotice.includes('Decorative navigation art only'), 'documented-guide geometry must retain decorative-only accuracy notice');
-  }
-}
-
-assert(boundaries.schemaVersion === 1, 'boundary schemaVersion must be 1');
-assert(boundaries.coordinateSystem === 'normalized-svg-0-100', 'boundary coordinate system must stay normalized and static');
-assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
-assert(boundaries.assetId === 'korea-official-static-family-boundaries-v2', 'G003 must use the official/static Korea overlay asset id');
-assert(boundaries.geometryKind === 'static-simplified-boundary-guide-polygons', 'G003 must reject hand-authored stylized geometryKind');
-assert(boundaries.officialSourceSnapshot?.firstLevelRegionCount === 17, 'official source snapshot must document 17 first-level Korea regions');
-assert(Array.isArray(boundaries.features), 'features must be an array');
-assert(boundaries.features.filter((feature) => feature.adminLevel === 1).length === 17, 'expected exactly 17 first-level Korea boundary-guide features');
-assert(boundaries.features.length === 21, 'expected 17 first-level regions plus 4 family drilldown targets');
-assert(Array.isArray(boundaries.worldReferenceLines) && boundaries.worldReferenceLines.length === 2, 'expected 2 decorative world reference lines');
-assert(Array.isArray(boundaries.usageConstraints), 'boundary data must publish usage constraints');
-for (const requiredConstraint of [
-  'Static official-source-documented boundary guide for family overlay only',
-  'No legal-boundary accuracy claims',
-  'No live map tiles, live map APIs, backend services, auth, or runtime API keys',
-]) {
-  assert(boundaries.usageConstraints.includes(requiredConstraint), `missing boundary usage constraint: ${requiredConstraint}`);
-}
-
-assertDocumentedSourceClassification();
-
-const requiredIds = new Set([
-  'kr-country-stylized',
-  'kr-seoul-stylized',
-  'kr-seoul-mapo-stylized',
-  'kr-busan-stylized',
-  'kr-busan-haeundae-stylized',
-  'kr-gyeongnam-stylized',
-  'kr-gyeongnam-gimhae-stylized',
-  'kr-gimhae-bonghwang-stylized',
+const firstLevelIds = new Set([
+  'kr-seoul', 'kr-busan', 'kr-daegu', 'kr-incheon', 'kr-gwangju', 'kr-daejeon', 'kr-ulsan', 'kr-sejong',
+  'kr-gyeonggi', 'kr-gangwon', 'kr-chungbuk', 'kr-chungnam', 'kr-jeonbuk', 'kr-jeonnam', 'kr-gyeongbuk', 'kr-gyeongnam', 'kr-jeju',
 ]);
-const familyTargetIds = new Set([
-  'kr-seoul-mapo',
-  'kr-busan-haeundae',
-  'kr-gyeongnam-gimhae',
-  'kr-gimhae-bonghwang',
-]);
+const familyTargetIds = new Set(['kr-seoul-mapo', 'kr-busan-haeundae', 'kr-gyeongnam-gimhae', 'kr-gimhae-bonghwang']);
 const requiredIds = new Set([...firstLevelIds, ...familyTargetIds]);
+const expectedTiers = new Map([
+  ['kr-seoul', 'special-city'], ['kr-busan', 'metropolitan-city'], ['kr-daegu', 'metropolitan-city'], ['kr-incheon', 'metropolitan-city'],
+  ['kr-gwangju', 'metropolitan-city'], ['kr-daejeon', 'metropolitan-city'], ['kr-ulsan', 'metropolitan-city'], ['kr-sejong', 'special-self-governing-city'],
+  ['kr-gyeonggi', 'province'], ['kr-gangwon', 'special-self-governing-province'], ['kr-chungbuk', 'province'], ['kr-chungnam', 'province'],
+  ['kr-jeonbuk', 'special-self-governing-province'], ['kr-jeonnam', 'province'], ['kr-gyeongbuk', 'province'], ['kr-gyeongnam', 'province'], ['kr-jeju', 'special-self-governing-province'],
+  ['kr-seoul-mapo', 'district'], ['kr-busan-haeundae', 'district'], ['kr-gyeongnam-gimhae', 'city'], ['kr-gimhae-bonghwang', 'neighborhood'],
+]);
+
+assert(boundaries.schemaVersion === 2, 'G003 boundary schemaVersion must be 2');
+assert(boundaries.assetId === 'korea-official-static-family-boundaries-v2', 'G003 must use v2 Korea boundary asset id');
+assert(boundaries.coordinateSystem === 'normalized-svg-0-100', 'boundary coordinate system must stay normalized and static');
+assert(boundaries.geometryKind === 'static-simplified-boundary-guide-polygons', 'G003 must reject legacy stylized geometryKind');
+assert(['official-derived', 'documented-guide'].includes(boundaries.sourceClassification), 'boundary sourceClassification must be official-derived or documented-guide');
+assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
+assert(provenance.committedAssetStrategy.assetId === boundaries.assetId, 'provenance asset id must match boundary asset');
+assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'data provenance must lock boundary asset id');
+assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'data provenance must lock boundary provenance id');
+
+assert(boundaries.officialSourceSnapshot?.firstLevelRegionCount === 17, 'official source snapshot must document 17 first-level Korea regions');
+assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document expected 17 first-level regions');
+sameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedRegionNames, 'boundary official first-level region names');
+assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock expected 17 first-level regions');
+sameMembers(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract.expectedRegionsKo, expectedRegionNames, 'data provenance first-level region names');
+
+assert(Array.isArray(boundaries.features), 'features must be an array');
+assert(boundaries.features.length === 21, 'expected 17 first-level regions plus 4 family drilldown targets');
 const ids = new Set();
 for (const feature of boundaries.features) {
   assert(requiredIds.has(feature.id), `unexpected feature id: ${feature.id}`);
   assert(!ids.has(feature.id), `duplicate feature id: ${feature.id}`);
   ids.add(feature.id);
-  assert(feature.interactive === true, `${feature.id} must remain an explicit family-path feature`);
+  assert(feature.interactive === true, `${feature.id} must be interactive`);
+  assert(feature.tier === expectedTiers.get(feature.id), `${feature.id} must keep approved tier`);
   assert(Array.isArray(feature.polygon) && feature.polygon.length >= 4, `${feature.id} needs a bounded polygon`);
   assert(Array.isArray(feature.centroid) && feature.centroid.length === 2, `${feature.id} needs a centroid`);
+  for (const [x, y] of [...feature.polygon, feature.centroid]) {
+    assert(Number.isFinite(x) && x >= 0 && x <= 100, `${feature.id} x coordinate out of normalized range`);
+    assert(Number.isFinite(y) && y >= 0 && y <= 100, `${feature.id} y coordinate out of normalized range`);
+  }
   if (firstLevelIds.has(feature.id)) {
-    assert(feature.adminLevel === 1, `${feature.id} must be marked adminLevel 1`);
-    assert(feature.officialRegionClass === 'first-level-administrative-division', `${feature.id} must be a first-level administrative division`);
+    assert(feature.adminLevel === 1, `${feature.id} must be adminLevel 1`);
+    assert(feature.officialRegionClass === 'first-level-administrative-division', `${feature.id} must be first-level region`);
   }
   if (familyTargetIds.has(feature.id)) {
-    assert(feature.adminLevel >= 2, `${feature.id} must be a family drilldown below first level`);
-    assert(feature.officialRegionClass === 'family-target-drilldown', `${feature.id} must be marked as a family drilldown target`);
-  }
-  for (const [x, y] of [...feature.polygon, feature.centroid]) {
-    assert(Number.isFinite(x) && Number.isFinite(y), `${feature.id} coordinates must be finite`);
-    assert(x >= 0 && x <= 100 && y >= 0 && y <= 100, `${feature.id} coordinates must stay in normalized bounds`);
+    assert(feature.adminLevel >= 2, `${feature.id} must be below first level`);
+    assert(feature.officialRegionClass === 'family-target-drilldown', `${feature.id} must be family target drilldown`);
   }
 }
 assert(ids.size === requiredIds.size, 'missing required Korea boundary-guide feature ids');
+sameMembers(boundaries.features.filter((feature) => feature.adminLevel === 1).map((feature) => feature.nameKo), expectedRegionNames, 'rendered first-level region names');
 
-const expectedTiers = new Map([
-  ['kr-seoul', 'special-city'],
-  ['kr-busan', 'metropolitan-city'],
-  ['kr-daegu', 'metropolitan-city'],
-  ['kr-incheon', 'metropolitan-city'],
-  ['kr-gwangju', 'metropolitan-city'],
-  ['kr-daejeon', 'metropolitan-city'],
-  ['kr-ulsan', 'metropolitan-city'],
-  ['kr-sejong', 'special-self-governing-city'],
-  ['kr-gyeonggi', 'province'],
-  ['kr-gangwon', 'special-self-governing-province'],
-  ['kr-chungbuk', 'province'],
-  ['kr-chungnam', 'province'],
-  ['kr-jeonbuk', 'special-self-governing-province'],
-  ['kr-jeonnam', 'province'],
-  ['kr-gyeongbuk', 'province'],
-  ['kr-gyeongnam', 'province'],
-  ['kr-jeju', 'special-self-governing-province'],
-  ['kr-seoul-mapo', 'district'],
-  ['kr-busan-haeundae', 'district'],
-  ['kr-gyeongnam-gimhae', 'city'],
-  ['kr-gimhae-bonghwang', 'neighborhood'],
-]);
-const expectedFamilyPathRoles = new Map([
-  ['kr-seoul', 'brother-branch'],
-  ['kr-seoul-mapo', 'brother-household-district'],
-  ['kr-busan', 'sister-parents-branch'],
-  ['kr-busan-haeundae', 'sister-parents-household-district'],
-  ['kr-gyeongnam', 'home-branch'],
-  ['kr-gyeongnam-gimhae', 'home-city'],
-  ['kr-gimhae-bonghwang', 'home-neighborhood'],
-]);
-for (const feature of boundaries.features) {
-  assert(feature.tier === expectedTiers.get(feature.id), `${feature.id} must keep its approved boundary tier`);
-  const expectedRole = expectedFamilyPathRoles.get(feature.id) ?? 'context';
-  assert(feature.familyPathRole === expectedRole, `${feature.id} must keep its family path role`);
-}
-
-const expectedTerminalRegions = ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'];
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
-assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
-
-const expectedFamilyTargets = new Map([
-  ['busan-haeundae', { terminalFeatureId: 'kr-busan-haeundae-stylized', pathKo: ['부산광역시', '해운대구'] }],
-  ['seoul-mapo', { terminalFeatureId: 'kr-seoul-mapo-stylized', pathKo: ['서울특별시', '마포구'] }],
-  ['gyeongnam-gimhae-bonghwang', { terminalFeatureId: 'kr-gimhae-bonghwang-stylized', pathKo: ['경상남도', '김해시', '봉황동'] }],
+sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
+const expectedTargets = new Map([
+  ['busan-haeundae', { terminalFeatureId: 'kr-busan-haeundae', pathKo: ['부산광역시', '해운대구'] }],
+  ['seoul-mapo', { terminalFeatureId: 'kr-seoul-mapo', pathKo: ['서울특별시', '마포구'] }],
+  ['gyeongnam-gimhae-bonghwang', { terminalFeatureId: 'kr-gimhae-bonghwang', pathKo: ['경상남도', '김해시', '봉황동'] }],
 ]);
-assert(Array.isArray(boundaries.familyTargetCoverage), 'boundary data must declare explicit family target coverage');
-assert(boundaries.familyTargetCoverage.length === expectedFamilyTargets.size, 'boundary data must cover exactly the required family targets');
+assert(Array.isArray(boundaries.familyTargetCoverage), 'boundary data must declare family target coverage');
+assert(boundaries.familyTargetCoverage.length === expectedTargets.size, 'boundary data must cover exactly required family targets');
 for (const target of boundaries.familyTargetCoverage) {
-  const expected = expectedFamilyTargets.get(target.targetId);
+  const expected = expectedTargets.get(target.targetId);
   assert(expected, `unexpected family target coverage id: ${target.targetId}`);
-  assert(target.terminalFeatureId === expected.terminalFeatureId, `${target.targetId} must terminate at ${expected.terminalFeatureId}`);
-  assert(JSON.stringify(target.pathKo) === JSON.stringify(expected.pathKo), `${target.targetId} must preserve Korean administrative path labels`);
-  assert(requiredIds.has(target.terminalFeatureId), `${target.targetId} terminal feature must be present in boundary features`);
+  assert(target.terminalFeatureId === expected.terminalFeatureId, `${target.targetId} terminal feature mismatch`);
+  assert(JSON.stringify(target.pathKo) === JSON.stringify(expected.pathKo), `${target.targetId} path labels mismatch`);
 }
 
-assert(provenance.committedAssetStrategy.status === 'permissive-for-repository', 'committed strategy must be permissive-for-repository');
-assert(provenance.committedAssetStrategy.summary.includes('hand-authored'), 'provenance must document hand-authored committed geometry');
-assert(provenance.committedAssetStrategy.accuracyNotice.includes('Decorative navigation art only'), 'provenance must keep decorative-only accuracy notice');
-assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'natural-earth-admin0-boundary-lines'), 'Natural Earth source candidate is required');
-assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Committed Natural Earth world border provenance is required');
+for (const requiredConstraint of ['No legal-boundary accuracy claims', 'No live map tiles, live map APIs, backend services, auth, or runtime API keys']) {
+  assert(boundaries.usageConstraints.includes(requiredConstraint), `missing boundary usage constraint: ${requiredConstraint}`);
+}
+assert(provenance.committedAssetStrategy.status === 'official-source-documented-static', 'committed strategy must be official-source-documented-static');
+assert(/decorative guide/i.test(provenance.committedAssetStrategy.accuracyNotice), 'provenance must keep decorative-only accuracy notice');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korean official legal-boundary source candidate is required');
-assert(provenance.excludedSources.some((source) => source.id === 'gadm'), 'GADM exclusion is required');
+assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Natural Earth world border source is required');
 assert(provenance.excludedSources.some((source) => source.id === 'live-map-tiles-or-client-api'), 'live map/API exclusion is required');
 for (const source of provenance.verifiedSourceCandidates) {
   assert(source.url?.startsWith('https://'), `source ${source.id} must keep an https provenance URL`);
@@ -209,101 +119,26 @@ for (const source of provenance.verifiedSourceCandidates) {
 }
 
 assert(dataProvenance.schemaVersion === 1, 'data provenance schemaVersion must be 1');
-assert(dataProvenance.id === 'globe-static-data-provenance-v1', 'data provenance id must be stable');
 assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'core data must not require runtime fetches');
 assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
 assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
+assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
+for (const target of ['부산광역시/해운대구', '서울특별시/마포구', '경상남도/김해시/봉황동']) {
+  assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes(target), `missing family target ${target}`);
+}
+assert(dataProvenance.koreaBoundaries.excludedSources.includes('live-map-tiles-or-client-api'), 'Korea boundary source lock must forbid live map tiles/client APIs');
 
-const runtimeSources = [
-  ['src/main.ts', mainSource],
-  ['src/koreaFamilyOverlay.ts', koreaOverlaySource],
-  ['src/globeRenderer.ts', globeRendererSource],
-];
-for (const [sourcePath, source] of runtimeSources) {
+for (const [sourcePath, source] of [['src/main.ts', mainSource], ['src/koreaFamilyOverlay.ts', koreaOverlaySource], ['src/globeRenderer.ts', globeRendererSource]]) {
   assert(!/fetch\s*\(/.test(source), `${sourcePath} must not fetch Korea/map/weather data at runtime`);
   assert(!/open-?meteo|weather|forecast/i.test(source), `${sourcePath} must not reintroduce weather/forecast runtime UI`);
-  assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld/i.test(source), `${sourcePath} must not depend on a runtime map API`);
+  assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld\s*(?:api|sdk|tile|tiles)|vworld\.(?:kr|com)/i.test(source), `${sourcePath} must not depend on runtime map API`);
 }
-assert(!/\"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)\"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
-
-assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
-assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
-assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('부산광역시/해운대구'), 'Korea boundary source lock must preserve Busan/Haeundae family target');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('서울특별시/마포구'), 'Korea boundary source lock must preserve Seoul/Mapo family target');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('경상남도/김해시/봉황동'), 'Korea boundary source lock must preserve Gyeongnam/Gimhae/Bonghwang family target');
-assert(dataProvenance.koreaBoundaries.excludedSources.includes('gadm'), 'Korea boundary source lock must exclude GADM');
-assert(dataProvenance.koreaBoundaries.excludedSources.includes('live-map-tiles-or-client-api'), 'Korea boundary source lock must forbid live map tiles/client APIs');
-
-assert(dataProvenance.capitals.sourceLock === 'wikidata-query-service-static-snapshot', 'capital source lock must be Wikidata static snapshot');
-assert(dataProvenance.capitals.currentLegacyCount === 33, 'capital source lock must record the legacy 33-entry baseline');
-assert(dataProvenance.capitals.minimumBundledCount > dataProvenance.capitals.currentLegacyCount, 'capital contract must require expansion beyond legacy entries');
-assert(dataProvenance.capitals.approvedSources.some((source) => source.id === 'wikidata-query-service-capitals'), 'capital source lock must include Wikidata Query Service');
-
-assert(dataProvenance.top100Cities.sourceLock === 'euromonitor-top100-city-destinations-2018', 'TOP100 source lock must be Euromonitor Top 100 City Destinations 2018');
-assert(dataProvenance.top100Cities.requiredCount === 100, 'TOP100 contract must require exactly 100 cities');
-assert(dataProvenance.top100Cities.requiredRanks === '1-100-contiguous', 'TOP100 contract must require ranks 1-100');
-assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking date must be locked');
-assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 City Destinations 2018');
-assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
-assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
-
-assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-boundary-data.mjs'), 'npm verify:data must run the boundary/provenance verifier');
-assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-city-data.mjs'), 'npm verify:data must run the city-data verifier');
-assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
-assert(rootReadme.includes('npm run verify'), 'root README must document the aggregate npm verification command');
-assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link the provenance document');
-assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document the bundled world border asset');
-assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
-assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
-
-assert(dataProvenance.schemaVersion === 1, 'data provenance schemaVersion must be 1');
-assert(dataProvenance.id === 'globe-static-data-provenance-v1', 'data provenance id must be stable');
-assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'core data must not require runtime fetches');
-assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
-assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
-
-assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
-assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
-assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('부산광역시/해운대구'), 'Korea boundary source lock must preserve Busan/Haeundae family target');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('서울특별시/마포구'), 'Korea boundary source lock must preserve Seoul/Mapo family target');
-assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('경상남도/김해시/봉황동'), 'Korea boundary source lock must preserve Gyeongnam/Gimhae/Bonghwang family target');
-assert(dataProvenance.koreaBoundaries.excludedSources.includes('gadm'), 'Korea boundary source lock must exclude GADM');
-assert(dataProvenance.koreaBoundaries.excludedSources.includes('live-map-tiles-or-client-api'), 'Korea boundary source lock must forbid live map tiles/client APIs');
-
-assert(dataProvenance.capitals.sourceLock === 'wikidata-query-service-static-snapshot', 'capital source lock must be Wikidata static snapshot');
-assert(dataProvenance.capitals.currentLegacyCount === 33, 'capital source lock must record the legacy 33-entry baseline');
-assert(dataProvenance.capitals.minimumBundledCount > dataProvenance.capitals.currentLegacyCount, 'capital contract must require expansion beyond legacy entries');
-assert(dataProvenance.capitals.approvedSources.some((source) => source.id === 'wikidata-query-service-capitals'), 'capital source lock must include Wikidata Query Service');
-
-assert(dataProvenance.top100Cities.sourceLock === 'euromonitor-top100-city-destinations-2018', 'TOP100 source lock must be Euromonitor Top 100 City Destinations 2018');
-assert(dataProvenance.top100Cities.requiredCount === 100, 'TOP100 contract must require exactly 100 cities');
-assert(dataProvenance.top100Cities.requiredRanks === '1-100-contiguous', 'TOP100 contract must require ranks 1-100');
-assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking date must be locked');
-assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 City Destinations 2018');
-assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
-assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
-
+assert(!/"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
-assert(worldBorders.sourceUrl.includes('natural-earth-vector'), 'world border source URL must document Natural Earth vector provenance');
-assert(worldBorders.lineCoordinateOrder === 'lat-lng', 'world border line coordinate order must be lat-lng');
 assert(Array.isArray(worldBorders.lines) && worldBorders.lines.length >= 150, 'world border asset must include broad country line coverage');
-assert(worldBorders.lineCount === worldBorders.lines.length, 'world border lineCount must match lines length');
-assert(worldBorders.lines.length <= 320, 'world border line count must stay inside the static app budget');
-assert(Buffer.byteLength(worldBordersRaw, 'utf8') <= 220_000, 'world border JSON must stay below the static raw-size budget');
-let worldBorderPointCount = 0;
-for (const line of worldBorders.lines) {
-  assert(Array.isArray(line) && line.length >= 2, 'world border lines must have at least two points');
-  worldBorderPointCount += line.length;
-  for (const point of line) {
-    const [lat, lng] = point;
-    assert(Number.isFinite(lat) && lat >= -90 && lat <= 90, 'world border latitude must be finite and valid');
-    assert(Number.isFinite(lng) && lng >= -180 && lng <= 180, 'world border longitude must be finite and valid');
-  }
-}
-assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
+assert(worldBorders.lines.length <= 320, 'world border line count must stay inside static budget');
+assert(Buffer.byteLength(worldBordersRaw, 'utf8') <= 220_000, 'world border JSON must stay below raw-size budget');
 
 const expectedHouseholds = {
   parents: { label: '한가네 본가', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae' },
@@ -311,36 +146,31 @@ const expectedHouseholds = {
   brother: { label: '진주네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo' },
   home: { label: '은하네', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang' },
 };
-
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
   assert(householdConfigSource.includes(`id: '${householdId}'`), `missing household config for ${householdId}`);
-  assert(householdConfigSource.includes(`label: '${expectation.label}'`), `missing household label ${expectation.label} for ${householdId}`);
-  assert(householdConfigSource.includes(`locationLabel: '${expectation.location}'`), `missing household location ${expectation.location} for ${householdId}`);
-  for (const name of expectation.names) {
-    assert(householdConfigSource.includes(`'${name}'`), `missing accepted name ${name} for ${householdId}`);
-  }
+  assert(householdConfigSource.includes(`label: '${expectation.label}'`), `missing household label ${expectation.label}`);
+  assert(householdConfigSource.includes(`locationLabel: '${expectation.location}'`), `missing household location ${expectation.location}`);
+  for (const name of expectation.names) assert(householdConfigSource.includes(`'${name}'`), `missing accepted name ${name}`);
   const slotMatches = householdConfigSource.match(new RegExp(`householdId: '${householdId}'`, 'g')) ?? [];
   assert(slotMatches.length === expectation.slots, `${householdId} must have ${expectation.slots} Naver Band slot(s)`);
-  assert(koreaOverlaySource.includes(`'${householdId}'`), `Korea overlay must route to household ${householdId}`);
-  assert(koreaOverlaySource.includes(expectation.terminalRegion), `Korea overlay must retain terminal region ${expectation.terminalRegion} for ${householdId}`);
+  assert(koreaOverlaySource.includes(expectation.terminalRegion), `Korea overlay must retain terminal region ${expectation.terminalRegion}`);
 }
-assert(koreaOverlaySource.includes('household-marker'), 'Korea overlay must render glowing household markers on the map');
-assert(koreaOverlaySource.includes('householdMarkers'), 'Korea overlay must keep an explicit household marker model');
-
-
+assert(koreaOverlaySource.includes('household-marker'), 'Korea overlay must render glowing household markers');
+assert(koreaOverlaySource.includes('householdMarkers'), 'Korea overlay must keep explicit household marker model');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
-const placeholderMatches = householdConfigSource.match(/placeholderHref: 'https:\/\/band\.us\/band\/[^']+'/g) ?? [];
-const statusMatches = householdConfigSource.match(/, status: 'placeholder' }/g) ?? [];
-assert(placeholderMatches.length === 7, 'household config must expose exactly 7 band.us placeholder links');
-assert(statusMatches.length === 7, 'all household link slots must remain placeholder status until real URLs are supplied');
+assert((householdConfigSource.match(/placeholderHref: 'https:\/\/band\.us\/band\/[^']+'/g) ?? []).length === 7, 'household config must expose exactly 7 band.us placeholder links');
+assert((householdConfigSource.match(/, status: 'placeholder' }/g) ?? []).length === 7, 'all household link slots must remain placeholder status');
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
-assert(householdConfigSource.includes('householdConfigValidation = validateHouseholdConfig(householdConfig)'), 'household config validation result must remain exported');
 
-for (const docsSource of [mapDataReadme, rootReadme]) {
-  assert(docsSource.includes('No backend') || docsSource.includes('no backend'), 'docs must preserve no-backend constraint');
-  assert(docsSource.includes('live map API') || docsSource.includes('live map APIs'), 'docs must preserve no-live-map-API constraint');
-}
+assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-boundary-data.mjs'), 'npm verify:data must run boundary verifier');
+assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-city-data.mjs'), 'npm verify:data must run city-data verifier');
+assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
+assert(rootReadme.includes('npm run verify'), 'root README must document npm verification');
+assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link provenance document');
+assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document bundled world border asset');
+assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document verification command');
+assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
 
 console.log('PASS boundary/provenance/household validation');

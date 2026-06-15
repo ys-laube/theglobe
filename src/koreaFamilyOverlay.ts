@@ -327,10 +327,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       const isNext = nextIds.has(id);
       const isHouseholdTarget = householdTarget.has(id);
       polygon.setAttribute('class', ['korea-region', isSelected ? 'is-selected' : '', isNext ? 'is-next' : '', isHouseholdTarget ? 'has-households' : ''].filter(Boolean).join(' '));
+      polygon.setAttribute('aria-label', isNext ? `${feature.nameKo}로 확대` : isSelected ? `${feature.nameKo} 선택됨` : feature.nameKo);
       if (isNext) {
         polygon.setAttribute('tabindex', '0');
         polygon.setAttribute('role', 'button');
-        polygon.setAttribute('aria-label', `${feature.nameKo}로 확대`);
         polygon.addEventListener('click', () => setRegion(id));
         polygon.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {

@@ -176,6 +176,7 @@ try {
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => document.body.textContent?.includes(label)).length;
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
+        const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
         await clickButtonByStrong('부산광역시');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan', 'Busan tier');
         await clickButtonByStrong('해운대구');
@@ -221,7 +222,6 @@ try {
           weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
           weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
-          koreaRegionCount,
           koreaRegionLabels,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           renderedFirstLevelCount,
