@@ -63,7 +63,7 @@ function assertDocumentedSourceClassification() {
   assertSameMembers(provenance.committedAssetStrategy.officialFirstLevelRegionPolicy.expectedOfficialRegionsKo, expectedOfficialFirstLevelRegionsKo, 'boundary provenance must document the official Korea first-level region set');
 
   if (boundaries.sourceClassification === 'official-derived') {
-    const firstLevelFeatures = boundaries.features.filter((feature) => expectedOfficialFirstLevelRegionsKo.includes(feature.nameKo));
+    const firstLevelFeatures = boundaries.features.filter((feature) => feature.tier === 'province' || feature.tier === 'province-city' || feature.tier === 'metropolitan-city' || feature.tier === 'special-self-governing-city');
     const firstLevelNames = firstLevelFeatures.map((feature) => feature.nameKo);
     assert(firstLevelFeatures.length === 17, 'official-derived Korea boundary data must include exactly 17 first-level region features');
     assertSameMembers(firstLevelNames, expectedOfficialFirstLevelRegionsKo, 'official-derived Korea boundary data must include the expected first-level region names');
