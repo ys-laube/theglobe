@@ -61,7 +61,31 @@ for (const feature of boundaries.features) {
 }
 assert(ids.size === requiredIds.size, 'missing required family-path feature ids');
 
-const expectedTerminalRegions = ['kr-busan-haeundae-stylized', 'kr-gimhae-bonghwang-stylized', 'kr-seoul-mapo-stylized'];
+const expectedTiers = new Map([
+  ['kr-country-stylized', 'country'],
+  ['kr-seoul-stylized', 'province-city'],
+  ['kr-seoul-mapo-stylized', 'district'],
+  ['kr-busan-stylized', 'province-city'],
+  ['kr-busan-haeundae-stylized', 'district'],
+  ['kr-gyeongnam-stylized', 'province'],
+  ['kr-gyeongnam-gimhae-stylized', 'city'],
+  ['kr-gimhae-bonghwang-stylized', 'neighborhood'],
+]);
+const expectedFamilyPathRoles = new Map([
+  ['kr-country-stylized', 'entry'],
+  ['kr-seoul-stylized', 'brother-branch'],
+  ['kr-seoul-mapo-stylized', 'brother-household-district'],
+  ['kr-busan-stylized', 'sister-parents-branch'],
+  ['kr-busan-haeundae-stylized', 'sister-parents-household-district'],
+  ['kr-gyeongnam-stylized', 'home-branch'],
+  ['kr-gyeongnam-gimhae-stylized', 'home-city'],
+  ['kr-gimhae-bonghwang-stylized', 'home-neighborhood'],
+]);
+for (const feature of boundaries.features) {
+  assert(feature.tier === expectedTiers.get(feature.id), `${feature.id} must keep its approved boundary tier`);
+  assert(feature.familyPathRole === expectedFamilyPathRoles.get(feature.id), `${feature.id} must keep its family path role`);
+}
+
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
 
@@ -151,16 +175,16 @@ for (const line of worldBorders.lines) {
 assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
 const expectedHouseholds = {
-  parents: { label: '부모님네', locationLabel: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
-  sister: { label: '누나네', locationLabel: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
-  brother: { label: '형네', locationLabel: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
-  home: { label: '우리집', locationLabel: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
+  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2 },
+  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3 },
+  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1 },
+  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1 },
 };
 
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
   assert(householdConfigSource.includes(`id: '${householdId}'`), `missing household config for ${householdId}`);
   assert(householdConfigSource.includes(`label: '${expectation.label}'`), `missing household label ${expectation.label} for ${householdId}`);
-  assert(householdConfigSource.includes(`locationLabel: '${expectation.locationLabel}'`), `missing location label ${expectation.locationLabel} for ${householdId}`);
+  assert(householdConfigSource.includes(`locationLabel: '${expectation.location}'`), `missing household location ${expectation.location} for ${householdId}`);
   for (const name of expectation.names) {
     assert(householdConfigSource.includes(`'${name}'`), `missing accepted name ${name} for ${householdId}`);
   }
@@ -178,7 +202,7 @@ const statusMatches = householdConfigSource.match(/, status: 'placeholder' }/g) 
 assert(placeholderMatches.length === 7, 'household config must expose exactly 7 band.us placeholder links');
 assert(statusMatches.length === 7, 'all household link slots must remain placeholder status until real URLs are supplied');
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
-assert(householdConfigSource.includes("status: 'placeholder'"), 'household Band slots must keep placeholder status in static config');
+assert(householdConfigSource.includes('householdConfigValidation = validateHouseholdConfig(householdConfig)'), 'household config validation result must remain exported');
 
 assert(weatherPolicySource.includes("mode: 'static-fallback-only'"), 'weather policy must be static fallback only');
 for (const requiredWeatherFlag of ['liveApiRequired: false', 'backendRequired: false', 'apiKeyRequired: false']) {

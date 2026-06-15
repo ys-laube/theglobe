@@ -1,24 +1,32 @@
-export type WeatherProviderPolicy = {
-  readonly mode: 'static-fallback-only';
-  readonly liveApiRequired: false;
-  readonly backendRequired: false;
-  readonly apiKeyRequired: false;
-  readonly fallbackLabel: string;
-  readonly fallbackSummary: string;
+export type WeatherMode = 'simulated' | 'live' | 'unavailable';
+
+export type WeatherPolicy = {
+  readonly id: 'static-weather-policy-v1';
+  readonly defaultMode: Extract<WeatherMode, 'simulated'>;
+  readonly liveProvider: 'open-meteo';
+  readonly liveEnhancementOptional: true;
+  readonly requiresApiKey: false;
+  readonly blocksInitialRender: false;
+  readonly fallbackMode: Extract<WeatherMode, 'unavailable'>;
+  readonly disclosureLabels: Readonly<Record<WeatherMode, string>>;
 };
 
 export const weatherPolicy = {
-  mode: 'static-fallback-only',
-  liveApiRequired: false,
-  backendRequired: false,
-  apiKeyRequired: false,
-  fallbackLabel: '날씨 정보 준비 중',
-  fallbackSummary: 'Weather is intentionally optional for this static gift app; never block the Korea family map on a live weather API, backend, or required API key.',
-} as const satisfies WeatherProviderPolicy;
+  id: 'static-weather-policy-v1',
+  defaultMode: 'simulated',
+  liveProvider: 'open-meteo',
+  liveEnhancementOptional: true,
+  requiresApiKey: false,
+  blocksInitialRender: false,
+  fallbackMode: 'unavailable',
+  disclosureLabels: {
+    simulated: 'Simulated weather ambience',
+    live: 'Live Open-Meteo weather',
+    unavailable: 'Weather unavailable; showing static ambience',
+  },
+} as const satisfies WeatherPolicy;
 
-export function getWeatherFallbackCopy(policy: WeatherProviderPolicy = weatherPolicy) {
-  return {
-    label: policy.fallbackLabel,
-    summary: policy.fallbackSummary,
-  } as const;
+export function resolveWeatherMode({ liveEnabled, liveAvailable }: { liveEnabled: boolean; liveAvailable: boolean }): WeatherMode {
+  if (!liveEnabled) return weatherPolicy.defaultMode;
+  return liveAvailable ? 'live' : weatherPolicy.fallbackMode;
 }
