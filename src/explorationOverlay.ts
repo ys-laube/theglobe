@@ -43,6 +43,12 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
   return element;
 }
 
+function rankBandLabel(rank: number) {
+  const start = Math.floor((rank - 1) / 10) * 10 + 1;
+  const end = start + 9;
+  return `${start}-${end}`;
+}
+
 function makeMarker(capital: Capital, radius: number) {
   const marker = new THREE.Mesh(
     new THREE.SphereGeometry(capital.mode === 'top100' ? 0.024 : 0.03, 18, 18),
@@ -158,12 +164,38 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.explorationButton.disabled = !earthReady;
     elements.tierButton.textContent = cityMode === 'top100' ? '수도 보기' : 'TOP 100 인기 도시 보기';
     elements.tierButton.disabled = !canShowMarkers;
-    const byRegion = [...new Set(data.map((c) => c.region))];
-    elements.regionList.replaceChildren(...byRegion.map((region) => {
-      const chip = document.createElement('span');
-      chip.textContent = region;
-      return chip;
-    }));
+    if (cityMode === 'top100' && data.length > 0) {
+      const grouped = new Map<string, Capital[]>();
+      data.forEach((capital) => {
+        if (!capital.rank) return;
+        const group = rankBandLabel(capital.rank);
+        grouped.set(group, [...(grouped.get(group) ?? []), capital]);
+      });
+      elements.regionList.replaceChildren(...[...grouped].map(([group, capitals]) => {
+        const section = document.createElement('section');
+        section.className = 'rank-group';
+        section.dataset.rankGroup = group;
+        appendText(section, 'h3', `Ranks ${group}`);
+        const list = document.createElement('ol');
+        list.start = capitals[0]?.rank ?? 1;
+        capitals.forEach((capital) => {
+          const item = document.createElement('li');
+          item.dataset.cityId = capital.id;
+          appendText(item, 'span', `${capital.rank}. ${capital.city}`, 'rank-city');
+          appendText(item, 'span', capital.country, 'rank-country');
+          list.append(item);
+        });
+        section.append(list);
+        return section;
+      }));
+    } else {
+      const byRegion = [...new Set(data.map((c) => c.region))];
+      elements.regionList.replaceChildren(...byRegion.map((region) => {
+        const chip = document.createElement('span');
+        chip.textContent = region;
+        return chip;
+      }));
+    }
     if ((!canShowMarkers || (selected && !data.includes(selected))) && selected) showCard(null);
   }
 
