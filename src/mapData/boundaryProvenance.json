@@ -4,9 +4,33 @@
   "committedAssetStrategy": {
     "assetId": "korea-official-static-family-boundaries-v2",
     "status": "official-source-documented-static",
-    "summary": "G003 commits a static Korea family overlay with 17 first-level administrative regions plus family drilldown targets, documented from official public-data/VWorld legal-boundary dataset metadata and bundled without runtime map APIs.",
+    "summary": "G003 commits a static Korea family overlay with 17 first-level administrative regions plus family drilldown targets, documented from official public-data/VWorld legal-boundary dataset metadata and bundled without runtime map APIs. The normalized guide polygons are hand-authored from official-source metadata review and are not legal-boundary coordinates.",
     "licenseTreatment": "공공데이터포털 metadata for 국토교통부_일별법정구역정보 lists 무료 and 이용허락범위 제한 없음; VWorld is documented as the official download surface. This app bundles simplified normalized SVG guide geometry, not raw SHP files.",
-    "accuracyNotice": "Static decorative guide only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions."
+    "accuracyNotice": "Decorative navigation art only. Static decorative guide only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions.",
+    "sourceClassification": "documented-guide",
+    "officialFirstLevelRegionPolicy": {
+      "expectedOfficialRegionCount": 17,
+      "expectedOfficialRegionsKo": [
+        "서울특별시",
+        "부산광역시",
+        "대구광역시",
+        "인천광역시",
+        "광주광역시",
+        "대전광역시",
+        "울산광역시",
+        "세종특별자치시",
+        "경기도",
+        "강원특별자치도",
+        "충청북도",
+        "충청남도",
+        "전북특별자치도",
+        "전라남도",
+        "경상북도",
+        "경상남도",
+        "제주특별자치도"
+      ],
+      "currentException": "documented-guide static overlay documents the official 17-region set and bundles simplified guide geometry plus family targets; it is not raw official-derived legal-boundary geometry."
+    }
   },
   "verifiedSourceCandidates": [
     {

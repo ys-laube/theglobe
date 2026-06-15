@@ -82,6 +82,26 @@ type CreateOptions = {
   onClose?: () => void;
 };
 
+const firstLevelRegionOrder = [
+  'kr-seoul',
+  'kr-busan',
+  'kr-daegu',
+  'kr-incheon',
+  'kr-gwangju',
+  'kr-daejeon',
+  'kr-ulsan',
+  'kr-sejong',
+  'kr-gyeonggi',
+  'kr-gangwon',
+  'kr-chungbuk',
+  'kr-chungnam',
+  'kr-jeonbuk',
+  'kr-jeonnam',
+  'kr-gyeongbuk',
+  'kr-gyeongnam',
+  'kr-jeju',
+] as const satisfies readonly RegionId[];
+
 const routeNodes: Record<RegionId, RouteNode> = {
   'kr-korea-overview': {
     id: 'kr-korea-overview',
@@ -254,7 +274,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const copy = document.createElement('div');
     appendText(copy, 'p', 'Official static Korea family map', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '공공데이터/VWorld 경계 데이터셋 메타데이터를 문서화한 정적 17개 광역 행정구역 안내에서 가족이 있는 자리까지 확대됩니다.');
+    appendText(copy, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 문서화한 정적 17개 광역 행정구역 안내에서 가족이 있는 자리까지 확대됩니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');
@@ -430,7 +450,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     if (!node.next.length) {
       appendText(routePanel, 'p', 'Official static region', 'map-kicker');
       appendText(routePanel, 'h3', `${node.label} 경계 가이드`);
-      appendText(routePanel, 'p', '공식 공공데이터/VWorld 경계 데이터셋 메타데이터를 기준으로 문서화한 정적 SVG 안내 영역입니다. 가족 목적지가 있는 지역만 다음 단계로 확대됩니다.');
+      appendText(routePanel, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 기준으로 문서화한 정적 SVG 안내 영역입니다. 가족 목적지가 있는 지역만 다음 단계로 확대됩니다.');
       return;
     }
 

@@ -226,7 +226,7 @@ for (const file of runtimeSourceFiles) {
     assert(!pattern.test(source), `${label} must not be introduced in runtime source: ${file.replace(root + '/', '')}`);
   }
 }
-assert(!runtimeSourceFiles.some((file) => file.includes('/.omx/')), 'runtime source scan must not include .omx/ultragoal artifacts');
+assert(!runtimeSourceFiles.some((file) => file.replace(root + '/', '').startsWith('.omx/')), 'runtime source scan must not include .omx/ultragoal artifacts');
 
 
 const runtimeSourceFiles = [
