@@ -65,25 +65,36 @@
     }
   },
   "capitals": {
-    "sourceLock": "wikidata-query-service-static-snapshot",
-    "minimumBundledCount": 34,
-    "currentLegacyCount": 33,
-    "inclusionRule": "Bundle sovereign-state capital candidates with coordinates and a safe HTTPS Wikipedia or source URL; generated data must exceed the legacy 33 curated entries.",
+    "sourceLock": "mledoze-countries-plus-capital-coordinates-snapshot",
+    "expectedBundledCount": 194,
+    "minimumBundledCount": 190,
+    "currentLegacyCount": 54,
+    "inclusionRule": "Sovereign-states-only: ISO 3166-1 officially-assigned entries where independent is true; territories/dependencies/disputed non-independent entries are excluded. One primary/listed capital marker per included state.",
     "snapshotRequiredFields": [
       "source",
       "queryUrl",
+      "coordinateSourceUrl",
       "extractedAt",
       "licenseUsageNote",
-      "inclusionRule"
+      "inclusionRule",
+      "expectedCount"
     ],
     "approvedSources": [
       {
-        "id": "wikidata-query-service-capitals",
-        "name": "Wikidata Query Service country/capital/coordinate candidates",
-        "url": "https://query.wikidata.org/",
-        "publisher": "Wikidata / Wikimedia Foundation",
+        "id": "mledoze-countries",
+        "name": "mledoze/countries independent ISO 3166-1 country list",
+        "url": "https://github.com/mledoze/countries",
+        "publisher": "mledoze/countries contributors",
         "retrievalPolicy": "build-time snapshot only; no client runtime query",
-        "licenseUsageNote": "Record the SPARQL query, extraction date, and Wikidata/linked-page attribution notes in the generated dataset metadata."
+        "licenseUsageNote": "ODbL-1.0 source used to filter independent=true and officially-assigned country entries."
+      },
+      {
+        "id": "capital-coordinate-csv",
+        "name": "country-capital-lat-long-population.csv",
+        "url": "https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9",
+        "publisher": "public GitHub gist; source noted in dataset metadata",
+        "retrievalPolicy": "build-time snapshot only; no client runtime query",
+        "licenseUsageNote": "Used only for capital display coordinates and capital labels; verify static metadata before refreshing."
       }
     ]
   },

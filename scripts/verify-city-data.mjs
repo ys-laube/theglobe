@@ -24,14 +24,18 @@ function assertUnique(entries, key, label) {
 }
 
 assert(capitals.schemaVersion === 1, 'world capitals schemaVersion must be 1');
-assert(capitals.datasetId === 'world-capitals-wikidata-snapshot-2026-06-15', 'world capitals dataset id must be stable');
-assert(capitals.source.id === 'wikidata-query-service-capitals', 'world capitals source id must be Wikidata lock');
+assert(capitals.datasetId === 'world-capitals-sovereign-states-static-2026-06-15', 'world capitals dataset id must be stable');
+assert(capitals.source.id === dataProvenance.capitals.sourceLock, 'world capitals source id must match provenance lock');
 assertHttps(capitals.source.queryUrl, 'world capitals source queryUrl');
+assertHttps(capitals.source.coordinateSourceUrl, 'world capitals coordinateSourceUrl');
 assert(typeof capitals.source.extractedAt === 'string' && capitals.source.extractedAt.length >= 10, 'world capitals extraction date is required');
 assert(capitals.minimumRequiredCount > capitals.legacyBaselineCount, 'capital minimum must exceed legacy baseline');
 assert(capitals.legacyBaselineCount === dataProvenance.capitals.currentLegacyCount, 'capital legacy baseline must match data provenance');
-assert(capitals.capitals.length > capitals.legacyBaselineCount, 'bundled capitals must exceed legacy 33 entries');
-assert(capitals.capitals.length >= capitals.minimumRequiredCount, 'bundled capitals must satisfy minimum required count');
+assert(capitals.expectedCount === dataProvenance.capitals.expectedBundledCount, 'capital expected count must match data provenance');
+assert(capitals.capitals.length === capitals.expectedCount, 'bundled capitals must match sovereign-states-only expected count');
+assert(capitals.capitals.length > capitals.legacyBaselineCount, 'bundled capitals must exceed legacy 54 entries');
+assert(capitals.capitals.length >= capitals.minimumRequiredCount && capitals.minimumRequiredCount === dataProvenance.capitals.minimumBundledCount, 'bundled capitals must satisfy minimum required count');
+assert(/sovereign-states-only/i.test(capitals.inclusionRule), 'capital inclusion rule must lock sovereign-states-only scope');
 assertUnique(capitals.capitals, 'id', 'capital');
 for (const entry of capitals.capitals) {
   assert(entry.sourceId === capitals.source.id, `capital ${entry.id} sourceId must match dataset source`);

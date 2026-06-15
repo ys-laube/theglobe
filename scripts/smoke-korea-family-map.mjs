@@ -144,7 +144,7 @@ try {
 
         const exploreButton = await waitFor(() => document.querySelector('[data-action="explore"]:not(:disabled)'), 'exploration button');
         exploreButton.click();
-        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '54', 'all capitals visible');
+        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '194', 'all capitals visible');
         const capitalsTitle = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const capitalsCopy = document.querySelector('[data-tier-copy]')?.textContent?.trim();
         const top100Toggle = document.querySelector('[data-action="toggle-tier"]');
