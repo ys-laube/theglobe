@@ -8,7 +8,10 @@ G001 keeps the Korea family map zoom fully static and client-side. Boundary or
 map-shape data must come from permissive local sources only: use bundled static
 data with clear provenance notes, or simplified stylized geometry when a
 production boundary source has not been approved. Do not add live map APIs,
-backend services, auth flows, or runtime API keys.
+backend services, auth flows, or runtime API keys. The current committed
+family-map geometry lives in `src/mapData/koreaFamilyBoundaries.json`, its
+provenance/source strategy lives in `src/mapData/boundaryProvenance.json`, and
+the decorative globe border asset lives in `src/mapData/worldCountryBorders.json`.
 
 The static data contract is locked in `src/mapData/dataProvenance.json` and
 validated by `npm run verify:data`: Korea boundary candidates are build-time
