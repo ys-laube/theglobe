@@ -10,7 +10,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 - **Capitals**: the next generated capital dataset must use a documented Wikidata Query Service static snapshot, must include source/query/extraction/license metadata, and must exceed the legacy 33 curated entries.
 - **TOP100 cities**: the UI-facing ranked dataset must contain exactly 100 contiguous ranks. The locked exact-100 source is the public Euromonitor Top 100 City Destinations 2018 white paper (`2018-11-01`, 2017 international arrivals metric). Partial Agoda posts, incomplete previews, and Mastercard GDCI 2019 top-20-only tables are not enough for the exact-100 contract.
 
-`npm run verify:data` validates these provenance contracts and delegates to `scripts/verify-city-data.mjs` before downstream UI work can rely on the datasets.
+`npm run verify:data` validates these provenance contracts, scans runtime source for forbidden map/auth/API-key/weather dependencies, guards against worker-created `.omx/ultragoal` mutation, and delegates to `scripts/verify-city-data.mjs` before downstream UI work can rely on the datasets.
 
 ## Committed Korea geometry
 

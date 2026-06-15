@@ -59,8 +59,9 @@ npm run verify
 This runs TypeScript checking, bundled boundary/provenance validation, and the
 production Vite build. The boundary/provenance step is `npm run verify:data`; it
 checks the static map JSON contracts, provenance exclusions, README provenance
-notes, and that the aggregate `npm run verify` command still includes the data
-verification gate. The app has no backend, login dependency, or required live API dependency.
+notes, forbidden runtime map/auth/API-key/weather source patterns, absence of a
+worker-created `.omx/ultragoal` directory, and that the aggregate `npm run verify`
+command still includes the data verification gate. The app has no backend, login dependency, or required live API dependency.
 On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, 17-region Korea map, Busan → Haeundae drilldown, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
 
 ## Shareable URL
