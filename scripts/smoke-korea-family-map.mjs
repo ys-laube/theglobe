@@ -174,9 +174,9 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         await clickButtonByStrong('부산광역시');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-stylized', 'Busan tier');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan', 'Busan tier');
         await clickButtonByStrong('해운대구');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae-stylized', 'Haeundae tier');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae', 'Haeundae tier');
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label')).filter(Boolean);
         const householdMarkerCount = document.querySelectorAll('.household-marker').length;
@@ -266,10 +266,10 @@ try {
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
-  if (result.selectedRegion !== 'kr-busan-haeundae-stylized') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
+  if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
-  if (result.koreaRegionCount < 8) throw new Error(`Expected Korea boundary layer to render at least 8 regions, found ${result.koreaRegionCount}`);
-  for (const requiredRegionLabel of ['대한민국', '부산광역시', '해운대구']) {
+  if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
+  for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
