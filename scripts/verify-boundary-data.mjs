@@ -8,6 +8,9 @@ const provenance = JSON.parse(await readFile(join(root, 'src/mapData/boundaryPro
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
+const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
+const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
+const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -54,6 +57,14 @@ assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'natur
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Committed Natural Earth world border provenance is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korean official legal-boundary source candidate is required');
 assert(provenance.excludedSources.some((source) => source.id === 'gadm'), 'GADM exclusion is required');
+
+assert(packageManifest.scripts?.['verify:data'] === 'node scripts/verify-boundary-data.mjs', 'npm verify:data must run the boundary/provenance verifier');
+assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
+assert(rootReadme.includes('npm run verify'), 'root README must document the aggregate npm verification command');
+assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link the provenance document');
+assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document the bundled world border asset');
+assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
+assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
 
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');

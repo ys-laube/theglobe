@@ -8,7 +8,10 @@ G001 keeps the Korea family map zoom fully static and client-side. Boundary or
 map-shape data must come from permissive local sources only: use bundled static
 data with clear provenance notes, or simplified stylized geometry when a
 production boundary source has not been approved. Do not add live map APIs,
-backend services, auth flows, or runtime API keys.
+backend services, auth flows, or runtime API keys. The current committed
+family-map geometry lives in `src/mapData/koreaFamilyBoundaries.json`, its
+provenance/source strategy lives in `src/mapData/boundaryProvenance.json`, and
+the decorative globe border asset lives in `src/mapData/worldCountryBorders.json`.
 
 The household configuration is intended to stay in one static file. Accepted
 family display names and the seven Naver Band link slots live in
@@ -45,7 +48,10 @@ npm run verify
 ```
 
 This runs TypeScript checking, bundled boundary/provenance validation, and the
-production Vite build. The app has no backend, login, or live API dependency.
+production Vite build. The boundary/provenance step is `npm run verify:data`; it
+checks the static map JSON contracts, provenance exclusions, README provenance
+notes, and that the aggregate `npm run verify` command still includes the data
+verification gate. The app has no backend, login, or live API dependency.
 On macOS with Google Chrome installed, run `npm run smoke:korea` after a build
 to exercise the Korea → Busan → Haeundae → household name-gate path in headless
 Chrome.
