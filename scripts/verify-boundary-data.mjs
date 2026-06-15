@@ -13,8 +13,6 @@ const weatherPolicySource = await readFile(join(root, 'src/weatherPolicy.ts'), '
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
-const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
-const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
 function assert(condition, message) {
@@ -98,11 +96,11 @@ assert(dataProvenance.capitals.currentLegacyCount === 33, 'capital source lock m
 assert(dataProvenance.capitals.minimumBundledCount > dataProvenance.capitals.currentLegacyCount, 'capital contract must require expansion beyond legacy entries');
 assert(dataProvenance.capitals.approvedSources.some((source) => source.id === 'wikidata-query-service-capitals'), 'capital source lock must include Wikidata Query Service');
 
-assert(dataProvenance.top100Cities.sourceLock === 'mastercard-global-destination-cities-index-2019-public-report', 'TOP100 source lock must be Mastercard GDCI public report');
+assert(dataProvenance.top100Cities.sourceLock === 'euromonitor-top100-city-destinations-2018', 'TOP100 source lock must be Euromonitor public Top 100 2018');
 assert(dataProvenance.top100Cities.requiredCount === 100, 'TOP100 contract must require exactly 100 cities');
 assert(dataProvenance.top100Cities.requiredRanks === '1-100-contiguous', 'TOP100 contract must require ranks 1-100');
-assert(dataProvenance.top100Cities.rankingDate === '2019-09-04', 'TOP100 ranking date must be locked');
-assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'mastercard-gdci-2019-global-report'), 'TOP100 source lock must include Mastercard GDCI report');
+assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking date must be locked');
+assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 2018');
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
 
 assert(dataProvenance.weather.baselineMode === 'simulated-static', 'weather baseline must be simulated/static');
@@ -112,7 +110,8 @@ assert(dataProvenance.weather.uiDisclosureRequired === true, 'weather UI disclos
 assert(dataProvenance.weather.approvedSources.some((source) => source.id === 'open-meteo-forecast-api'), 'weather policy must lock Open-Meteo as optional source');
 assert(dataProvenance.weather.forbiddenBehavior.includes('secret key or paid endpoint in client bundle'), 'weather policy must forbid client secrets/paid endpoint');
 
-assert(packageManifest.scripts?.['verify:data'] === 'node scripts/verify-boundary-data.mjs', 'npm verify:data must run the boundary/provenance verifier');
+assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-boundary-data.mjs'), 'npm verify:data must run the boundary/provenance verifier');
+assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-city-data.mjs'), 'npm verify:data must run the city-data verifier');
 assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
 assert(rootReadme.includes('npm run verify'), 'root README must document the aggregate npm verification command');
 assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link the provenance document');

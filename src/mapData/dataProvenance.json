@@ -65,20 +65,20 @@
     ]
   },
   "top100Cities": {
-    "sourceLock": "mastercard-global-destination-cities-index-2019-public-report",
+    "sourceLock": "euromonitor-top100-city-destinations-2018",
     "requiredCount": 100,
     "requiredRanks": "1-100-contiguous",
-    "rankingDate": "2019-09-04",
-    "metric": "international overnight visitors, 2018 arrivals with 2019 forecast context",
-    "fallbackDecision": "Use the complete public Mastercard Global Destination Cities Index 2019 report unless a later complete public Top 100 travel-city source is approved before UI dependency. Do not infer from partial Agoda/Euromonitor previews.",
+    "rankingDate": "2018-11-01",
+    "metric": "international arrivals by city, 2017 current ranking",
+    "fallbackDecision": "Use the complete public Euromonitor Top 100 City Destinations 2018 static ranking for the initial bundled exact-100 asset. Do not infer from partial Agoda previews. A later complete public source may replace this only with updated provenance before UI dependency.",
     "approvedSources": [
       {
-        "id": "mastercard-gdci-2019-global-report",
-        "name": "Mastercard Global Destination Cities Index 2019 global report",
-        "url": "https://www.mastercard.com/news/media/wexffu4b/gdci-global-report-final-1.pdf",
-        "publisher": "Mastercard",
-        "retrievalPolicy": "build-time manual/static transcription with source metadata; no runtime dependency",
-        "licenseUsageNote": "Public report is used as ranking provenance for a static, attributed list; do not bundle report text or assets beyond minimal factual ranking metadata."
+        "id": "euromonitor-top100-city-destinations-2018",
+        "name": "Euromonitor Top 100 City Destinations 2018",
+        "url": "https://go.euromonitor.com/white-paper-travel-2018-100-cities",
+        "publisher": "Euromonitor International",
+        "retrievalPolicy": "build-time static transcription with source metadata; no runtime dependency",
+        "licenseUsageNote": "Static factual ranking metadata only; do not bundle report prose or imagery."
       }
     ],
     "rejectedSources": [

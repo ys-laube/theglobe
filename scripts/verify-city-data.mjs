@@ -1,0 +1,68 @@
+import { readFile } from 'node:fs/promises';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const capitals = JSON.parse(await readFile(join(root, 'src/data/worldCapitals.json'), 'utf8'));
+const top100 = JSON.parse(await readFile(join(root, 'src/data/top100Cities.json'), 'utf8'));
+const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+function assertHttps(url, label) {
+  assert(typeof url === 'string' && url.startsWith('https://'), `${label} must be an HTTPS URL`);
+}
+
+function assertCoordinate(entry, label) {
+  assert(Number.isFinite(entry.lat) && entry.lat >= -90 && entry.lat <= 90, `${label} latitude must be valid`);
+  assert(Number.isFinite(entry.lng) && entry.lng >= -180 && entry.lng <= 180, `${label} longitude must be valid`);
+}
+
+function assertUnique(entries, key, label) {
+  const values = entries.map((entry) => entry[key]);
+  assert(new Set(values).size === values.length, `${label} ${key} values must be unique`);
+}
+
+assert(capitals.schemaVersion === 1, 'world capitals schemaVersion must be 1');
+assert(capitals.datasetId === 'world-capitals-wikidata-snapshot-2026-06-15', 'world capitals dataset id must be stable');
+assert(capitals.source.id === 'wikidata-query-service-capitals', 'world capitals source id must be Wikidata lock');
+assertHttps(capitals.source.queryUrl, 'world capitals source queryUrl');
+assert(typeof capitals.source.extractedAt === 'string' && capitals.source.extractedAt.length >= 10, 'world capitals extraction date is required');
+assert(capitals.minimumRequiredCount > capitals.legacyBaselineCount, 'capital minimum must exceed legacy baseline');
+assert(capitals.legacyBaselineCount === dataProvenance.capitals.currentLegacyCount, 'capital legacy baseline must match data provenance');
+assert(capitals.capitals.length > capitals.legacyBaselineCount, 'bundled capitals must exceed legacy 33 entries');
+assert(capitals.capitals.length >= capitals.minimumRequiredCount, 'bundled capitals must satisfy minimum required count');
+assertUnique(capitals.capitals, 'id', 'capital');
+for (const entry of capitals.capitals) {
+  assert(entry.sourceId === capitals.source.id, `capital ${entry.id} sourceId must match dataset source`);
+  for (const field of ['id', 'city', 'country', 'capitalOf', 'region']) {
+    assert(typeof entry[field] === 'string' && entry[field].length > 0, `capital ${entry.id} missing ${field}`);
+  }
+  assertCoordinate(entry, `capital ${entry.id}`);
+  assertHttps(entry.link, `capital ${entry.id} link`);
+}
+
+assert(top100.schemaVersion === 1, 'TOP100 schemaVersion must be 1');
+assert(top100.datasetId === 'top100-city-destinations-euromonitor-2018-static-v1', 'TOP100 dataset id must be stable');
+assert(top100.requiredCount === dataProvenance.top100Cities.requiredCount, 'TOP100 required count must match provenance');
+assert(top100.requiredRanks === dataProvenance.top100Cities.requiredRanks, 'TOP100 rank policy must match provenance');
+assert(top100.cities.length === 100, 'TOP100 must contain exactly 100 cities');
+assert(top100.source.id === dataProvenance.top100Cities.sourceLock, 'TOP100 source id must match data provenance source lock');
+assert(top100.source.rankingDate === dataProvenance.top100Cities.rankingDate, 'TOP100 ranking date must match provenance');
+assert(top100.source.licenseUsageNote?.length > 0, 'TOP100 license/usage note is required');
+assertHttps(top100.source.url, 'TOP100 source URL');
+assertUnique(top100.cities, 'id', 'TOP100 city');
+const ranks = top100.cities.map((entry) => entry.rank).sort((a, b) => a - b);
+assert(ranks.every((rank, index) => rank === index + 1), 'TOP100 ranks must be contiguous 1-100');
+for (const entry of top100.cities) {
+  assert(entry.sourceId === top100.source.id, `TOP100 ${entry.id} sourceId must match dataset source`);
+  for (const field of ['id', 'city', 'country', 'region']) {
+    assert(typeof entry[field] === 'string' && entry[field].length > 0, `TOP100 ${entry.id} missing ${field}`);
+  }
+  assertCoordinate(entry, `TOP100 ${entry.id}`);
+  assertHttps(entry.link, `TOP100 ${entry.id} link`);
+}
+
+console.log(`PASS city data validation: ${capitals.capitals.length} capitals, ${top100.cities.length} TOP100 cities`);
