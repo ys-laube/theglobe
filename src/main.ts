@@ -15,6 +15,7 @@ app.innerHTML = `
       <p class="message">세상은 넓고, 너희가 닿을 곳은 더 넓다. 먼저 지구를 천천히 바라보고, 준비되면 도시의 빛을 하나씩 열어보자.</p>
       <div class="actions">
         <button class="primary" data-action="start">지구본 열기</button>
+        <button class="ghost" data-action="korea-family">Korea family map</button>
         <button class="ghost" data-action="explore">탐험 모드 준비 중</button>
       </div>
     </section>
@@ -26,7 +27,7 @@ app.innerHTML = `
         <strong data-state-label>Preparing Earth</strong>
         <span data-state-copy>Loading the globe renderer.</span>
       </div>
-      <div class="hint">드래그해서 지구를 돌리고, 탐험 모드를 켠 뒤 수도를 눌러보세요</div>
+      <div class="hint">드래그해서 지구를 돌리고, Korea family map은 별도 버튼으로 열어보세요</div>
       <article class="city-card" data-empty="true" aria-live="polite"></article>
     </section>
 
@@ -51,15 +52,23 @@ const canvas = document.querySelector<HTMLCanvasElement>('#globe')!;
 const stage = document.querySelector<HTMLElement>('.globe-stage')!;
 const startButton = document.querySelector<HTMLButtonElement>('[data-action="start"]')!;
 const explorationButton = document.querySelector<HTMLButtonElement>('[data-action="explore"]')!;
+const koreaFamilyButton = document.querySelector<HTMLButtonElement>('[data-action="korea-family"]')!;
 const tierButton = document.querySelector<HTMLButtonElement>('[data-action="toggle-tier"]')!;
 const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
 const attribution = document.querySelector<HTMLElement>('[data-attribution]')!;
 
+let koreaFamilyEntryRequested = false;
+
 function updateQaState() {
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     explorationMode: overlay.getExplorationMode(),
+    koreaFamilyEntryRequested,
+    koreaOverlayOpen: false,
+    koreaTier: null,
+    selectedRegion: null,
+    selectedHousehold: null,
     forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
   };
 }
@@ -136,6 +145,13 @@ canvas.addEventListener('pointerleave', () => {
 startButton.addEventListener('click', () => stage.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 explorationButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
 tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
+koreaFamilyButton.addEventListener('click', () => {
+  koreaFamilyEntryRequested = true;
+  window.dispatchEvent(new CustomEvent('korea-family-map-request'));
+  stateLabel.textContent = 'Korea family map';
+  stateCopy.textContent = '한국 가족 지도를 열 준비가 되었어요. 다음 단계에서 지도 오버레이가 연결됩니다.';
+  updateQaState();
+});
 
 function resize() {
   globe.resize();

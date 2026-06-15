@@ -19,6 +19,15 @@
       "implementationNote": "Use low-scale 1:110m or simplified derived linework for subtle non-pickable globe borders; avoid making disputed-boundary political claims beyond the source's de facto view."
     },
     {
+      "id": "committed-natural-earth-110m-country-border-lines",
+      "name": "Bundled Natural Earth 110m Admin 0 country border lines",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson",
+      "publisher": "Natural Earth / nvkelso natural-earth-vector GitHub mirror",
+      "licenseSummary": "Natural Earth describes its map data as public domain. The bundled asset extracts low-resolution line coordinates for decorative globe borders.",
+      "permittedUseDecision": "Committed for G002 as static, non-live, decorative country border data.",
+      "implementationNote": "Render as non-pickable GlobeRenderer-owned line geometry; do not use for political/legal boundary claims."
+    },
+    {
       "id": "data-go-kr-molit-daily-legal-district-shp",
       "name": "국토교통부_일별법정구역정보 SHP",
       "url": "https://www.data.go.kr/data/15045881/fileData.do?recommendDataYn=Y",

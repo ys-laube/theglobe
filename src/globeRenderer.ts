@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, shouldForcePrimaryTextureFailure, shouldForcePrimaryTextureTimeout } from './assetsPolicy';
+import worldCountryBorders from './mapData/worldCountryBorders.json';
 
 export type GlobeRuntimeState = 'boot' | 'loading-earth' | 'earth-ready' | 'fallback-earth' | 'asset-enhancement-ready';
 
@@ -8,6 +9,10 @@ type StateMeta = {
 };
 
 type StateListener = (state: GlobeRuntimeState, message: string, attribution: string, meta?: StateMeta) => void;
+
+type BorderLineAsset = {
+  readonly lines: readonly (readonly (readonly [number, number])[])[];
+};
 
 export type GlobeRenderer = {
   radius: number;
@@ -108,6 +113,37 @@ function loadTexture(loader: THREE.TextureLoader, url: string, label: string) {
   });
 }
 
+
+function makeCountryBorderLayer(borderAsset: BorderLineAsset, borderRadius = radius + 0.031) {
+  const positions: number[] = [];
+  borderAsset.lines.forEach((line) => {
+    for (let index = 1; index < line.length; index += 1) {
+      const [prevLat, prevLng] = line[index - 1];
+      const [lat, lng] = line[index];
+      if (Math.abs(lng - prevLng) > 180) continue;
+      const a = latLngToVector(prevLat, prevLng, borderRadius);
+      const b = latLngToVector(lat, lng, borderRadius);
+      positions.push(a.x, a.y, a.z, b.x, b.y, b.z);
+    }
+  });
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  const material = new THREE.LineBasicMaterial({
+    color: '#dbeafe',
+    transparent: true,
+    opacity: 0.24,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const borders = new THREE.LineSegments(geometry, material);
+  borders.name = 'renderer-owned-country-borders';
+  borders.frustumCulled = false;
+  borders.renderOrder = 3;
+  borders.userData.nonPickable = true;
+  return borders;
+}
+
 function makeStars() {
   const starGeometry = new THREE.BufferGeometry();
   const starPositions: number[] = [];
@@ -160,6 +196,10 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   );
   globeGroup.add(atmosphere);
 
+  const countryBorders = makeCountryBorderLayer(worldCountryBorders as unknown as BorderLineAsset);
+  countryBorders.visible = false;
+  globeGroup.add(countryBorders);
+
   const markerGroup = new THREE.Group();
   markerGroup.visible = false;
   globeGroup.add(markerGroup);
@@ -186,6 +226,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     attribution = nextAttribution;
     failureReason = meta.failureReason;
     host.dataset.earthState = state;
+    countryBorders.visible = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state);
     const detail = { state, message, attribution, failureReason };
     listeners.forEach((listener) => listener(state, stateMessage, attribution, detail));
     window.dispatchEvent(new CustomEvent('globe-state-change', { detail }));
