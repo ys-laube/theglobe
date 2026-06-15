@@ -97,7 +97,7 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
   background: radial-gradient(circle at center, rgba(56, 189, 248, 0.10), rgba(2, 6, 23, 0.2) 45%, rgba(2, 6, 23, 0.72));
 }
 
-#globe { width: 100%; height: 100%; display: block; touch-action: none; }
+#globe { width: 100%; height: 100%; display: block; touch-action: none; transition: transform 520ms ease, filter 520ms ease; }
 .halo {
   position: absolute;
   inset: 8%;
@@ -134,6 +134,12 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
 .globe-stage[data-earth-state="earth-ready"] .earth-status,
 .globe-stage[data-earth-state="asset-enhancement-ready"] .earth-status { opacity: 0.86; }
 .globe-stage[data-earth-state="fallback-earth"] .earth-status { border-color: rgba(250, 204, 21, 0.34); color: #fde68a; }
+.globe-stage[data-korea-mode="map"] #globe {
+  transform: scale(1.08);
+  filter: saturate(0.78) brightness(0.58) blur(1.2px);
+  transition: transform 520ms ease, filter 520ms ease;
+}
+.globe-stage[data-korea-mode="map"] .halo { box-shadow: 0 0 130px rgba(250, 204, 21, 0.18); }
 
 .city-card {
   position: absolute;
@@ -207,7 +213,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-host[hidden] { display: none; }
 .korea-map-overlay {
   position: absolute;
-  inset: 1rem;
+  inset: 1.1rem;
   z-index: 8;
   display: grid;
   grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1.1fr);
@@ -219,10 +225,16 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   background:
     radial-gradient(circle at 20% 10%, rgba(125, 211, 252, 0.20), transparent 18rem),
     radial-gradient(circle at 80% 15%, rgba(192, 132, 252, 0.18), transparent 20rem),
-    linear-gradient(145deg, rgba(2, 6, 23, 0.92), rgba(15, 23, 42, 0.86));
+    linear-gradient(145deg, rgba(2, 6, 23, 0.82), rgba(15, 23, 42, 0.64));
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255,255,255,0.12);
-  backdrop-filter: blur(24px);
+  backdrop-filter: blur(18px);
+  animation: koreaStageIn 520ms cubic-bezier(.2,.8,.2,1) both;
 }
+@keyframes koreaStageIn {
+  from { opacity: 0; transform: scale(0.965) translateY(14px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .korea-map-header {
   grid-column: 1 / -1;
   display: flex;
@@ -259,6 +271,13 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   overflow: hidden;
 }
 .korea-map-canvas svg { width: 100%; height: 100%; min-height: 320px; display: block; }
+.korea-context-line {
+  fill: none;
+  stroke: rgba(125, 211, 252, 0.22);
+  stroke-width: 0.38;
+  stroke-dasharray: 1.1 1.4;
+  vector-effect: non-scaling-stroke;
+}
 .korea-region {
   fill: rgba(96, 165, 250, 0.12);
   stroke: rgba(226, 232, 240, 0.35);

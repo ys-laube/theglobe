@@ -173,8 +173,9 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       return;
     }
     const hit = globe.pickVisibleObject(event, event.currentTarget as HTMLElement);
-    document.body.style.cursor = hit ? 'pointer' : '';
-    if (hit && commit) showCard(hit.userData.capital as Capital);
+    const capital = hit?.userData.capital as Capital | undefined;
+    document.body.style.cursor = capital ? 'pointer' : '';
+    if (capital && commit) showCard(capital);
   }
 
   function setExplorationMode(enabled: boolean) {

@@ -61,6 +61,7 @@ let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
 function updateQaState() {
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
+    viewMode: globe.getViewMode(),
     explorationMode: overlay.getExplorationMode(),
     koreaFamilyEntryRequested,
     koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
@@ -87,7 +88,24 @@ const overlay = createExplorationOverlay(globe, {
 koreaFamilyOverlay = createKoreaFamilyOverlay({
   host: koreaMapHost,
   onStateChange: updateQaState,
+  onClose: () => {
+    koreaFamilyEntryRequested = false;
+    globe.setKoreaFocus(false);
+  },
 });
+
+globe.onViewChange(updateQaState);
+
+function openKoreaMapFromGlobe() {
+  koreaFamilyEntryRequested = true;
+  overlay.setExplorationMode(false);
+  globe.setMarkerLayerVisible(false);
+  globe.setKoreaFocus(true);
+  koreaFamilyOverlay?.open();
+  updateQaState();
+}
+
+window.addEventListener('korea-family-map-request', openKoreaMapFromGlobe);
 
 globe.onStateChange((state, message, credit) => {
   stateLabel.textContent = state.replaceAll('-', ' ');
@@ -129,12 +147,19 @@ canvas.addEventListener('pointermove', (event) => {
     lastX = event.clientX;
     lastY = event.clientY;
   }
-  overlay.handlePointerMove(event, isDragging);
+  if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerMove(event, isDragging);
 });
 
 canvas.addEventListener('pointerup', (event) => {
   isDragging = false;
-  overlay.handlePointerUp(event, movedDistance);
+  if (movedDistance <= 6 && !koreaFamilyOverlay?.getState().open) {
+    const hit = globe.pickVisibleObject(event, canvas);
+    if (hit?.userData.koreaHotspot) {
+      openKoreaMapFromGlobe();
+      return;
+    }
+  }
+  if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerUp(event, movedDistance);
 });
 
 canvas.addEventListener('pointercancel', () => {
@@ -161,7 +186,7 @@ globe.loadEarth();
 
 function animate() {
   requestAnimationFrame(animate);
-  if (!isDragging) {
+  if (!isDragging && globe.getViewMode() === 'earth') {
     globe.drift(velocityX, velocityY);
     velocityX = THREE.MathUtils.lerp(velocityX, 0.0016, 0.006);
     velocityY *= 0.96;

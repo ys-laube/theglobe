@@ -3,12 +3,14 @@ import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, shouldForce
 import worldCountryBorders from './mapData/worldCountryBorders.json';
 
 export type GlobeRuntimeState = 'boot' | 'loading-earth' | 'earth-ready' | 'fallback-earth' | 'asset-enhancement-ready';
+export type GlobeViewMode = 'earth' | 'korea-focus';
 
 type StateMeta = {
   failureReason?: string;
 };
 
 type StateListener = (state: GlobeRuntimeState, message: string, attribution: string, meta?: StateMeta) => void;
+type ViewListener = (viewMode: GlobeViewMode) => void;
 
 type BorderLineAsset = {
   readonly lines: readonly (readonly (readonly [number, number])[])[];
@@ -18,6 +20,10 @@ export type GlobeRenderer = {
   radius: number;
   addMarkerObjects: (...objects: THREE.Object3D[]) => void;
   setMarkerLayerVisible: (visible: boolean) => void;
+  enableKoreaHotspot: (visible: boolean) => void;
+  setKoreaFocus: (active: boolean) => void;
+  getViewMode: () => GlobeViewMode;
+  onViewChange: (listener: ViewListener) => void;
   pickVisibleObject: (event: PointerEvent, target: HTMLElement) => THREE.Object3D | null;
   rotateBy: (deltaY: number, deltaX: number) => void;
   drift: (velocityY: number, velocityX: number) => void;
@@ -144,6 +150,46 @@ function makeCountryBorderLayer(borderAsset: BorderLineAsset, borderRadius = rad
   return borders;
 }
 
+
+function makeKoreaHotspot() {
+  const korea = new THREE.Group();
+  korea.name = 'renderer-owned-korea-hotspot';
+
+  const position = latLngToVector(36.35, 127.85, radius + 0.09);
+  const dot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.052, 24, 24),
+    new THREE.MeshBasicMaterial({ color: '#fde68a', transparent: true, opacity: 0.96, blending: THREE.AdditiveBlending })
+  );
+  dot.position.copy(position);
+  dot.userData.koreaHotspot = true;
+
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(0.082, 0.104, 40),
+    new THREE.MeshBasicMaterial({ color: '#facc15', transparent: true, opacity: 0.58, side: THREE.DoubleSide, blending: THREE.AdditiveBlending })
+  );
+  ring.position.copy(position.clone().multiplyScalar(1.002));
+  ring.lookAt(new THREE.Vector3(0, 0, 0));
+  ring.userData.koreaHotspot = true;
+
+  const aura = new THREE.Mesh(
+    new THREE.SphereGeometry(0.18, 24, 24),
+    new THREE.MeshBasicMaterial({ color: '#fef3c7', transparent: true, opacity: 0.08, depthWrite: false, blending: THREE.AdditiveBlending })
+  );
+  aura.position.copy(position);
+  aura.userData.koreaHotspot = true;
+
+  const hitArea = new THREE.Mesh(
+    new THREE.SphereGeometry(0.19, 20, 20),
+    new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+  );
+  hitArea.position.copy(position);
+  hitArea.userData.koreaHotspot = true;
+
+  korea.add(aura, ring, dot, hitArea);
+  korea.visible = false;
+  return { korea, hitArea, pulseObjects: [aura, ring, dot] };
+}
+
 function makeStars() {
   const starGeometry = new THREE.BufferGeometry();
   const starPositions: number[] = [];
@@ -203,7 +249,11 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const markerGroup = new THREE.Group();
   markerGroup.visible = false;
   globeGroup.add(markerGroup);
-  const pickables: THREE.Object3D[] = [];
+
+  const { korea: koreaHotspot, hitArea: koreaHitArea, pulseObjects: koreaPulseObjects } = makeKoreaHotspot();
+  globeGroup.add(koreaHotspot);
+
+  const pickables: THREE.Object3D[] = [koreaHitArea];
 
   const lights = [
     new THREE.AmbientLight('#8fb6ff', 0.72),
@@ -215,7 +265,13 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   scene.add(...lights, makeStars());
 
   const listeners: StateListener[] = [];
+  const viewListeners: ViewListener[] = [];
   let state: GlobeRuntimeState = 'boot';
+  let viewMode: GlobeViewMode = 'earth';
+  const earthCameraZ = 6.2;
+  const koreaCameraZ = 4.25;
+  const earthRotation = new THREE.Euler(globeGroup.rotation.x, globeGroup.rotation.y, globeGroup.rotation.z);
+  const koreaRotation = new THREE.Euler(0.48, 2.5, 0.02);
   let stateMessage = 'Preparing the globe.';
   let attribution = EARTH_ASSETS.day.attribution;
   let failureReason: string | undefined;
@@ -226,10 +282,20 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     attribution = nextAttribution;
     failureReason = meta.failureReason;
     host.dataset.earthState = state;
-    countryBorders.visible = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state);
+    const ready = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state);
+    countryBorders.visible = ready;
+    koreaHotspot.visible = ready && viewMode === 'earth';
     const detail = { state, message, attribution, failureReason };
     listeners.forEach((listener) => listener(state, stateMessage, attribution, detail));
     window.dispatchEvent(new CustomEvent('globe-state-change', { detail }));
+  }
+
+  function emitView(nextViewMode: GlobeViewMode) {
+    if (viewMode === nextViewMode) return;
+    viewMode = nextViewMode;
+    host.dataset.koreaMode = viewMode === 'korea-focus' ? 'map' : 'earth';
+    koreaHotspot.visible = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state) && viewMode === 'earth';
+    viewListeners.forEach((listener) => listener(viewMode));
   }
 
   async function loadEarth() {
@@ -288,6 +354,15 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     setMarkerLayerVisible: (visible) => {
       markerGroup.visible = visible;
     },
+    enableKoreaHotspot: (visible) => {
+      koreaHotspot.visible = visible && ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state) && viewMode === 'earth';
+    },
+    setKoreaFocus: (active) => emitView(active ? 'korea-focus' : 'earth'),
+    getViewMode: () => viewMode,
+    onViewChange: (listener) => {
+      viewListeners.push(listener);
+      listener(viewMode);
+    },
     pickVisibleObject: (event, target) => {
       const rect = target.getBoundingClientRect();
       const pointer = new THREE.Vector2(
@@ -308,6 +383,15 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeGroup.rotation.x += velocityX;
     },
     animateMarkers: (now) => {
+      const targetRotation = viewMode === 'korea-focus' ? koreaRotation : earthRotation;
+      globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, targetRotation.x, 0.055);
+      globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, targetRotation.y, 0.055);
+      globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, targetRotation.z, 0.055);
+      camera.position.z = THREE.MathUtils.lerp(camera.position.z, viewMode === 'korea-focus' ? koreaCameraZ : earthCameraZ, 0.055);
+      koreaPulseObjects.forEach((child, index) => {
+        const s = 1 + Math.sin(now * 0.003 + index) * 0.12;
+        child.scale.setScalar(s);
+      });
       markerGroup.children.forEach((child, index) => {
         if (child.type === 'Mesh' && child.visible && child.userData.capital) {
           const s = 1 + Math.sin(now * 0.002 + index) * 0.045;

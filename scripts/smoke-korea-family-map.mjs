@@ -118,6 +118,13 @@ try {
         };
         const readyStates = new Set(['earth-ready', 'fallback-earth', 'asset-enhancement-ready']);
         await waitFor(() => readyStates.has(window.__GLOBE_QA__?.state), 'earth ready state');
+        const clickButtonByStrong = async (text) => {
+          const button = await waitFor(
+            () => [...document.querySelectorAll('button')].find((candidate) => candidate.querySelector('strong')?.textContent?.trim() === text || candidate.textContent?.includes(text)),
+            'button ' + text
+          );
+          button.click();
+        };
 
         const bodyText = document.body.textContent ?? '';
         const rejectedCopy = [
@@ -140,6 +147,15 @@ try {
         await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '100', 'TOP100 visible');
         const top100Title = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const toggleLabelAfter = top100Toggle?.textContent?.trim();
+        const top100Count = document.querySelector('[data-visible-count]')?.textContent?.trim();
+
+        window.dispatchEvent(new CustomEvent('korea-family-map-request'));
+        await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
+        await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
+        await clickButtonByStrong('부산광역시');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-stylized', 'Busan tier');
+        await clickButtonByStrong('해운대구');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae-stylized', 'Haeundae tier');
 
         return {
           qa: window.__GLOBE_QA__,
@@ -150,9 +166,15 @@ try {
           toggleLabelBefore,
           top100Title,
           toggleLabelAfter,
-          count: document.querySelector('[data-visible-count]')?.textContent?.trim(),
+          count: top100Count,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
           cityCardPresent: Boolean(document.querySelector('.city-card')),
+          stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
+          koreaOverlayOpen: window.__GLOBE_QA__?.koreaOverlayOpen,
+          viewMode: window.__GLOBE_QA__?.viewMode,
+          selectedRegion: window.__GLOBE_QA__?.selectedRegion,
+          mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
+          contextLineCount: document.querySelectorAll('.korea-context-line').length,
         };
       })()
     `,
@@ -174,7 +196,13 @@ try {
   if (result.count !== '100') throw new Error(`Expected 100 TOP100 cities, found ${result.count}`);
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
-  console.log('PASS layout and exploration headless smoke', JSON.stringify(result));
+  if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
+  if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
+  if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
+  if (result.selectedRegion !== 'kr-busan-haeundae-stylized') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
+  if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
+  if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
+  console.log('PASS layout, exploration, and Korea morph headless smoke', JSON.stringify(result));
 } finally {
   await terminate(chrome);
   await terminate(preview);

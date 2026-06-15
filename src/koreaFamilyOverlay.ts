@@ -12,8 +12,15 @@ type BoundaryFeature = {
   readonly centroid: readonly [number, number];
 };
 
+type ReferenceLine = {
+  readonly id: string;
+  readonly label: string;
+  readonly points: readonly (readonly [number, number])[];
+};
+
 type OverlayData = {
   readonly features: readonly BoundaryFeature[];
+  readonly worldReferenceLines: readonly ReferenceLine[];
 };
 
 type RegionId =
@@ -51,6 +58,7 @@ export type KoreaFamilyOverlay = {
 type CreateOptions = {
   host: HTMLElement;
   onStateChange: () => void;
+  onClose?: () => void;
 };
 
 const routeNodes: Record<RegionId, RouteNode> = {
@@ -122,6 +130,10 @@ function polygonPoints(points: readonly (readonly [number, number])[]) {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
 
+function pathPoints(points: readonly (readonly [number, number])[]) {
+  return points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ');
+}
+
 function featureById(id: RegionId) {
   const data = koreaFamilyBoundaries as unknown as OverlayData;
   const feature = data.features.find((candidate) => candidate.id === id);
@@ -135,7 +147,7 @@ function householdById(id: HouseholdId) {
   return household;
 }
 
-export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions): KoreaFamilyOverlay {
+export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: CreateOptions): KoreaFamilyOverlay {
   let openState = false;
   let selectedRegion: RegionId = 'kr-country-stylized';
   let selectedHousehold: HouseholdId | null = null;
@@ -190,9 +202,9 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
   function renderHeader() {
     header.replaceChildren();
     const copy = document.createElement('div');
-    appendText(copy, 'p', 'Korea family map', 'map-kicker');
+    appendText(copy, 'p', 'Family map in Korea', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '세계로 뻗어가는 마음이 다시 가족의 자리로 돌아오는 길입니다.');
+    appendText(copy, 'p', '지구 위 한국에서 시작해, 가족이 서로를 기억하는 자리까지 천천히 확대됩니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');
@@ -215,6 +227,30 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
     svg.setAttribute('viewBox', '0 0 100 100');
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', '가족 경로 중심의 한국 지도');
+
+    const data = koreaFamilyBoundaries as unknown as OverlayData;
+    const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    defs.innerHTML = `
+      <radialGradient id="korea-map-glow" cx="50%" cy="48%" r="58%">
+        <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.20"/>
+        <stop offset="62%" stop-color="#2563eb" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+      </radialGradient>`;
+    svg.append(defs);
+    const oceanGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    oceanGlow.setAttribute('x', '0');
+    oceanGlow.setAttribute('y', '0');
+    oceanGlow.setAttribute('width', '100');
+    oceanGlow.setAttribute('height', '100');
+    oceanGlow.setAttribute('fill', 'url(#korea-map-glow)');
+    svg.append(oceanGlow);
+    data.worldReferenceLines.forEach((line) => {
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathPoints(line.points));
+      path.setAttribute('class', 'korea-context-line');
+      path.setAttribute('aria-label', line.label);
+      svg.append(path);
+    });
 
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
@@ -391,6 +427,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
     nameGateState = 'closed';
     unlockedHousehold = null;
     render();
+    onClose?.();
     onStateChange();
   });
 
@@ -409,6 +446,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange }: CreateOptions)
       nameGateState = 'closed';
       unlockedHousehold = null;
       render();
+      onClose?.();
       onStateChange();
     },
     getState: state,
