@@ -10,6 +10,13 @@ export type ExplorationOverlay = {
   handlePointerMove: (event: PointerEvent, dragging: boolean) => void;
   handlePointerUp: (event: PointerEvent, movedDistance: number) => void;
   updateState: (state: GlobeRuntimeState) => void;
+  getQaState: () => {
+    cityMode: CityExplorationMode;
+    visibleCityCount: number;
+    top100GroupCount: number;
+    selectedCityId: string | null;
+    focusedCityId: string | null;
+  };
 };
 
 type OverlayElements = {
@@ -33,6 +40,12 @@ function safeExternalUrl(url: string) {
   const parsed = new URL(url);
   if (parsed.protocol !== 'https:') throw new Error(`Unsupported city link protocol: ${parsed.protocol}`);
   return parsed.toString();
+}
+
+const top100BucketSize = 10;
+
+function top100BucketLabel(startRank: number) {
+  return `${startRank}-${startRank + top100BucketSize - 1}`;
 }
 
 function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, tagName: K, text: string, className?: string) {
@@ -85,10 +98,19 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   let explorationMode = false;
   let earthReady = false;
   let selected: Capital | null = null;
+  let focused: Capital | null = null;
 
   function visibleData() {
     if (!explorationMode || !earthReady) return [];
     return markerObjects.filter(({ capital }) => capital.mode === cityMode).map(({ capital }) => capital);
+  }
+
+  function selectCity(capital: Capital | null, focusGlobe = false) {
+    if (capital && focusGlobe) {
+      focused = capital;
+      globe.focusLatLng(capital.lat, capital.lng);
+    }
+    showCard(capital);
   }
 
   function showCard(capital: Capital | null) {
@@ -164,29 +186,30 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.explorationButton.disabled = !earthReady;
     elements.tierButton.textContent = cityMode === 'top100' ? '수도 보기' : 'TOP 100 인기 도시 보기';
     elements.tierButton.disabled = !canShowMarkers;
-    if (cityMode === 'top100' && data.length > 0) {
-      const grouped = new Map<string, Capital[]>();
-      data.forEach((capital) => {
-        if (!capital.rank) return;
-        const group = rankBandLabel(capital.rank);
-        grouped.set(group, [...(grouped.get(group) ?? []), capital]);
+    if (cityMode === 'top100') {
+      const groups = Array.from({ length: 10 }, (_value, index) => {
+        const startRank = index * top100BucketSize + 1;
+        return data.filter((capital) => capital.rank && capital.rank >= startRank && capital.rank < startRank + top100BucketSize);
       });
-      elements.regionList.replaceChildren(...[...grouped].map(([group, capitals]) => {
-        const section = document.createElement('section');
-        section.className = 'rank-group';
-        section.dataset.rankGroup = group;
-        appendText(section, 'h3', `Ranks ${group}`);
+      elements.regionList.replaceChildren(...groups.map((group, index) => {
+        const startRank = index * top100BucketSize + 1;
+        const groupElement = document.createElement('section');
+        groupElement.className = 'rank-group';
+        groupElement.dataset.rankGroup = top100BucketLabel(startRank);
+        appendText(groupElement, 'h3', `Ranks ${top100BucketLabel(startRank)}`);
         const list = document.createElement('ol');
-        list.start = capitals[0]?.rank ?? 1;
-        capitals.forEach((capital) => {
+        group.forEach((capital) => {
           const item = document.createElement('li');
-          item.dataset.cityId = capital.id;
-          appendText(item, 'span', `${capital.rank}. ${capital.city}`, 'rank-city');
-          appendText(item, 'span', capital.country, 'rank-country');
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.dataset.cityId = capital.id;
+          button.textContent = `${capital.rank}. ${capital.city}`;
+          button.addEventListener('click', () => selectCity(capital, true));
+          item.append(button);
           list.append(item);
         });
-        section.append(list);
-        return section;
+        groupElement.append(list);
+        return groupElement;
       }));
     } else {
       const byRegion = [...new Set(data.map((c) => c.region))];
@@ -207,12 +230,13 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     const hit = globe.pickVisibleObject(event, event.currentTarget as HTMLElement);
     const capital = hit?.userData.capital as Capital | undefined;
     document.body.style.cursor = capital ? 'pointer' : '';
-    if (capital && commit) showCard(capital);
+    if (capital && commit) selectCity(capital, true);
   }
 
   function setExplorationMode(enabled: boolean) {
     explorationMode = enabled && earthReady;
     showCard(null);
+    focused = null;
     syncUi();
   }
 
@@ -229,6 +253,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     getExplorationMode: () => explorationMode,
     setCityMode: (mode) => {
       cityMode = mode;
+      showCard(null);
+      focused = null;
       syncUi();
     },
     handlePointerMove: (event, dragging) => {
@@ -242,5 +268,12 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       if (!earthReady) explorationMode = false;
       syncUi();
     },
+    getQaState: () => ({
+      cityMode,
+      visibleCityCount: visibleData().length,
+      top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
+      selectedCityId: selected?.id ?? null,
+      focusedCityId: focused?.id ?? null,
+    }),
   };
 }
