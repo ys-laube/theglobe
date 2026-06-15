@@ -20,6 +20,13 @@ list, TOP100 city data must contain exactly 100 contiguous ranked rows from
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes, and weather starts as simulated/static with
 only optional no-key Open-Meteo enhancement plus fallback disclosure.
 
+The static data contract is locked in `src/mapData/dataProvenance.json` and
+validated by `npm run verify:data`: Korea boundary candidates are build-time
+public-data snapshots only, expanded capitals must exceed the legacy 33-entry
+list, TOP100 city data must contain exactly 100 contiguous ranked rows from
+the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes, and weather starts as simulated/static with
+only optional no-key Open-Meteo enhancement plus fallback disclosure.
+
 The household configuration is intended to stay in one static file. Accepted
 family display names and the seven Naver Band link slots live in
 `src/householdConfig.ts`: 부모님네 has two placeholder Band slots, 누나네 has

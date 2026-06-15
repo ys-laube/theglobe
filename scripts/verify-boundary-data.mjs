@@ -144,6 +144,41 @@ assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must
 assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
 assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
 
+assert(dataProvenance.schemaVersion === 1, 'data provenance schemaVersion must be 1');
+assert(dataProvenance.id === 'globe-static-data-provenance-v1', 'data provenance id must be stable');
+assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'core data must not require runtime fetches');
+assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
+assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
+
+assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
+assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
+assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
+assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('부산광역시/해운대구'), 'Korea boundary source lock must preserve Busan/Haeundae family target');
+assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('서울특별시/마포구'), 'Korea boundary source lock must preserve Seoul/Mapo family target');
+assert(dataProvenance.koreaBoundaries.requiredFamilyTargets.includes('경상남도/김해시/봉황동'), 'Korea boundary source lock must preserve Gyeongnam/Gimhae/Bonghwang family target');
+assert(dataProvenance.koreaBoundaries.excludedSources.includes('gadm'), 'Korea boundary source lock must exclude GADM');
+assert(dataProvenance.koreaBoundaries.excludedSources.includes('live-map-tiles-or-client-api'), 'Korea boundary source lock must forbid live map tiles/client APIs');
+
+assert(dataProvenance.capitals.sourceLock === 'wikidata-query-service-static-snapshot', 'capital source lock must be Wikidata static snapshot');
+assert(dataProvenance.capitals.currentLegacyCount === 33, 'capital source lock must record the legacy 33-entry baseline');
+assert(dataProvenance.capitals.minimumBundledCount > dataProvenance.capitals.currentLegacyCount, 'capital contract must require expansion beyond legacy entries');
+assert(dataProvenance.capitals.approvedSources.some((source) => source.id === 'wikidata-query-service-capitals'), 'capital source lock must include Wikidata Query Service');
+
+assert(dataProvenance.top100Cities.sourceLock === 'euromonitor-top100-city-destinations-2018', 'TOP100 source lock must be Euromonitor Top 100 City Destinations 2018');
+assert(dataProvenance.top100Cities.requiredCount === 100, 'TOP100 contract must require exactly 100 cities');
+assert(dataProvenance.top100Cities.requiredRanks === '1-100-contiguous', 'TOP100 contract must require ranks 1-100');
+assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking date must be locked');
+assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 City Destinations 2018');
+assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
+assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
+
+assert(dataProvenance.weather.baselineMode === 'simulated-static', 'weather baseline must be simulated/static');
+assert(dataProvenance.weather.liveEnhancement === 'optional-open-meteo-no-key-only', 'weather live enhancement must be optional Open-Meteo no-key only');
+assert(dataProvenance.weather.requiredFallback === 'simulated-or-unavailable-with-disclosure', 'weather fallback disclosure contract is required');
+assert(dataProvenance.weather.uiDisclosureRequired === true, 'weather UI disclosure must be required');
+assert(dataProvenance.weather.approvedSources.some((source) => source.id === 'open-meteo-forecast-api'), 'weather policy must lock Open-Meteo as optional source');
+assert(dataProvenance.weather.forbiddenBehavior.includes('secret key or paid endpoint in client bundle'), 'weather policy must forbid client secrets/paid endpoint');
+
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
 assert(worldBorders.sourceUrl.includes('natural-earth-vector'), 'world border source URL must document Natural Earth vector provenance');
