@@ -21,8 +21,8 @@ const buckets = Array.from({ length: 10 }, (_value, index) => {
 assert(buckets.every((bucket) => bucket.length === 10), 'TOP100 data must split into ten rank buckets of ten cities');
 assert(overlaySource.includes('data-rank-group'), 'overlay must render rank group elements for TOP100');
 assert(overlaySource.includes('button.dataset.cityId = capital.id'), 'overlay must render clickable city list buttons');
-assert(overlaySource.includes('selectCity(capital, true)'), 'overlay list/marker selection must focus and open the card');
-assert(rendererSource.includes('focusLatLng'), 'renderer must expose focusLatLng for city focus');
-assert(rendererSource.includes('focusedEarthRotation'), 'renderer must animate toward focused city rotation');
-assert(mainSource.includes('exploration: overlay.getQaState()'), 'QA state must expose exploration list/focus/card contract');
+assert(overlaySource.includes('focusCity(capital)'), 'overlay list/marker selection must focus and open the card');
+assert(rendererSource.includes('focusLocation'), 'renderer must expose focusLocation for city focus');
+assert(rendererSource.includes('focusRotation'), 'renderer must animate toward focusRotation city target');
+assert(mainSource.includes('selectedCityId') && mainSource.includes('lastFocusRotationDelta') && mainSource.includes('selectedCityCardOpen'), 'QA state must expose exploration list/focus/card contract');
 console.log('PASS TOP100 exploration smoke: 10 groups, 100 clickable cities, focus/card QA contract present');

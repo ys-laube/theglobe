@@ -35,7 +35,6 @@ export type GlobeRenderer = {
   onStateChange: (listener: StateListener) => void;
   getState: () => GlobeRuntimeState;
   getRotation: () => { x: number; y: number; z: number };
-  focusLatLng: (lat: number, lng: number) => void;
 };
 
 const radius = 2;
@@ -402,14 +401,9 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeGroup.rotation.x = THREE.MathUtils.clamp(globeGroup.rotation.x, -0.75, 0.75);
     },
     drift: (velocityY, velocityX) => {
-      if (focusedEarthRotation) return;
+      if (focusRotation) return;
       globeGroup.rotation.y += velocityY;
       globeGroup.rotation.x += velocityX;
-    },
-    focusLatLng: (lat, lng) => {
-      const targetX = THREE.MathUtils.clamp(THREE.MathUtils.degToRad(lat) * 0.82, -0.75, 0.75);
-      const targetY = THREE.MathUtils.degToRad(-lng) - Math.PI / 2;
-      focusedEarthRotation = new THREE.Euler(targetX, targetY, earthRotation.z);
     },
     animateMarkers: (now) => {
       if (viewMode === 'korea-focus') {

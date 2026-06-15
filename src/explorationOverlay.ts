@@ -241,13 +241,13 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     const hit = globe.pickVisibleObject(event, event.currentTarget as HTMLElement);
     const capital = hit?.userData.capital as Capital | undefined;
     document.body.style.cursor = capital ? 'pointer' : '';
-    if (capital && commit) selectCity(capital, true);
+    if (capital && commit) focusCity(capital);
   }
 
   function setExplorationMode(enabled: boolean) {
     explorationMode = enabled && earthReady;
     showCard(null);
-    focused = null;
+    lastFocus = null;
     syncUi();
   }
 
@@ -255,7 +255,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   elements.tierButton.addEventListener('click', () => {
     cityMode = cityMode === 'top100' ? 'capitals' : 'top100';
     showCard(null);
-    focused = null;
+    lastFocus = null;
     syncUi();
   });
   showCard(null);
@@ -269,7 +269,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     setCityMode: (mode) => {
       cityMode = mode;
       showCard(null);
-      focused = null;
+      lastFocus = null;
       syncUi();
     },
     handlePointerMove: (event, dragging) => {
@@ -288,7 +288,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       visibleCityCount: visibleData().length,
       top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
       selectedCityId: selected?.id ?? null,
-      focusedCityId: focused?.id ?? null,
+      focusedCityId: lastFocus?.cityId ?? null,
     }),
   };
 }
