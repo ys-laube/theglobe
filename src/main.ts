@@ -64,11 +64,7 @@ function updateQaState() {
     viewMode: globe.getViewMode(),
     globeRotation: globe.getRotation(),
     explorationMode: overlay.getExplorationMode(),
-    selectedCity: overlay.getSelectedCity() ? {
-      id: overlay.getSelectedCity()?.id,
-      city: overlay.getSelectedCity()?.city,
-      rank: overlay.getSelectedCity()?.rank ?? null,
-    } : null,
+    exploration: overlay.getQaState(),
     koreaFamilyEntryRequested,
     koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
     koreaTier: koreaFamilyOverlay?.getState().tier ?? null,

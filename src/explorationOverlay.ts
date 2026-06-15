@@ -251,6 +251,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   elements.explorationButton.addEventListener('click', () => setExplorationMode(!explorationMode));
   elements.tierButton.addEventListener('click', () => {
     cityMode = cityMode === 'top100' ? 'capitals' : 'top100';
+    showCard(null);
+    focused = null;
     syncUi();
   });
   showCard(null);

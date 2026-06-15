@@ -11,7 +11,8 @@
     "verify": "npm run typecheck && npm run verify:data && npm run build",
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "verify:city-data": "node scripts/verify-city-data.mjs"
+    "verify:city-data": "node scripts/verify-city-data.mjs",
+    "smoke:top100": "node scripts/smoke-top100-exploration.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-basic-ssl": "latest",
