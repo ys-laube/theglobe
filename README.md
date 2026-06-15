@@ -14,9 +14,11 @@ provenance/source strategy lives in `src/mapData/boundaryProvenance.json`, and
 the decorative globe border asset lives in `src/mapData/worldCountryBorders.json`.
 
 The static data contract is locked in `src/mapData/dataProvenance.json` and
-validated by `npm run verify:data`: Korea boundary candidates are build-time
-public-data snapshots only, expanded capitals must exceed the legacy 33-entry
-list, TOP100 city data must contain exactly 100 contiguous ranked rows from
+validated by `npm run verify:data`: the current Korea family overlay is classified
+as `documented-guide`, any official-derived Korea boundary replacement must
+validate the expected 17 first-level regions unless source metadata documents a
+narrower administrative layer, expanded capitals must exceed the legacy 33-entry
+list, and TOP100 city data must contain exactly 100 contiguous ranked rows from
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
