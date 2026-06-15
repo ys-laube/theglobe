@@ -63,6 +63,13 @@ type RouteNode = {
   readonly households?: readonly HouseholdId[];
 };
 
+type FamilyRouteSegment = {
+  readonly id: string;
+  readonly from: RegionId;
+  readonly to: RegionId;
+  readonly label: string;
+};
+
 export type KoreaFamilyOverlay = {
   open: () => void;
   close: () => void;
@@ -181,6 +188,18 @@ function featureById(id: RegionId) {
   return feature;
 }
 
+function centroidOf(id: RegionId) {
+  return featureById(id).centroid;
+}
+
+function routePath(segment: FamilyRouteSegment) {
+  const [x1, y1] = centroidOf(segment.from);
+  const [x2, y2] = centroidOf(segment.to);
+  const cx = (x1 + x2) / 2;
+  const cy = (y1 + y2) / 2 - Math.max(3, Math.abs(x2 - x1) * 0.12);
+  return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
+}
+
 function householdById(id: HouseholdId) {
   const household = householdConfig.households.find((candidate) => candidate.id === id);
   if (!household) throw new Error(`Missing household config: ${id}`);
@@ -295,6 +314,19 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
+    const activeRouteSegmentIds = new Set(activeRouteSegmentIdsByRegion[selectedRegion]);
+
+    const routeLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    routeLayer.setAttribute('class', 'korea-family-route-layer');
+    routeLayer.setAttribute('aria-hidden', 'true');
+    familyRouteSegments.forEach((segment) => {
+      const route = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      route.setAttribute('d', routePath(segment));
+      route.setAttribute('class', ['korea-family-route', activeRouteSegmentIds.has(segment.id) ? 'is-active' : ''].filter(Boolean).join(' '));
+      route.setAttribute('aria-label', segment.label);
+      routeLayer.append(route);
+    });
+    svg.append(routeLayer);
 
     for (const id of regionOrder) {
       const feature = featureById(id);
@@ -373,7 +405,11 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       svg.append(group);
     });
 
-    mapMount.append(svg);
+    const legend = document.createElement('div');
+    legend.className = 'korea-map-legend';
+    appendText(legend, 'strong', 'Static family overlay');
+    appendText(legend, 'span', 'Bundled geometry · no live map API · decorative navigation');
+    mapMount.append(svg, legend);
   }
 
   function renderRoutePanel() {
