@@ -10,7 +10,6 @@ const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'u
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
-
 function assertHttps(url, label) {
   const parsed = new URL(url);
   assert(parsed.protocol === 'https:', `${label} must use https`);
