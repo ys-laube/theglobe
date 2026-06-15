@@ -9,6 +9,9 @@ const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataPro
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
+const mainSource = await readFile(join(root, 'src/main.ts'), 'utf8');
+const globeRendererSource = await readFile(join(root, 'src/globeRenderer.ts'), 'utf8');
+const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8');
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
@@ -106,6 +109,18 @@ assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'c
 assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
 assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
 
+const runtimeSources = [
+  ['src/main.ts', mainSource],
+  ['src/koreaFamilyOverlay.ts', koreaOverlaySource],
+  ['src/globeRenderer.ts', globeRendererSource],
+];
+for (const [sourcePath, source] of runtimeSources) {
+  assert(!/fetch\s*\(/.test(source), `${sourcePath} must not fetch Korea/map/weather data at runtime`);
+  assert(!/open-?meteo|weather|forecast/i.test(source), `${sourcePath} must not reintroduce weather/forecast runtime UI`);
+  assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld/i.test(source), `${sourcePath} must not depend on a runtime map API`);
+}
+assert(!/\"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)\"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
+
 assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
 assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
@@ -142,6 +157,18 @@ assert(dataProvenance.id === 'globe-static-data-provenance-v1', 'data provenance
 assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'core data must not require runtime fetches');
 assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
 assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
+
+const runtimeSources = [
+  ['src/main.ts', mainSource],
+  ['src/koreaFamilyOverlay.ts', koreaOverlaySource],
+  ['src/globeRenderer.ts', globeRendererSource],
+];
+for (const [sourcePath, source] of runtimeSources) {
+  assert(!/fetch\s*\(/.test(source), `${sourcePath} must not fetch Korea/map/weather data at runtime`);
+  assert(!/open-?meteo|weather|forecast/i.test(source), `${sourcePath} must not reintroduce weather/forecast runtime UI`);
+  assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld/i.test(source), `${sourcePath} must not depend on a runtime map API`);
+}
+assert(!/\"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)\"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
 
 assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
