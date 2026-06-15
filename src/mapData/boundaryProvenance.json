@@ -6,7 +6,32 @@
     "status": "permissive-for-repository",
     "summary": "The committed geometry is hand-authored, normalized, stylized overlay data created for this app. It does not copy external GIS coordinates, so it can remain bundled in a public static app while future official data preprocessing is evaluated.",
     "licenseTreatment": "Project-owned stylized data; external sources below are documented as verified source candidates/provenance strategy, not copied geometry.",
-    "accuracyNotice": "Decorative navigation art only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions."
+    "accuracyNotice": "Decorative navigation art only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions.",
+    "sourceClassification": "documented-guide",
+    "officialFirstLevelRegionPolicy": {
+      "expectedOfficialRegionCount": 17,
+      "expectedOfficialRegionsKo": [
+        "서울특별시",
+        "부산광역시",
+        "대구광역시",
+        "인천광역시",
+        "광주광역시",
+        "대전광역시",
+        "울산광역시",
+        "세종특별자치시",
+        "경기도",
+        "강원특별자치도",
+        "충청북도",
+        "충청남도",
+        "전북특별자치도",
+        "전라남도",
+        "경상북도",
+        "경상남도",
+        "제주특별자치도"
+      ],
+      "sourceMetadataExceptionRequiredWhenNotOfficialDerived": true,
+      "currentException": "The current committed asset is documented-guide family-route geometry only; it must not be presented as official-derived Korea first-level boundary coverage."
+    }
   },
   "verifiedSourceCandidates": [
     {
@@ -33,7 +58,7 @@
       "url": "https://www.data.go.kr/data/15045881/fileData.do?recommendDataYn=Y",
       "publisher": "국토교통부 / 공공데이터포털",
       "licenseSummary": "Public-data portal entry is free and intended for legal administrative-boundary information; confirm the displayed 이용허락범위 at download time before committing derived geometry.",
-      "permittedUseDecision": "Preferred future source for current Korea legal-boundary preprocessing when an execution lane can download, simplify, and document the snapshot.",
+      "permittedUseDecision": "Preferred source for current Korea legal-boundary preprocessing when an execution lane can download, simplify, validate all 17 first-level regions, cover family targets, and document the snapshot.",
       "implementationNote": "Use build-time preprocessing only; do not call portal/VWorld APIs from the client at runtime."
     },
     {
