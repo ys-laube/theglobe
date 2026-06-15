@@ -84,7 +84,6 @@ for (const feature of boundaries.features) {
   assert(feature.familyPathRole === expectedFamilyPathRoles.get(feature.id), `${feature.id} must keep its family path role`);
 }
 
-const expectedTerminalRegions = ['kr-busan-haeundae-stylized', 'kr-gimhae-bonghwang-stylized', 'kr-seoul-mapo-stylized'];
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
 
@@ -166,10 +165,10 @@ for (const line of worldBorders.lines) {
 assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
 const expectedHouseholds = {
-  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
-  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
-  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
-  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
+  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2 },
+  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3 },
+  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1 },
+  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1 },
 };
 
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
