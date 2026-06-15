@@ -13,8 +13,6 @@ const weatherPolicySource = await readFile(join(root, 'src/weatherPolicy.ts'), '
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
-const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
-const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
 function assert(condition, message) {
@@ -86,6 +84,7 @@ for (const feature of boundaries.features) {
   assert(feature.familyPathRole === expectedFamilyPathRoles.get(feature.id), `${feature.id} must keep its family path role`);
 }
 
+const expectedTerminalRegions = ['kr-busan-haeundae-stylized', 'kr-gimhae-bonghwang-stylized', 'kr-seoul-mapo-stylized'];
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
 
@@ -146,14 +145,6 @@ assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must
 assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
 assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
 
-assert(packageManifest.scripts?.['verify:data'] === 'node scripts/verify-boundary-data.mjs', 'npm verify:data must run the boundary/provenance verifier');
-assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
-assert(rootReadme.includes('npm run verify'), 'root README must document the aggregate npm verification command');
-assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link the provenance document');
-assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document the bundled world border asset');
-assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
-assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
-
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
 assert(worldBorders.sourceUrl.includes('natural-earth-vector'), 'world border source URL must document Natural Earth vector provenance');
@@ -175,10 +166,10 @@ for (const line of worldBorders.lines) {
 assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
 const expectedHouseholds = {
-  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2 },
-  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3 },
-  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1 },
-  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1 },
+  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
+  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
+  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
+  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
 };
 
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
@@ -204,11 +195,13 @@ assert(statusMatches.length === 7, 'all household link slots must remain placeho
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
 assert(householdConfigSource.includes('householdConfigValidation = validateHouseholdConfig(householdConfig)'), 'household config validation result must remain exported');
 
-assert(weatherPolicySource.includes("mode: 'static-fallback-only'"), 'weather policy must be static fallback only');
-for (const requiredWeatherFlag of ['liveApiRequired: false', 'backendRequired: false', 'apiKeyRequired: false']) {
+assert(weatherPolicySource.includes("id: 'static-weather-policy-v1'"), 'weather policy id must be stable');
+assert(weatherPolicySource.includes("defaultMode: 'simulated'"), 'weather policy default mode must be simulated');
+assert(weatherPolicySource.includes("liveProvider: 'open-meteo'"), 'weather live provider must be Open-Meteo');
+for (const requiredWeatherFlag of ['liveEnhancementOptional: true', 'requiresApiKey: false', 'blocksInitialRender: false']) {
   assert(weatherPolicySource.includes(requiredWeatherFlag), `weather policy must include ${requiredWeatherFlag}`);
 }
-assert(weatherPolicySource.includes('getWeatherFallbackCopy'), 'weather fallback copy helper must remain exported');
+assert(weatherPolicySource.includes("fallbackMode: 'unavailable'"), 'weather fallback mode must be unavailable');
 assert(!weatherPolicySource.includes('fetch('), 'weather policy must not fetch live data');
 assert(!weatherPolicySource.includes('import.meta.env'), 'weather policy must not require runtime environment keys');
 
