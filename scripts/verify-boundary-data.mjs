@@ -112,6 +112,14 @@ assert(dataProvenance.weather.uiDisclosureRequired === true, 'weather UI disclos
 assert(dataProvenance.weather.approvedSources.some((source) => source.id === 'open-meteo-forecast-api'), 'weather policy must lock Open-Meteo as optional source');
 assert(dataProvenance.weather.forbiddenBehavior.includes('secret key or paid endpoint in client bundle'), 'weather policy must forbid client secrets/paid endpoint');
 
+assert(packageManifest.scripts?.['verify:data'] === 'node scripts/verify-boundary-data.mjs', 'npm verify:data must run the boundary/provenance verifier');
+assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
+assert(rootReadme.includes('npm run verify'), 'root README must document the aggregate npm verification command');
+assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README must link the provenance document');
+assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document the bundled world border asset');
+assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document the data/provenance verification command');
+assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
+
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
 assert(worldBorders.sourceUrl.includes('natural-earth-vector'), 'world border source URL must document Natural Earth vector provenance');
