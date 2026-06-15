@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { access, readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -16,6 +16,27 @@ const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8'
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
+
+async function pathExists(path) {
+  try {
+    await access(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function listFiles(path) {
+  const entries = await readdir(path, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const child = join(path, entry.name);
+    if (entry.isDirectory()) files.push(...await listFiles(child));
+    else files.push(child);
+  }
+  return files;
+}
+
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -172,5 +193,27 @@ assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README 
 assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document bundled world border asset');
 assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document verification command');
 assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
+
+
+const runtimeSourceFiles = [
+  join(root, 'index.html'),
+  join(root, 'package.json'),
+  ...(await listFiles(join(root, 'src'))).filter((file) => /\.(ts|tsx|js|jsx|css)$/.test(file)),
+];
+const forbiddenRuntimePatterns = [
+  { pattern: /fetch\s*\(/i, label: 'runtime fetch call' },
+  { pattern: /XMLHttpRequest/i, label: 'runtime XMLHttpRequest' },
+  { pattern: /open-?meteo|forecast|weather/i, label: 'weather/forecast runtime surface' },
+  { pattern: /api[_-]?key|apikey|secret[_-]?key|access[_-]?token/i, label: 'runtime API key or secret token surface' },
+  { pattern: /https?:\/\/(?:www\.)?(?:vworld\.kr|data\.go\.kr)|@?mapbox|google\.maps|kakao\.maps|naver\.maps/i, label: 'runtime map API/provider surface' },
+  { pattern: /\blogin\b|\bauth\b|oauth|firebase|supabase/i, label: 'runtime auth/login/backend surface' },
+];
+for (const file of runtimeSourceFiles) {
+  const source = await readFile(file, 'utf8');
+  for (const { pattern, label } of forbiddenRuntimePatterns) {
+    assert(!pattern.test(source), `${label} must not be introduced in runtime source: ${file.replace(root + '/', '')}`);
+  }
+}
+assert(!(await pathExists(join(root, '.omx/ultragoal'))), '.omx/ultragoal must not be created or mutated by worker verification');
 
 console.log('PASS boundary/provenance/household validation');
