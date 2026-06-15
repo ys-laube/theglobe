@@ -70,7 +70,7 @@
     "requiredRanks": "1-100-contiguous",
     "rankingDate": "2018-11-01",
     "metric": "international arrivals by city, 2017 current ranking",
-    "fallbackDecision": "Use the complete public Euromonitor Top 100 City Destinations 2018 static ranking for the initial bundled exact-100 asset. Do not infer from partial Agoda previews. A later complete public source may replace this only with updated provenance before UI dependency.",
+    "fallbackDecision": "Use the complete public Euromonitor Top 100 City Destinations 2018 white paper for exact-100 static rows. Mastercard GDCI 2019 remains a top-20-only corroborating source and must not be used to infer ranks 21-100.",
     "approvedSources": [
       {
         "id": "euromonitor-top100-city-destinations-2018",
@@ -78,7 +78,7 @@
         "url": "https://go.euromonitor.com/white-paper-travel-2018-100-cities",
         "publisher": "Euromonitor International",
         "retrievalPolicy": "build-time static transcription with source metadata; no runtime dependency",
-        "licenseUsageNote": "Static factual ranking metadata only; do not bundle report prose or imagery."
+        "licenseUsageNote": "Public white paper ranking used as factual source for the exact-100 static city list; do not bundle report prose or imagery."
       }
     ],
     "rejectedSources": [
@@ -87,8 +87,12 @@
         "reason": "Public Agoda materials are partial/promotional and do not provide a legally complete global top-100 dataset for this static app."
       },
       {
-        "id": "euromonitor-preview-only",
-        "reason": "Use only if a complete legally accessible Top 100 list is obtained; public preview pages alone are insufficient for exact 100 bundled rows."
+        "id": "mastercard-gdci-2019-top20-only",
+        "reason": "Public Mastercard GDCI 2019 report exposes top-20 detail only, so it cannot validate exact ranks 21-100."
+      },
+      {
+        "id": "euromonitor-preview-only-without-table",
+        "reason": "Any source page that does not expose the complete ranking table is insufficient for exact 100 bundled rows."
       }
     ]
   },

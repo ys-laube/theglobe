@@ -8,7 +8,7 @@
     "extractedAt": "2026-06-15",
     "licenseUsageNote": "Static seed snapshot for bundled capital exploration; verify-city-data enforces metadata, coordinates, links, uniqueness, and count expansion beyond 33."
   },
-  "inclusionRule": "Sovereign-state capital candidates with coordinates and a safe HTTPS Wikipedia/source URL; deliberately exceeds the legacy 33-entry curated list.",
+  "inclusionRule": "Bundle sovereign-state capital candidates with coordinates and a safe HTTPS Wikipedia or source URL; generated data must exceed the legacy 33 curated entries.",
   "minimumRequiredCount": 34,
   "legacyBaselineCount": 33,
   "capitals": [

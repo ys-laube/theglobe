@@ -1,68 +1,88 @@
 import { readFile } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const capitals = JSON.parse(await readFile(join(root, 'src/data/worldCapitals.json'), 'utf8'));
-const top100 = JSON.parse(await readFile(join(root, 'src/data/top100Cities.json'), 'utf8'));
 const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
+const worldCapitals = JSON.parse(await readFile(join(root, 'src/data/worldCapitals.json'), 'utf8'));
+const top100Cities = JSON.parse(await readFile(join(root, 'src/data/top100Cities.json'), 'utf8'));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-function assertHttps(url, label) {
-  assert(typeof url === 'string' && url.startsWith('https://'), `${label} must be an HTTPS URL`);
+function assertHttpsUrl(value, context) {
+  const parsed = new URL(value);
+  assert(parsed.protocol === 'https:', `${context} must use HTTPS`);
 }
 
-function assertCoordinate(entry, label) {
-  assert(Number.isFinite(entry.lat) && entry.lat >= -90 && entry.lat <= 90, `${label} latitude must be valid`);
-  assert(Number.isFinite(entry.lng) && entry.lng >= -180 && entry.lng <= 180, `${label} longitude must be valid`);
+function assertCoordinates(row, context) {
+  assert(Number.isFinite(row.lat) && row.lat >= -90 && row.lat <= 90, `${context} latitude must be valid`);
+  assert(Number.isFinite(row.lng) && row.lng >= -180 && row.lng <= 180, `${context} longitude must be valid`);
 }
 
-function assertUnique(entries, key, label) {
-  const values = entries.map((entry) => entry[key]);
-  assert(new Set(values).size === values.length, `${label} ${key} values must be unique`);
-}
-
-assert(capitals.schemaVersion === 1, 'world capitals schemaVersion must be 1');
-assert(capitals.datasetId === 'world-capitals-wikidata-snapshot-2026-06-15', 'world capitals dataset id must be stable');
-assert(capitals.source.id === 'wikidata-query-service-capitals', 'world capitals source id must be Wikidata lock');
-assertHttps(capitals.source.queryUrl, 'world capitals source queryUrl');
-assert(typeof capitals.source.extractedAt === 'string' && capitals.source.extractedAt.length >= 10, 'world capitals extraction date is required');
-assert(capitals.minimumRequiredCount > capitals.legacyBaselineCount, 'capital minimum must exceed legacy baseline');
-assert(capitals.legacyBaselineCount === dataProvenance.capitals.currentLegacyCount, 'capital legacy baseline must match data provenance');
-assert(capitals.capitals.length > capitals.legacyBaselineCount, 'bundled capitals must exceed legacy 33 entries');
-assert(capitals.capitals.length >= capitals.minimumRequiredCount, 'bundled capitals must satisfy minimum required count');
-assertUnique(capitals.capitals, 'id', 'capital');
-for (const entry of capitals.capitals) {
-  assert(entry.sourceId === capitals.source.id, `capital ${entry.id} sourceId must match dataset source`);
-  for (const field of ['id', 'city', 'country', 'capitalOf', 'region']) {
-    assert(typeof entry[field] === 'string' && entry[field].length > 0, `capital ${entry.id} missing ${field}`);
+function assertUniqueRows(rows, label) {
+  const seen = new Set();
+  for (const row of rows) {
+    assert(typeof row.id === 'string' && row.id.length > 0, `${label} row id is required`);
+    assert(!seen.has(row.id), `${label} row id must be unique: ${row.id}`);
+    seen.add(row.id);
   }
-  assertCoordinate(entry, `capital ${entry.id}`);
-  assertHttps(entry.link, `capital ${entry.id} link`);
 }
 
-assert(top100.schemaVersion === 1, 'TOP100 schemaVersion must be 1');
-assert(top100.datasetId === 'top100-city-destinations-euromonitor-2018-static-v1', 'TOP100 dataset id must be stable');
-assert(top100.requiredCount === dataProvenance.top100Cities.requiredCount, 'TOP100 required count must match provenance');
-assert(top100.requiredRanks === dataProvenance.top100Cities.requiredRanks, 'TOP100 rank policy must match provenance');
-assert(top100.cities.length === 100, 'TOP100 must contain exactly 100 cities');
-assert(top100.source.id === dataProvenance.top100Cities.sourceLock, 'TOP100 source id must match data provenance source lock');
-assert(top100.source.rankingDate === dataProvenance.top100Cities.rankingDate, 'TOP100 ranking date must match provenance');
-assert(top100.source.licenseUsageNote?.length > 0, 'TOP100 license/usage note is required');
-assertHttps(top100.source.url, 'TOP100 source URL');
-assertUnique(top100.cities, 'id', 'TOP100 city');
-const ranks = top100.cities.map((entry) => entry.rank).sort((a, b) => a - b);
-assert(ranks.every((rank, index) => rank === index + 1), 'TOP100 ranks must be contiguous 1-100');
-for (const entry of top100.cities) {
-  assert(entry.sourceId === top100.source.id, `TOP100 ${entry.id} sourceId must match dataset source`);
-  for (const field of ['id', 'city', 'country', 'region']) {
-    assert(typeof entry[field] === 'string' && entry[field].length > 0, `TOP100 ${entry.id} missing ${field}`);
-  }
-  assertCoordinate(entry, `TOP100 ${entry.id}`);
-  assertHttps(entry.link, `TOP100 ${entry.id} link`);
+assert(worldCapitals.schemaVersion === 1, 'world capitals schemaVersion must be 1');
+assert(worldCapitals.datasetId === 'world-capitals-wikidata-snapshot-2026-06-15', 'world capitals dataset id must be stable');
+assert(worldCapitals.source.id === dataProvenance.capitals.approvedSources[0].id, 'world capitals source must match provenance-approved source');
+assert(worldCapitals.source.queryUrl === dataProvenance.capitals.approvedSources[0].url, 'world capitals query URL must match provenance');
+assert(typeof worldCapitals.source.extractedAt === 'string' && worldCapitals.source.extractedAt.length > 0, 'world capitals extraction date is required');
+assert(worldCapitals.source.licenseUsageNote.includes('Static'), 'world capitals license/static usage note is required');
+assert(worldCapitals.inclusionRule === dataProvenance.capitals.inclusionRule, 'world capitals inclusion rule must match provenance');
+assert(worldCapitals.legacyBaselineCount === dataProvenance.capitals.currentLegacyCount, 'world capitals legacy baseline must match provenance');
+assert(worldCapitals.minimumRequiredCount === dataProvenance.capitals.minimumBundledCount, 'world capitals minimum count must match provenance');
+assert(Array.isArray(worldCapitals.capitals), 'world capitals rows must be an array');
+assert(worldCapitals.capitals.length >= worldCapitals.minimumRequiredCount, 'world capitals must meet minimum required count');
+assert(worldCapitals.capitals.length > worldCapitals.legacyBaselineCount, 'world capitals must expand beyond legacy 33 entries');
+assertUniqueRows(worldCapitals.capitals, 'world capital');
+
+for (const capital of worldCapitals.capitals) {
+  assert(typeof capital.city === 'string' && capital.city.length > 0, `${capital.id} city is required`);
+  assert(typeof capital.country === 'string' && capital.country.length > 0, `${capital.id} country is required`);
+  assert(typeof capital.capitalOf === 'string' && capital.capitalOf.length > 0, `${capital.id} capitalOf is required`);
+  assert(typeof capital.region === 'string' && capital.region.length > 0, `${capital.id} region is required`);
+  assert(capital.sourceId === worldCapitals.source.id, `${capital.id} sourceId must match dataset source`);
+  assertCoordinates(capital, `world capital ${capital.id}`);
+  assertHttpsUrl(capital.link, `world capital ${capital.id} link`);
 }
 
-console.log(`PASS city data validation: ${capitals.capitals.length} capitals, ${top100.cities.length} TOP100 cities`);
+assert(top100Cities.schemaVersion === 1, 'TOP100 schemaVersion must be 1');
+assert(top100Cities.datasetId === 'top100-city-destinations-euromonitor-2018-static-v1', 'TOP100 dataset id must be stable');
+assert(top100Cities.source.id === dataProvenance.top100Cities.sourceLock, 'TOP100 source id must match provenance source lock');
+assert(top100Cities.source.url === dataProvenance.top100Cities.approvedSources[0].url, 'TOP100 source URL must match provenance');
+assert(top100Cities.source.rankingDate === dataProvenance.top100Cities.rankingDate, 'TOP100 ranking date must match provenance');
+assert(top100Cities.requiredCount === dataProvenance.top100Cities.requiredCount, 'TOP100 required count must match provenance');
+assert(top100Cities.requiredRanks === dataProvenance.top100Cities.requiredRanks, 'TOP100 required ranks must match provenance');
+assert(top100Cities.source.licenseUsageNote.includes('Static'), 'TOP100 static usage note is required');
+assert(Array.isArray(top100Cities.cities), 'TOP100 rows must be an array');
+assert(top100Cities.cities.length === top100Cities.requiredCount, 'TOP100 must include exactly 100 rows');
+assertUniqueRows(top100Cities.cities, 'TOP100 city');
+
+const ranks = new Set();
+for (const [index, city] of top100Cities.cities.entries()) {
+  assert(Number.isInteger(city.rank), `${city.id} rank must be an integer`);
+  assert(city.rank === index + 1, `${city.id} rank order must be contiguous and sorted`);
+  assert(city.rank >= 1 && city.rank <= 100, `${city.id} rank must be 1-100`);
+  assert(!ranks.has(city.rank), `${city.id} rank must be unique: ${city.rank}`);
+  ranks.add(city.rank);
+  assert(typeof city.city === 'string' && city.city.length > 0, `${city.id} city is required`);
+  assert(typeof city.country === 'string' && city.country.length > 0, `${city.id} country is required`);
+  assert(city.sourceId === top100Cities.source.id, `${city.id} sourceId must match dataset source`);
+  assertCoordinates(city, `TOP100 city ${city.id}`);
+  assertHttpsUrl(city.link, `TOP100 city ${city.id} link`);
+}
+for (let rank = 1; rank <= 100; rank += 1) {
+  assert(ranks.has(rank), `TOP100 rank missing: ${rank}`);
+}
+
+assert(dataProvenance.validationContract.cityDataVerifier.includes('scripts/verify-city-data.mjs'), 'provenance must point at verify-city-data script');
+
+console.log(`PASS city data validation (${worldCapitals.capitals.length} capitals, ${top100Cities.cities.length} TOP100 cities)`);

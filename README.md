@@ -8,10 +8,14 @@ G001 keeps the Korea family map zoom fully static and client-side. Boundary or
 map-shape data must come from permissive local sources only: use bundled static
 data with clear provenance notes, or simplified stylized geometry when a
 production boundary source has not been approved. Do not add live map APIs,
-backend services, auth flows, or runtime API keys. The current committed
-family-map geometry lives in `src/mapData/koreaFamilyBoundaries.json`, its
-provenance/source strategy lives in `src/mapData/boundaryProvenance.json`, and
-the decorative globe border asset lives in `src/mapData/worldCountryBorders.json`.
+backend services, auth flows, or runtime API keys.
+
+The static data contract is locked in `src/mapData/dataProvenance.json` and
+validated by `npm run verify:data`: Korea boundary candidates are build-time
+public-data snapshots only, expanded capitals must exceed the legacy 33-entry
+list, TOP100 city data must contain exactly 100 contiguous ranked rows from
+the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes, and weather starts as simulated/static with
+only optional no-key Open-Meteo enhancement plus fallback disclosure.
 
 The household configuration is intended to stay in one static file. Accepted
 family display names and the seven Naver Band link slots live in
