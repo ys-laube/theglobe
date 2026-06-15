@@ -112,7 +112,7 @@ koreaFamilyOverlay = createKoreaFamilyOverlay({
 
 globe.onViewChange(updateQaState);
 
-function openKoreaMapFromGlobe() {
+function enterKoreaFamilyMap() {
   koreaFamilyEntryRequested = true;
   overlay.setExplorationMode(false);
   globe.setMarkerLayerVisible(false);
@@ -121,7 +121,16 @@ function openKoreaMapFromGlobe() {
   updateQaState();
 }
 
-window.addEventListener('korea-family-map-request', openKoreaMapFromGlobe);
+function handleGlobeTap(event: PointerEvent) {
+  const hit = globe.pickVisibleObject(event, canvas);
+  if (hit?.userData.koreaHotspot) {
+    enterKoreaFamilyMap();
+    return true;
+  }
+  return false;
+}
+
+window.addEventListener('korea-family-map-request', enterKoreaFamilyMap);
 
 globe.onStateChange((state, message, credit) => {
   stateLabel.textContent = state.replaceAll('-', ' ');
@@ -170,10 +179,7 @@ canvas.addEventListener('pointerup', (event) => {
   isDragging = false;
   if (movedDistance <= 6 && !koreaFamilyOverlay?.getState().open) {
     const hit = globe.pickVisibleObject(event, canvas);
-    if (hit?.userData.koreaHotspot) {
-      openKoreaMapFromGlobe();
-      return;
-    }
+    if (handleGlobeTap(event)) return;
   }
   if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerUp(event, movedDistance);
 });

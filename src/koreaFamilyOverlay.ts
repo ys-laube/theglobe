@@ -106,7 +106,7 @@ const routeNodes: Record<RegionId, RouteNode> = {
   'kr-korea-overview': {
     id: 'kr-korea-overview',
     label: '대한민국',
-    next: ['kr-seoul', 'kr-busan', 'kr-daegu', 'kr-incheon', 'kr-gwangju', 'kr-daejeon', 'kr-ulsan', 'kr-sejong', 'kr-gyeonggi', 'kr-gangwon', 'kr-chungbuk', 'kr-chungnam', 'kr-jeonbuk', 'kr-jeonnam', 'kr-gyeongbuk', 'kr-gyeongnam', 'kr-jeju'],
+    next: firstLevelRegionOrder,
   },
   'kr-seoul': { id: 'kr-seoul', label: '서울특별시', next: ['kr-seoul-mapo'] },
   'kr-busan': { id: 'kr-busan', label: '부산광역시', next: ['kr-busan-haeundae'] },
@@ -148,25 +148,31 @@ const familyRouteSegments: readonly FamilyRouteSegment[] = [
   { id: 'route-gimhae-bonghwang', from: 'kr-gyeongnam-gimhae', to: 'kr-gimhae-bonghwang', label: '김해시에서 봉황동 가족 자리로 확대' },
 ];
 
-const activeRouteSegmentIdsByRegion: Record<RegionId, readonly string[]> = {
-  'kr-korea-overview': [],
-  'kr-busan': ['route-country-busan'],
-  'kr-busan-haeundae': ['route-country-busan', 'route-busan-haeundae'],
-  'kr-seoul': ['route-country-seoul'],
-  'kr-seoul-mapo': ['route-country-seoul', 'route-seoul-mapo'],
-  'kr-gyeongnam': ['route-country-gyeongnam'],
-  'kr-gyeongnam-gimhae': ['route-country-gyeongnam', 'route-gyeongnam-gimhae'],
-  'kr-gimhae-bonghwang': ['route-country-gyeongnam', 'route-gyeongnam-gimhae', 'route-gimhae-bonghwang'],
-  'kr-daegu': [], 'kr-incheon': [], 'kr-gwangju': [], 'kr-daejeon': [], 'kr-ulsan': [], 'kr-sejong': [], 'kr-gyeonggi': [], 'kr-gangwon': [], 'kr-chungbuk': [], 'kr-chungnam': [], 'kr-jeonbuk': [], 'kr-jeonnam': [], 'kr-gyeongbuk': [], 'kr-jeju': []
-};
-
-const regionOrder: RegionId[] = [
-  'kr-seoul', 'kr-busan', 'kr-daegu', 'kr-incheon', 'kr-gwangju', 'kr-daejeon', 'kr-ulsan', 'kr-sejong', 'kr-gyeonggi', 'kr-gangwon', 'kr-chungbuk', 'kr-chungnam', 'kr-jeonbuk', 'kr-jeonnam', 'kr-gyeongbuk', 'kr-gyeongnam', 'kr-jeju',
+const familyTargetRegionOrder = [
   'kr-seoul-mapo',
   'kr-busan-haeundae',
   'kr-gyeongnam-gimhae',
   'kr-gimhae-bonghwang',
-];
+] as const satisfies readonly RegionId[];
+
+function buildActiveRouteSegmentIdsByRegion() {
+  const segmentByTarget = new Map<RegionId, FamilyRouteSegment>(familyRouteSegments.map((segment) => [segment.to, segment]));
+  const activeEntries = (Object.keys(routeNodes) as RegionId[]).map((region) => {
+    const routeIds: string[] = [];
+    let cursor: RegionId | undefined = region;
+    while (cursor) {
+      const segment = segmentByTarget.get(cursor);
+      if (!segment) break;
+      routeIds.unshift(segment.id);
+      cursor = segment.from;
+    }
+    return [region, routeIds] as const;
+  });
+  return Object.fromEntries(activeEntries) as unknown as Record<RegionId, readonly string[]>;
+}
+
+const activeRouteSegmentIdsByRegion = buildActiveRouteSegmentIdsByRegion();
+const regionOrder: RegionId[] = [...firstLevelRegionOrder, ...familyTargetRegionOrder];
 
 function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, tagName: K, text: string, className?: string) {
   const element = document.createElement(tagName);
