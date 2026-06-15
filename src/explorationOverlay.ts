@@ -58,11 +58,6 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
   return element;
 }
 
-function rankBandLabel(rank: number) {
-  const start = Math.floor((rank - 1) / 10) * 10 + 1;
-  const end = start + 9;
-  return `${start}-${end}`;
-}
 
 function makeMarker(capital: Capital, radius: number) {
   const marker = new THREE.Mesh(

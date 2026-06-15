@@ -178,7 +178,6 @@ canvas.addEventListener('pointermove', (event) => {
 canvas.addEventListener('pointerup', (event) => {
   isDragging = false;
   if (movedDistance <= 6 && !koreaFamilyOverlay?.getState().open) {
-    const hit = globe.pickVisibleObject(event, canvas);
     if (handleGlobeTap(event)) return;
   }
   if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerUp(event, movedDistance);
