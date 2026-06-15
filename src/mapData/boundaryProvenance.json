@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "korea-family-boundary-provenance-v1",
+  "committedAssetStrategy": {
+    "assetId": "korea-family-boundaries-stylized-v1",
+    "status": "permissive-for-repository",
+    "summary": "The committed geometry is hand-authored, normalized, stylized overlay data created for this app. It does not copy external GIS coordinates, so it can remain bundled in a public static app while future official data preprocessing is evaluated.",
+    "licenseTreatment": "Project-owned stylized data; external sources below are documented as verified source candidates/provenance strategy, not copied geometry.",
+    "accuracyNotice": "Decorative navigation art only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions."
+  },
+  "verifiedSourceCandidates": [
+    {
+      "id": "natural-earth-admin0-boundary-lines",
+      "name": "Natural Earth Admin 0 Boundary Lines / Countries",
+      "url": "https://www.naturalearthdata.com/downloads/110m-cultural-vectors/",
+      "publisher": "Natural Earth",
+      "licenseSummary": "Natural Earth describes its vector/raster map data as public domain.",
+      "permittedUseDecision": "Acceptable future source for lightweight world/country outlines if a later worker preprocesses and attributes the static asset.",
+      "implementationNote": "Use low-scale 1:110m or simplified derived linework for subtle non-pickable globe borders; avoid making disputed-boundary political claims beyond the source's de facto view."
+    },
+    {
+      "id": "data-go-kr-molit-daily-legal-district-shp",
+      "name": "국토교통부_일별법정구역정보 SHP",
+      "url": "https://www.data.go.kr/data/15045881/fileData.do?recommendDataYn=Y",
+      "publisher": "국토교통부 / 공공데이터포털",
+      "licenseSummary": "Public-data portal entry is free and intended for legal administrative-boundary information; confirm the displayed 이용허락범위 at download time before committing derived geometry.",
+      "permittedUseDecision": "Preferred future source for current Korea legal-boundary preprocessing when an execution lane can download, simplify, and document the snapshot.",
+      "implementationNote": "Use build-time preprocessing only; do not call portal/VWorld APIs from the client at runtime."
+    },
+    {
+      "id": "data-go-kr-sigg-legal-boundary-api",
+      "name": "법정구역경계_시군구 / 행정안전부 legal-boundary feeds",
+      "url": "https://www.data.go.kr/data/28846482/linkedData.do",
+      "publisher": "행정안전부 / 공공데이터포털",
+      "licenseSummary": "Public-data portal legal-boundary feed candidate; verify the active 이용허락범위 and attribution requirements at retrieval time.",
+      "permittedUseDecision": "Acceptable future source candidate for gu-level Korea overlay if processed into static bundled data.",
+      "implementationNote": "No live client API usage; cache a bounded simplified snapshot with provenance."
+    },
+    {
+      "id": "southkorea-southkorea-maps",
+      "name": "southkorea/southkorea-maps",
+      "url": "https://github.com/southkorea/southkorea-maps",
+      "publisher": "Open-source GitHub repository",
+      "licenseSummary": "Repository documents open map formats and source provenance; current repo state should be checked for license/source freshness before copying geometry.",
+      "permittedUseDecision": "Fallback reference only if official feed preprocessing blocks execution and licensing/freshness is explicitly accepted.",
+      "implementationNote": "Do not copy GADM-derived files from this or any other source for the public app."
+    }
+  ],
+  "excludedSources": [
+    {
+      "id": "gadm",
+      "reason": "Avoid for this redistributed public/static gift app because common GADM terms restrict commercial redistribution and derivatives."
+    },
+    {
+      "id": "non-commercial-no-derivatives-census-boundaries",
+      "reason": "Avoid NC/ND census-boundary data when simplification/modification or public redistribution is required."
+    },
+    {
+      "id": "live-map-tiles-or-client-api",
+      "reason": "Violates the static/no-live-API requirement and adds runtime dependency risk."
+    }
+  ],
+  "attributionText": "Korea family overlay geometry in this repository is hand-authored/stylized for decorative navigation. Future boundary preprocessing may use Natural Earth public-domain country boundaries and Korean public-data legal-boundary feeds with snapshot-specific attribution."
+}

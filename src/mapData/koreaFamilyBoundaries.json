@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "assetId": "korea-family-boundaries-stylized-v1",
+  "title": "Stylized Korea family path boundary data",
+  "coordinateSystem": "normalized-svg-0-100",
+  "intendedUse": "Premium family-map overlay navigation only; not GIS, legal, survey, routing, or address lookup data.",
+  "geometryKind": "hand-authored-stylized-polygons-and-lines",
+  "provenanceId": "korea-family-boundary-provenance-v1",
+  "bounds": {
+    "minX": 0,
+    "minY": 0,
+    "maxX": 100,
+    "maxY": 100
+  },
+  "worldReferenceLines": [
+    {
+      "id": "world-context-eurasia-pacific-arc",
+      "label": "World context arc near East Asia",
+      "kind": "decorative-reference-line",
+      "points": [[6, 21], [19, 15], [34, 16], [48, 24], [62, 34], [75, 45], [90, 52]]
+    },
+    {
+      "id": "world-context-north-pacific-rim",
+      "label": "North Pacific rim context arc",
+      "kind": "decorative-reference-line",
+      "points": [[7, 70], [22, 63], [40, 61], [59, 66], [77, 76], [93, 86]]
+    }
+  ],
+  "features": [
+    {
+      "id": "kr-country-stylized",
+      "nameKo": "대한민국",
+      "nameEn": "South Korea",
+      "tier": "country",
+      "familyPathRole": "entry",
+      "interactive": true,
+      "polygon": [[46, 5], [57, 8], [63, 17], [68, 29], [66, 42], [72, 52], [69, 66], [61, 81], [52, 95], [44, 88], [38, 73], [32, 60], [35, 46], [31, 34], [37, 20]],
+      "centroid": [52, 50]
+    },
+    {
+      "id": "kr-seoul-stylized",
+      "nameKo": "서울특별시",
+      "nameEn": "Seoul",
+      "tier": "province-city",
+      "familyPathRole": "brother-branch",
+      "interactive": true,
+      "polygon": [[42, 26], [49, 22], [56, 25], [58, 32], [53, 38], [45, 38], [40, 33]],
+      "centroid": [49, 31]
+    },
+    {
+      "id": "kr-seoul-mapo-stylized",
+      "nameKo": "마포구",
+      "nameEn": "Mapo-gu",
+      "tier": "district",
+      "familyPathRole": "brother-household-district",
+      "interactive": true,
+      "polygon": [[41, 30], [47, 27], [52, 29], [51, 34], [46, 36], [41, 34]],
+      "centroid": [46, 32]
+    },
+    {
+      "id": "kr-busan-stylized",
+      "nameKo": "부산광역시",
+      "nameEn": "Busan",
+      "tier": "province-city",
+      "familyPathRole": "sister-parents-branch",
+      "interactive": true,
+      "polygon": [[57, 71], [66, 70], [74, 76], [76, 84], [69, 91], [59, 88], [54, 80]],
+      "centroid": [65, 80]
+    },
+    {
+      "id": "kr-busan-haeundae-stylized",
+      "nameKo": "해운대구",
+      "nameEn": "Haeundae-gu",
+      "tier": "district",
+      "familyPathRole": "sister-parents-household-district",
+      "interactive": true,
+      "polygon": [[67, 76], [75, 78], [76, 84], [70, 88], [64, 84]],
+      "centroid": [70, 82]
+    },
+    {
+      "id": "kr-gyeongnam-stylized",
+      "nameKo": "경상남도",
+      "nameEn": "Gyeongsangnam-do",
+      "tier": "province",
+      "familyPathRole": "home-branch",
+      "interactive": true,
+      "polygon": [[40, 62], [53, 58], [66, 61], [72, 70], [67, 79], [55, 81], [45, 77], [36, 69]],
+      "centroid": [54, 70]
+    },
+    {
+      "id": "kr-gyeongnam-gimhae-stylized",
+      "nameKo": "김해시",
+      "nameEn": "Gimhae-si",
+      "tier": "city",
+      "familyPathRole": "home-city",
+      "interactive": true,
+      "polygon": [[51, 68], [60, 66], [66, 71], [63, 78], [54, 79], [48, 74]],
+      "centroid": [57, 73]
+    },
+    {
+      "id": "kr-gimhae-bonghwang-stylized",
+      "nameKo": "봉황동",
+      "nameEn": "Bonghwang-dong",
+      "tier": "neighborhood",
+      "familyPathRole": "home-neighborhood",
+      "interactive": true,
+      "polygon": [[55, 71], [60, 70], [63, 73], [61, 77], [56, 77], [53, 74]],
+      "centroid": [58, 74]
+    }
+  ],
+  "familyPathOrder": [
+    ["kr-country-stylized", "kr-busan-stylized", "kr-busan-haeundae-stylized"],
+    ["kr-country-stylized", "kr-seoul-stylized", "kr-seoul-mapo-stylized"],
+    ["kr-country-stylized", "kr-gyeongnam-stylized", "kr-gyeongnam-gimhae-stylized", "kr-gimhae-bonghwang-stylized"]
+  ],
+  "excludedBehavior": [
+    "No live map API calls",
+    "No backend/auth dependency",
+    "No address lookup or real geocoding",
+    "No legal-boundary accuracy claims"
+  ]
+}
