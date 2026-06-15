@@ -24,14 +24,14 @@ type OverlayData = {
 };
 
 type RegionId =
-  | 'kr-country-stylized'
-  | 'kr-busan-stylized'
-  | 'kr-busan-haeundae-stylized'
-  | 'kr-seoul-stylized'
-  | 'kr-seoul-mapo-stylized'
-  | 'kr-gyeongnam-stylized'
-  | 'kr-gyeongnam-gimhae-stylized'
-  | 'kr-gimhae-bonghwang-stylized';
+  | 'kr-seoul'
+  | 'kr-busan'
+  | 'kr-busan-haeundae'
+  | 'kr-seoul'
+  | 'kr-seoul-mapo'
+  | 'kr-gyeongnam'
+  | 'kr-gyeongnam-gimhae'
+  | 'kr-gimhae-bonghwang';
 
 type OverlayState = {
   open: boolean;
@@ -62,45 +62,45 @@ type CreateOptions = {
 };
 
 const routeNodes: Record<RegionId, RouteNode> = {
-  'kr-country-stylized': {
-    id: 'kr-country-stylized',
+  'kr-seoul': {
+    id: 'kr-seoul',
     label: '대한민국',
-    next: ['kr-busan-stylized', 'kr-seoul-stylized', 'kr-gyeongnam-stylized'],
+    next: ['kr-busan', 'kr-seoul', 'kr-gyeongnam'],
   },
-  'kr-busan-stylized': {
-    id: 'kr-busan-stylized',
+  'kr-busan': {
+    id: 'kr-busan',
     label: '부산광역시',
-    next: ['kr-busan-haeundae-stylized'],
+    next: ['kr-busan-haeundae'],
   },
-  'kr-busan-haeundae-stylized': {
-    id: 'kr-busan-haeundae-stylized',
+  'kr-busan-haeundae': {
+    id: 'kr-busan-haeundae',
     label: '해운대구',
     next: [],
     households: ['sister', 'parents'],
   },
-  'kr-seoul-stylized': {
-    id: 'kr-seoul-stylized',
+  'kr-seoul': {
+    id: 'kr-seoul',
     label: '서울특별시',
-    next: ['kr-seoul-mapo-stylized'],
+    next: ['kr-seoul-mapo'],
   },
-  'kr-seoul-mapo-stylized': {
-    id: 'kr-seoul-mapo-stylized',
+  'kr-seoul-mapo': {
+    id: 'kr-seoul-mapo',
     label: '마포구',
     next: [],
     households: ['brother'],
   },
-  'kr-gyeongnam-stylized': {
-    id: 'kr-gyeongnam-stylized',
+  'kr-gyeongnam': {
+    id: 'kr-gyeongnam',
     label: '경상남도',
-    next: ['kr-gyeongnam-gimhae-stylized'],
+    next: ['kr-gyeongnam-gimhae'],
   },
-  'kr-gyeongnam-gimhae-stylized': {
-    id: 'kr-gyeongnam-gimhae-stylized',
+  'kr-gyeongnam-gimhae': {
+    id: 'kr-gyeongnam-gimhae',
     label: '김해시',
-    next: ['kr-gimhae-bonghwang-stylized'],
+    next: ['kr-gimhae-bonghwang'],
   },
-  'kr-gimhae-bonghwang-stylized': {
-    id: 'kr-gimhae-bonghwang-stylized',
+  'kr-gimhae-bonghwang': {
+    id: 'kr-gimhae-bonghwang',
     label: '봉황동',
     next: [],
     households: ['home'],
@@ -108,21 +108,21 @@ const routeNodes: Record<RegionId, RouteNode> = {
 };
 
 const householdMarkers: readonly { readonly householdId: HouseholdId; readonly regionId: RegionId; readonly dx: number; readonly dy: number }[] = [
-  { householdId: 'parents', regionId: 'kr-busan-haeundae-stylized', dx: -3.4, dy: -2.4 },
-  { householdId: 'sister', regionId: 'kr-busan-haeundae-stylized', dx: 3.6, dy: 2.4 },
-  { householdId: 'brother', regionId: 'kr-seoul-mapo-stylized', dx: 0, dy: -2.6 },
-  { householdId: 'home', regionId: 'kr-gimhae-bonghwang-stylized', dx: 0, dy: 2.8 },
+  { householdId: 'parents', regionId: 'kr-busan-haeundae', dx: -3.4, dy: -2.4 },
+  { householdId: 'sister', regionId: 'kr-busan-haeundae', dx: 3.6, dy: 2.4 },
+  { householdId: 'brother', regionId: 'kr-seoul-mapo', dx: 0, dy: -2.6 },
+  { householdId: 'home', regionId: 'kr-gimhae-bonghwang', dx: 0, dy: 2.8 },
 ];
 
 const regionOrder: RegionId[] = [
-  'kr-country-stylized',
-  'kr-busan-stylized',
-  'kr-busan-haeundae-stylized',
-  'kr-seoul-stylized',
-  'kr-seoul-mapo-stylized',
-  'kr-gyeongnam-stylized',
-  'kr-gyeongnam-gimhae-stylized',
-  'kr-gimhae-bonghwang-stylized',
+  'kr-seoul',
+  'kr-busan',
+  'kr-busan-haeundae',
+  'kr-seoul',
+  'kr-seoul-mapo',
+  'kr-gyeongnam',
+  'kr-gyeongnam-gimhae',
+  'kr-gimhae-bonghwang',
 ];
 
 function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, tagName: K, text: string, className?: string) {
@@ -156,7 +156,7 @@ function householdById(id: HouseholdId) {
 
 export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: CreateOptions): KoreaFamilyOverlay {
   let openState = false;
-  let selectedRegion: RegionId = 'kr-country-stylized';
+  let selectedRegion: RegionId = 'kr-seoul';
   let selectedHousehold: HouseholdId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
@@ -217,10 +217,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const rootButton = document.createElement('button');
     rootButton.type = 'button';
     rootButton.textContent = '대한민국';
-    rootButton.disabled = selectedRegion === 'kr-country-stylized';
-    rootButton.addEventListener('click', () => setRegion('kr-country-stylized'));
+    rootButton.disabled = selectedRegion === 'kr-seoul';
+    rootButton.addEventListener('click', () => setRegion('kr-seoul'));
     breadcrumbs.append(rootButton);
-    if (selectedRegion !== 'kr-country-stylized') {
+    if (selectedRegion !== 'kr-seoul') {
       const current = appendText(breadcrumbs, 'span', `› ${routeNodes[selectedRegion].label}`);
       current.setAttribute('aria-current', 'page');
     }
@@ -474,7 +474,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
   closeButton.addEventListener('click', () => {
     openState = false;
-    selectedRegion = 'kr-country-stylized';
+    selectedRegion = 'kr-seoul';
     selectedHousehold = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
@@ -486,7 +486,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   return {
     open: () => {
       openState = true;
-      selectedRegion = 'kr-country-stylized';
+      selectedRegion = 'kr-seoul';
       selectedHousehold = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
