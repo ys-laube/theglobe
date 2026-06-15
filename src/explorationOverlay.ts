@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { capitals, type Capital } from './capitals';
+import { capitalCities, top100PopularCities, type Capital, type CityExplorationMode } from './capitals';
 import type { GlobeRenderer, GlobeRuntimeState } from './globeRenderer';
 import { latLngToVector } from './globeRenderer';
 
 export type ExplorationOverlay = {
   setExplorationMode: (enabled: boolean) => void;
   getExplorationMode: () => boolean;
-  setShowAll: (all: boolean) => void;
+  setCityMode: (mode: CityExplorationMode) => void;
   handlePointerMove: (event: PointerEvent, dragging: boolean) => void;
   handlePointerUp: (event: PointerEvent, movedDistance: number) => void;
   updateState: (state: GlobeRuntimeState) => void;
@@ -45,22 +45,22 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
 
 function makeMarker(capital: Capital, radius: number) {
   const marker = new THREE.Mesh(
-    new THREE.SphereGeometry(capital.tier === 'highlight' ? 0.045 : 0.027, 18, 18),
-    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.tier === 'highlight' ? 1 : 0.78 })
+    new THREE.SphereGeometry(capital.mode === 'top100' ? 0.024 : 0.03, 18, 18),
+    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.mode === 'top100' ? 0.72 : 0.82 })
   );
   marker.position.copy(latLngToVector(capital.lat, capital.lng, radius + 0.045));
   marker.userData.capital = capital;
 
   const hitArea = new THREE.Mesh(
-    new THREE.SphereGeometry(capital.tier === 'highlight' ? 0.108 : 0.082, 16, 16),
+    new THREE.SphereGeometry(capital.mode === 'top100' ? 0.074 : 0.082, 16, 16),
     new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
   );
   hitArea.position.copy(marker.position);
   hitArea.userData.capital = capital;
 
   const ring = new THREE.Mesh(
-    new THREE.RingGeometry(capital.tier === 'highlight' ? 0.075 : 0.045, capital.tier === 'highlight' ? 0.085 : 0.052, 32),
-    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.tier === 'highlight' ? 0.58 : 0.24, side: THREE.DoubleSide })
+    new THREE.RingGeometry(capital.mode === 'top100' ? 0.038 : 0.045, capital.mode === 'top100' ? 0.046 : 0.052, 32),
+    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.mode === 'top100' ? 0.22 : 0.28, side: THREE.DoubleSide })
   );
   ring.position.copy(marker.position.clone().multiplyScalar(1.002));
   ring.lookAt(new THREE.Vector3(0, 0, 0));
@@ -69,19 +69,20 @@ function makeMarker(capital: Capital, radius: number) {
 }
 
 export function createExplorationOverlay(globe: GlobeRenderer, elements: OverlayElements): ExplorationOverlay {
-  const markerObjects = capitals.map((capital) => ({ capital, ...makeMarker(capital, globe.radius) }));
+  const cityData = [...capitalCities, ...top100PopularCities];
+  const markerObjects = cityData.map((capital) => ({ capital, ...makeMarker(capital, globe.radius) }));
   markerObjects.forEach(({ marker, ring, hitArea }) => {
     globe.addMarkerObjects(marker, ring, hitArea);
   });
 
-  let showAll = false;
+  let cityMode: CityExplorationMode = 'capitals';
   let explorationMode = false;
   let earthReady = false;
   let selected: Capital | null = null;
 
   function visibleData() {
     if (!explorationMode || !earthReady) return [];
-    return markerObjects.filter(({ capital }) => showAll || capital.tier === 'highlight').map(({ capital }) => capital);
+    return markerObjects.filter(({ capital }) => capital.mode === cityMode).map(({ capital }) => capital);
   }
 
   function showCard(capital: Capital | null) {
@@ -110,8 +111,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
 
     const copy = document.createElement('div');
     copy.className = 'card-copy';
-    appendText(copy, 'p', `${capital.region} · ${capital.country}`, 'card-kicker');
-    appendText(copy, 'h2', capital.city);
+    appendText(copy, 'p', `${capital.rank ? `#${capital.rank} · ` : ''}${capital.region} · ${capital.country}`, 'card-kicker');
+    appendText(copy, 'h2', capital.rank ? `${capital.rank}. ${capital.city}` : capital.city);
     appendText(copy, 'p', capital.note);
 
     const details = document.createElement('dl');
@@ -137,7 +138,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     const canShowMarkers = explorationMode && earthReady;
     globe.setMarkerLayerVisible(canShowMarkers);
     markerObjects.forEach(({ capital, marker, ring, hitArea }) => {
-      const visible = canShowMarkers && (showAll || capital.tier === 'highlight');
+      const visible = canShowMarkers && capital.mode === cityMode;
       marker.visible = visible;
       ring.visible = visible;
       hitArea.visible = visible;
@@ -147,15 +148,15 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.card.hidden = !canShowMarkers;
     elements.card.setAttribute('aria-hidden', String(!canShowMarkers));
     elements.visibleCount.textContent = String(data.length);
-    elements.tierTitle.textContent = !earthReady ? 'Earth loading' : explorationMode ? (showAll ? 'World capitals' : 'Premium highlights') : 'Earth-first gift mode';
+    elements.tierTitle.textContent = !earthReady ? 'Earth loading' : explorationMode ? (cityMode === 'top100' ? 'TOP 100 인기 도시' : '세계의 수도') : 'Discovery mode';
     elements.tierCopy.textContent = !earthReady
       ? '지구 표면 또는 의도된 폴백이 준비될 때까지 핀과 카드는 숨겨둡니다.'
       : explorationMode
-        ? (showAll ? '더 많은 나라와 수도를 탐색하되, 카드 내용은 짧고 안정적으로 유지합니다.' : '엄선된 수도부터 차분히 탐색합니다.')
-        : '첫 화면은 건희, 민하, 찬희를 위한 진짜 지구 같은 인상을 먼저 보여줍니다.';
+        ? (cityMode === 'top100' ? '여행 인기 도시 100곳을 순위와 함께 보여줍니다.' : '검증된 수도 전체를 처음부터 지구 위에 보여줍니다.')
+        : '탐험 모드를 켜면 세계의 수도부터 차분히 펼쳐집니다.';
     elements.explorationButton.textContent = explorationMode ? '탐험 모드 닫기' : '탐험 모드 열기';
     elements.explorationButton.disabled = !earthReady;
-    elements.tierButton.textContent = showAll ? '하이라이트만 보기' : '더 많은 수도 보기';
+    elements.tierButton.textContent = cityMode === 'top100' ? '수도 보기' : 'TOP 100 인기 도시 보기';
     elements.tierButton.disabled = !canShowMarkers;
     const byRegion = [...new Set(data.map((c) => c.region))];
     elements.regionList.replaceChildren(...byRegion.map((region) => {
@@ -184,7 +185,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
 
   elements.explorationButton.addEventListener('click', () => setExplorationMode(!explorationMode));
   elements.tierButton.addEventListener('click', () => {
-    showAll = !showAll;
+    cityMode = cityMode === 'top100' ? 'capitals' : 'top100';
     syncUi();
   });
   showCard(null);
@@ -193,8 +194,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   return {
     setExplorationMode,
     getExplorationMode: () => explorationMode,
-    setShowAll: (all) => {
-      showAll = all;
+    setCityMode: (mode) => {
+      cityMode = mode;
       syncUi();
     },
     handlePointerMove: (event, dragging) => {

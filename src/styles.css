@@ -31,9 +31,10 @@ body::before {
   margin: 0 auto;
   padding: clamp(1rem, 2vw, 2rem);
   display: grid;
-  grid-template-columns: minmax(280px, 0.88fr) minmax(360px, 1.48fr) minmax(260px, 0.72fr);
+  grid-template-columns: minmax(520px, 1fr) minmax(280px, 360px);
+  grid-template-rows: auto minmax(620px, 1fr);
   gap: clamp(1rem, 2.5vw, 2rem);
-  align-items: center;
+  align-items: stretch;
 }
 
 .hero, .panel, .city-card {
@@ -44,7 +45,8 @@ body::before {
   border-radius: 2rem;
 }
 
-.hero { padding: clamp(1.35rem, 3vw, 2.6rem); }
+.hero { grid-column: 1 / -1; padding: clamp(1.35rem, 3vw, 2.6rem); text-align: center; }
+.hero .actions { justify-content: center; }
 .eyebrow, .panel-label, .card-kicker {
   margin: 0 0 0.8rem;
   color: #93c5fd;
@@ -87,8 +89,8 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
 
 .globe-stage {
   position: relative;
-  min-height: min(72vh, 760px);
-  height: 720px;
+  min-height: min(76vh, 820px);
+  height: 760px;
   border-radius: 2.4rem;
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.14);
@@ -173,9 +175,11 @@ dt { color: #93c5fd; font-size: 0.72rem; text-transform: uppercase; letter-spaci
 dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .card-copy a { display: inline-flex; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.14); padding: 0.58rem 0.82rem; }
 
-.panel { padding: 1.3rem; }
+.panel { padding: 1.3rem; align-self: start; margin-top: 1rem; }
 .panel h2 { margin: 0; font-size: 1.45rem; }
 .panel p { color: #cbd5e1; line-height: 1.6; }
+.discovery-count { margin: 1.4rem 0 1rem; border-radius: 1.2rem; padding: 1rem; background: rgba(255,255,255,0.06); color: #cbd5e1; }
+.discovery-count strong { color: #f8fafc; font-size: 2rem; margin-right: 0.35rem; }
 .stats { display: grid; gap: 0.75rem; margin: 1.5rem 0; }
 .stats span { border-radius: 1rem; padding: 0.9rem; background: rgba(255,255,255,0.06); color: #cbd5e1; }
 .stats strong { color: #f8fafc; font-size: 1.7rem; margin-right: 0.3rem; }
@@ -184,10 +188,10 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .asset-note { margin-top: 1rem; font-size: 0.76rem; color: #94a3b8; }
 
 @media (max-width: 1080px) {
-  .shell { grid-template-columns: 1fr; align-items: stretch; }
+  .shell { grid-template-columns: 1fr; grid-template-rows: auto; align-items: stretch; }
   .globe-stage { order: 2; height: 68vh; min-height: 540px; }
   .hero { order: 1; }
-  .panel { order: 3; }
+  .panel { order: 3; margin-top: 0; }
 }
 
 @media (max-width: 640px) {

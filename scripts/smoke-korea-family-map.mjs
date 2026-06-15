@@ -116,33 +116,43 @@ try {
           }
           throw new Error('Timed out waiting for ' + label);
         };
-        const clickButtonByStrong = async (text) => {
-          const button = await waitFor(
-            () => [...document.querySelectorAll('button')].find((candidate) => candidate.querySelector('strong')?.textContent?.trim() === text || candidate.textContent?.includes(text)),
-            'button ' + text
-          );
-          button.click();
-        };
-        const koreaButton = await waitFor(() => document.querySelector('[data-action="korea-family"]'), 'Korea button');
-        koreaButton.click();
-        await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'Korea overlay');
-        await clickButtonByStrong('부산광역시');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-stylized', 'Busan tier');
-        await clickButtonByStrong('해운대구');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae-stylized', 'Haeundae tier');
-        await clickButtonByStrong('누나네');
-        await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === 'sister', 'sister household');
-        const input = document.querySelector('.name-gate input');
-        input.value = '박건희';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', 'name gate unlock');
-        const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
+        const readyStates = new Set(['earth-ready', 'fallback-earth', 'asset-enhancement-ready']);
+        await waitFor(() => readyStates.has(window.__GLOBE_QA__?.state), 'earth ready state');
+
+        const bodyText = document.body.textContent ?? '';
+        const rejectedCopy = [
+          'Earth-first gift mode',
+          '첫 화면은 건희, 민하, 찬희를 위한 진짜 지구',
+          '6 region',
+          'Korea family map',
+          '더 많은 수도 보기',
+        ].filter((text) => bodyText.includes(text));
+        const koreaButtonPresent = Boolean(document.querySelector('[data-action="korea-family"]'));
+
+        const exploreButton = await waitFor(() => document.querySelector('[data-action="explore"]:not(:disabled)'), 'exploration button');
+        exploreButton.click();
+        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '54', 'all capitals visible');
+        const capitalsTitle = document.querySelector('[data-tier-title]')?.textContent?.trim();
+        const capitalsCopy = document.querySelector('[data-tier-copy]')?.textContent?.trim();
+        const top100Toggle = document.querySelector('[data-action="toggle-tier"]');
+        const toggleLabelBefore = top100Toggle?.textContent?.trim();
+        top100Toggle.click();
+        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '100', 'TOP100 visible');
+        const top100Title = document.querySelector('[data-tier-title]')?.textContent?.trim();
+        const toggleLabelAfter = top100Toggle?.textContent?.trim();
+
         return {
           qa: window.__GLOBE_QA__,
-          linkCount: links.length,
-          links,
-          nonKoreaCityCardStillPresent: Boolean(document.querySelector('.city-card')),
+          rejectedCopy,
+          koreaButtonPresent,
+          capitalsTitle,
+          capitalsCopy,
+          toggleLabelBefore,
+          top100Title,
+          toggleLabelAfter,
+          count: document.querySelector('[data-visible-count]')?.textContent?.trim(),
+          panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
+          cityCardPresent: Boolean(document.querySelector('.city-card')),
         };
       })()
     `,
@@ -154,12 +164,17 @@ try {
   }
   const result = smoke.result.value;
   if (!result) throw new Error(`Browser smoke returned no serializable result: ${JSON.stringify(smoke)}`);
-  if (result.qa.selectedHousehold !== 'sister') throw new Error('Expected sister household selection');
-  if (result.qa.nameGateState !== 'unlocked') throw new Error('Expected unlocked name gate');
-  if (result.linkCount !== 3) throw new Error(`Expected 3 sister Band links, found ${result.linkCount}`);
-  if (!result.links.every((href) => href.startsWith('https://band.us/'))) throw new Error('Expected band.us placeholder links');
-  if (!result.nonKoreaCityCardStillPresent) throw new Error('Expected existing city card surface to remain present');
-  console.log('PASS Korea family map headless smoke', JSON.stringify(result));
+  if (result.rejectedCopy.length) throw new Error(`Rejected copy still present: ${result.rejectedCopy.join(', ')}`);
+  if (result.koreaButtonPresent) throw new Error('Expected primary Korea family button to be removed');
+  if (result.capitalsTitle !== '세계의 수도') throw new Error(`Expected capitals title, found ${result.capitalsTitle}`);
+  if (!result.capitalsCopy.includes('검증된 수도 전체')) throw new Error(`Expected all-capitals copy, found ${result.capitalsCopy}`);
+  if (result.toggleLabelBefore !== 'TOP 100 인기 도시 보기') throw new Error(`Expected TOP100 toggle label, found ${result.toggleLabelBefore}`);
+  if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
+  if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);
+  if (result.count !== '100') throw new Error(`Expected 100 TOP100 cities, found ${result.count}`);
+  if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
+  if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
+  console.log('PASS layout and exploration headless smoke', JSON.stringify(result));
 } finally {
   await terminate(chrome);
   await terminate(preview);

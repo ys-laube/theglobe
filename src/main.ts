@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { capitals } from './capitals';
 import { createExplorationOverlay } from './explorationOverlay';
 import { createGlobeRenderer } from './globeRenderer';
 import { createKoreaFamilyOverlay, type KoreaFamilyOverlay } from './koreaFamilyOverlay';
@@ -16,8 +15,7 @@ app.innerHTML = `
       <p class="message">Across oceans, cities, and time, our hearts always find the same light — home.</p>
       <div class="actions">
         <button class="primary" data-action="start">지구본 열기</button>
-        <button class="ghost" data-action="korea-family">Korea family map</button>
-        <button class="ghost" data-action="explore">탐험 모드 준비 중</button>
+        <button class="ghost" data-action="explore">탐험 모드 열기</button>
       </div>
     </section>
 
@@ -28,7 +26,7 @@ app.innerHTML = `
         <strong data-state-label>Preparing Earth</strong>
         <span data-state-copy>Loading the globe renderer.</span>
       </div>
-      <div class="hint">드래그해서 지구를 돌리고, Korea family map은 별도 버튼으로 열어보세요</div>
+      <div class="hint">드래그해서 지구를 돌리고, 탐험 모드에서 세계의 수도와 인기 도시를 만나보세요</div>
       <article class="city-card" data-empty="true" aria-live="polite"></article>
       <section class="korea-map-host" aria-label="한국 가족 지도"></section>
     </section>
@@ -36,14 +34,11 @@ app.innerHTML = `
     <aside class="panel" aria-label="탐색 상태">
       <div>
         <p class="panel-label">Discovery mode</p>
-        <h2 data-tier-title>Earth-first gift mode</h2>
-        <p data-tier-copy>처음에는 가족 모두를 위한 진짜 지구 같은 첫인상을 보여줍니다.</p>
+        <h2 data-tier-title>세계의 수도</h2>
+        <p data-tier-copy>탐험 모드를 켜면 검증된 수도들이 지구 위에 빛납니다.</p>
       </div>
-      <div class="stats">
-        <span><strong data-visible-count>0</strong> visible capitals</span>
-        <span><strong>${new Set(capitals.map((c) => c.region)).size}</strong> regions</span>
-      </div>
-      <button class="ghost wide" data-action="toggle-tier" disabled>더 많은 수도 보기</button>
+      <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
+      <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
       <div class="region-list" data-region-list></div>
       <p class="asset-note" data-attribution>Earth imagery policy loading…</p>
     </aside>
@@ -54,7 +49,6 @@ const canvas = document.querySelector<HTMLCanvasElement>('#globe')!;
 const stage = document.querySelector<HTMLElement>('.globe-stage')!;
 const startButton = document.querySelector<HTMLButtonElement>('[data-action="start"]')!;
 const explorationButton = document.querySelector<HTMLButtonElement>('[data-action="explore"]')!;
-const koreaFamilyButton = document.querySelector<HTMLButtonElement>('[data-action="korea-family"]')!;
 const tierButton = document.querySelector<HTMLButtonElement>('[data-action="toggle-tier"]')!;
 const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
@@ -156,15 +150,6 @@ canvas.addEventListener('pointerleave', () => {
 startButton.addEventListener('click', () => stage.scrollIntoView({ behavior: 'smooth', block: 'center' }));
 explorationButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
 tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
-koreaFamilyButton.addEventListener('click', () => {
-  koreaFamilyEntryRequested = true;
-  window.dispatchEvent(new CustomEvent('korea-family-map-request'));
-  koreaFamilyOverlay?.open();
-  stateLabel.textContent = 'Korea family map';
-  stateCopy.textContent = '한국 가족 지도가 열렸어요. 가족이 있는 지역을 따라 들어가 보세요.';
-  stage.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  updateQaState();
-});
 
 function resize() {
   globe.resize();
