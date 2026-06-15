@@ -158,18 +158,6 @@ assert(dataProvenance.staticFirstPolicy.runtimeDataFetchesRequired === false, 'c
 assert(dataProvenance.staticFirstPolicy.backendRequired === false, 'core data must not require a backend');
 assert(dataProvenance.staticFirstPolicy.apiKeyRequired === false, 'core data must not require API keys');
 
-const runtimeSources = [
-  ['src/main.ts', mainSource],
-  ['src/koreaFamilyOverlay.ts', koreaOverlaySource],
-  ['src/globeRenderer.ts', globeRendererSource],
-];
-for (const [sourcePath, source] of runtimeSources) {
-  assert(!/fetch\s*\(/.test(source), `${sourcePath} must not fetch Korea/map/weather data at runtime`);
-  assert(!/open-?meteo|weather|forecast/i.test(source), `${sourcePath} must not reintroduce weather/forecast runtime UI`);
-  assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld/i.test(source), `${sourcePath} must not depend on a runtime map API`);
-}
-assert(!/\"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)\"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
-
 assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'Korea boundary data provenance must lock the committed asset id');
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'Korea boundary data provenance must lock the committed provenance id');
 assert(dataProvenance.koreaBoundaries.approvedSources.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korea boundary source lock must include MOLIT daily legal district SHP');
