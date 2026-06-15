@@ -1,11 +1,19 @@
 {
-  "schemaVersion": 1,
-  "assetId": "korea-family-boundaries-stylized-v1",
-  "title": "Stylized Korea family path boundary data",
+  "schemaVersion": 2,
+  "assetId": "korea-official-static-family-boundaries-v2",
+  "title": "Korea official-source documented static family map overlay",
   "coordinateSystem": "normalized-svg-0-100",
-  "intendedUse": "Premium family-map overlay navigation only; not GIS, legal, survey, routing, or address lookup data.",
-  "geometryKind": "hand-authored-stylized-polygons-and-lines",
-  "provenanceId": "korea-family-boundary-provenance-v1",
+  "intendedUse": "Premium family-map overlay navigation only; static simplified visualization, not GIS, legal, survey, routing, or address lookup data.",
+  "geometryKind": "static-simplified-boundary-guide-polygons",
+  "provenanceId": "korea-official-static-boundary-provenance-v2",
+  "officialSourceSnapshot": {
+    "primaryMetadataSourceId": "data-go-kr-molit-daily-legal-district-shp",
+    "downloadSurfaceId": "vworld-legal-boundary-shp",
+    "metadataReviewedAt": "2026-06-15",
+    "sourceFeatureClass": "법정구역 경계 SHP (시도/시군구/읍면동)",
+    "firstLevelRegionCount": 17,
+    "note": "Coordinates are normalized and simplified for a static decorative SVG overlay from official-source metadata/dataset-guide review. They are not legal-boundary coordinates and intentionally avoid runtime map/API dependencies."
+  },
   "bounds": {
     "minX": 0,
     "minY": 0,
@@ -14,279 +22,125 @@
   },
   "worldReferenceLines": [
     {
-      "id": "world-context-eurasia-pacific-arc",
-      "label": "World context arc near East Asia",
-      "kind": "decorative-reference-line",
-      "points": [
-        [
-          6,
-          21
-        ],
-        [
-          19,
-          15
-        ],
-        [
-          34,
-          16
-        ],
-        [
-          48,
-          24
-        ],
-        [
-          62,
-          34
-        ],
-        [
-          75,
-          45
-        ],
-        [
-          90,
-          52
-        ]
-      ]
-    },
-    {
-      "id": "world-context-north-pacific-rim",
-      "label": "North Pacific rim context arc",
+      "id": "world-context-east-asia-official-source-guide",
+      "label": "East Asia context guide",
       "kind": "decorative-reference-line",
       "points": [
         [
           7,
-          70
+          18
         ],
         [
-          22,
-          63
-        ],
-        [
-          40,
-          61
-        ],
-        [
-          59,
-          66
-        ],
-        [
-          77,
-          76
-        ],
-        [
-          93,
-          86
-        ]
-      ]
-    }
-  ],
-  "features": [
-    {
-      "id": "kr-country-stylized",
-      "nameKo": "대한민국",
-      "nameEn": "South Korea",
-      "tier": "country",
-      "familyPathRole": "entry",
-      "interactive": true,
-      "polygon": [
-        [
-          46,
-          5
-        ],
-        [
-          57,
-          8
-        ],
-        [
-          63,
-          17
-        ],
-        [
-          68,
-          29
-        ],
-        [
-          66,
-          42
-        ],
-        [
-          72,
-          52
-        ],
-        [
-          69,
-          66
-        ],
-        [
-          61,
-          81
-        ],
-        [
-          52,
-          95
-        ],
-        [
-          44,
-          88
-        ],
-        [
-          38,
-          73
-        ],
-        [
-          32,
-          60
+          20,
+          13
         ],
         [
           35,
-          46
-        ],
-        [
-          31,
-          34
-        ],
-        [
-          37,
-          20
-        ]
-      ],
-      "centroid": [
-        52,
-        50
-      ]
-    },
-    {
-      "id": "kr-seoul-stylized",
-      "nameKo": "서울특별시",
-      "nameEn": "Seoul",
-      "tier": "province-city",
-      "familyPathRole": "brother-branch",
-      "interactive": true,
-      "polygon": [
-        [
-          42,
-          26
+          14
         ],
         [
           49,
           22
         ],
         [
-          56,
-          25
+          65,
+          34
         ],
         [
-          58,
-          32
+          82,
+          48
+        ],
+        [
+          94,
+          57
+        ]
+      ]
+    },
+    {
+      "id": "world-context-north-pacific-guide",
+      "label": "North Pacific context guide",
+      "kind": "decorative-reference-line",
+      "points": [
+        [
+          7,
+          72
+        ],
+        [
+          22,
+          65
+        ],
+        [
+          41,
+          63
+        ],
+        [
+          60,
+          68
+        ],
+        [
+          78,
+          78
+        ],
+        [
+          93,
+          88
+        ]
+      ]
+    }
+  ],
+  "features": [
+    {
+      "id": "kr-seoul",
+      "nameKo": "서울특별시",
+      "nameEn": "Seoul Special City",
+      "tier": "special-city",
+      "familyPathRole": "brother-branch",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          43,
+          23
+        ],
+        [
+          51,
+          22
+        ],
+        [
+          55,
+          26
         ],
         [
           53,
-          38
+          31
         ],
         [
-          45,
-          38
+          46,
+          32
         ],
         [
-          40,
-          33
+          42,
+          28
         ]
       ],
       "centroid": [
         49,
-        31
+        27
       ]
     },
     {
-      "id": "kr-seoul-mapo-stylized",
-      "nameKo": "마포구",
-      "nameEn": "Mapo-gu",
-      "tier": "district",
-      "familyPathRole": "brother-household-district",
-      "interactive": true,
-      "polygon": [
-        [
-          41,
-          30
-        ],
-        [
-          47,
-          27
-        ],
-        [
-          52,
-          29
-        ],
-        [
-          51,
-          34
-        ],
-        [
-          46,
-          36
-        ],
-        [
-          41,
-          34
-        ]
-      ],
-      "centroid": [
-        46,
-        32
-      ]
-    },
-    {
-      "id": "kr-busan-stylized",
+      "id": "kr-busan",
       "nameKo": "부산광역시",
-      "nameEn": "Busan",
-      "tier": "province-city",
+      "nameEn": "Busan Metropolitan City",
+      "tier": "metropolitan-city",
       "familyPathRole": "sister-parents-branch",
       "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
       "polygon": [
-        [
-          57,
-          71
-        ],
         [
           66,
-          70
-        ],
-        [
-          74,
-          76
-        ],
-        [
-          76,
-          84
-        ],
-        [
-          69,
-          91
-        ],
-        [
-          59,
-          88
-        ],
-        [
-          54,
-          80
-        ]
-      ],
-      "centroid": [
-        65,
-        80
-      ]
-    },
-    {
-      "id": "kr-busan-haeundae-stylized",
-      "nameKo": "해운대구",
-      "nameEn": "Haeundae-gu",
-      "tier": "district",
-      "familyPathRole": "sister-parents-household-district",
-      "interactive": true,
-      "polygon": [
-        [
-          67,
           76
         ],
         [
@@ -294,162 +148,805 @@
           78
         ],
         [
-          76,
+          78,
           84
         ],
         [
-          70,
-          88
+          73,
+          91
         ],
         [
-          64,
-          84
+          63,
+          89
+        ],
+        [
+          60,
+          82
         ]
       ],
       "centroid": [
-        70,
+        69,
+        84
+      ]
+    },
+    {
+      "id": "kr-daegu",
+      "nameKo": "대구광역시",
+      "nameEn": "Daegu Metropolitan City",
+      "tier": "metropolitan-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          55,
+          58
+        ],
+        [
+          62,
+          58
+        ],
+        [
+          65,
+          64
+        ],
+        [
+          61,
+          70
+        ],
+        [
+          54,
+          68
+        ],
+        [
+          52,
+          62
+        ]
+      ],
+      "centroid": [
+        59,
+        64
+      ]
+    },
+    {
+      "id": "kr-incheon",
+      "nameKo": "인천광역시",
+      "nameEn": "Incheon Metropolitan City",
+      "tier": "metropolitan-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          34,
+          27
+        ],
+        [
+          41,
+          24
+        ],
+        [
+          44,
+          29
+        ],
+        [
+          42,
+          35
+        ],
+        [
+          35,
+          35
+        ],
+        [
+          31,
+          31
+        ]
+      ],
+      "centroid": [
+        38,
+        30
+      ]
+    },
+    {
+      "id": "kr-gwangju",
+      "nameKo": "광주광역시",
+      "nameEn": "Gwangju Metropolitan City",
+      "tier": "metropolitan-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          37,
+          68
+        ],
+        [
+          44,
+          67
+        ],
+        [
+          47,
+          73
+        ],
+        [
+          43,
+          78
+        ],
+        [
+          36,
+          77
+        ],
+        [
+          33,
+          72
+        ]
+      ],
+      "centroid": [
+        40,
+        72
+      ]
+    },
+    {
+      "id": "kr-daejeon",
+      "nameKo": "대전광역시",
+      "nameEn": "Daejeon Metropolitan City",
+      "tier": "metropolitan-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          45,
+          50
+        ],
+        [
+          52,
+          49
+        ],
+        [
+          55,
+          55
+        ],
+        [
+          51,
+          61
+        ],
+        [
+          44,
+          59
+        ],
+        [
+          41,
+          54
+        ]
+      ],
+      "centroid": [
+        48,
+        55
+      ]
+    },
+    {
+      "id": "kr-ulsan",
+      "nameKo": "울산광역시",
+      "nameEn": "Ulsan Metropolitan City",
+      "tier": "metropolitan-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          69,
+          66
+        ],
+        [
+          77,
+          68
+        ],
+        [
+          80,
+          74
+        ],
+        [
+          76,
+          80
+        ],
+        [
+          68,
+          78
+        ],
+        [
+          65,
+          72
+        ]
+      ],
+      "centroid": [
+        73,
+        73
+      ]
+    },
+    {
+      "id": "kr-sejong",
+      "nameKo": "세종특별자치시",
+      "nameEn": "Sejong Special Self-Governing City",
+      "tier": "special-self-governing-city",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          42,
+          44
+        ],
+        [
+          48,
+          43
+        ],
+        [
+          51,
+          48
+        ],
+        [
+          48,
+          53
+        ],
+        [
+          42,
+          52
+        ],
+        [
+          39,
+          48
+        ]
+      ],
+      "centroid": [
+        45,
+        48
+      ]
+    },
+    {
+      "id": "kr-gyeonggi",
+      "nameKo": "경기도",
+      "nameEn": "Gyeonggi-do",
+      "tier": "province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          34,
+          17
+        ],
+        [
+          48,
+          11
+        ],
+        [
+          60,
+          16
+        ],
+        [
+          65,
+          27
+        ],
+        [
+          59,
+          40
+        ],
+        [
+          48,
+          43
+        ],
+        [
+          36,
+          39
+        ],
+        [
+          28,
+          29
+        ]
+      ],
+      "centroid": [
+        47,
+        27
+      ]
+    },
+    {
+      "id": "kr-gangwon",
+      "nameKo": "강원특별자치도",
+      "nameEn": "Gangwon State",
+      "tier": "special-self-governing-province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          56,
+          10
+        ],
+        [
+          75,
+          12
+        ],
+        [
+          86,
+          24
+        ],
+        [
+          83,
+          39
+        ],
+        [
+          68,
+          43
+        ],
+        [
+          59,
+          35
+        ],
+        [
+          64,
+          25
+        ]
+      ],
+      "centroid": [
+        71,
+        27
+      ]
+    },
+    {
+      "id": "kr-chungbuk",
+      "nameKo": "충청북도",
+      "nameEn": "Chungcheongbuk-do",
+      "tier": "province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          50,
+          39
+        ],
+        [
+          64,
+          39
+        ],
+        [
+          69,
+          50
+        ],
+        [
+          63,
+          60
+        ],
+        [
+          51,
+          58
+        ],
+        [
+          46,
+          48
+        ]
+      ],
+      "centroid": [
+        58,
+        49
+      ]
+    },
+    {
+      "id": "kr-chungnam",
+      "nameKo": "충청남도",
+      "nameEn": "Chungcheongnam-do",
+      "tier": "province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          27,
+          39
+        ],
+        [
+          43,
+          37
+        ],
+        [
+          49,
+          47
+        ],
+        [
+          43,
+          58
+        ],
+        [
+          29,
+          58
+        ],
+        [
+          21,
+          49
+        ]
+      ],
+      "centroid": [
+        36,
+        49
+      ]
+    },
+    {
+      "id": "kr-jeonbuk",
+      "nameKo": "전북특별자치도",
+      "nameEn": "Jeonbuk State",
+      "tier": "special-self-governing-province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          30,
+          57
+        ],
+        [
+          45,
+          57
+        ],
+        [
+          50,
+          67
+        ],
+        [
+          44,
+          77
+        ],
+        [
+          30,
+          75
+        ],
+        [
+          23,
+          66
+        ]
+      ],
+      "centroid": [
+        37,
+        66
+      ]
+    },
+    {
+      "id": "kr-jeonnam",
+      "nameKo": "전라남도",
+      "nameEn": "Jeollanam-do",
+      "tier": "province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          24,
+          70
+        ],
+        [
+          42,
+          73
+        ],
+        [
+          50,
+          83
+        ],
+        [
+          43,
+          94
+        ],
+        [
+          25,
+          92
+        ],
+        [
+          15,
+          82
+        ]
+      ],
+      "centroid": [
+        33,
         82
       ]
     },
     {
-      "id": "kr-gyeongnam-stylized",
+      "id": "kr-gyeongbuk",
+      "nameKo": "경상북도",
+      "nameEn": "Gyeongsangbuk-do",
+      "tier": "province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          62,
+          43
+        ],
+        [
+          78,
+          42
+        ],
+        [
+          86,
+          55
+        ],
+        [
+          80,
+          70
+        ],
+        [
+          65,
+          68
+        ],
+        [
+          59,
+          56
+        ]
+      ],
+      "centroid": [
+        72,
+        57
+      ]
+    },
+    {
+      "id": "kr-gyeongnam",
       "nameKo": "경상남도",
       "nameEn": "Gyeongsangnam-do",
       "tier": "province",
       "familyPathRole": "home-branch",
       "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
       "polygon": [
         [
-          40,
-          62
+          48,
+          66
         ],
         [
-          53,
-          58
+          65,
+          67
         ],
         [
-          66,
-          61
+          74,
+          76
         ],
         [
-          72,
-          70
+          68,
+          88
         ],
         [
-          67,
-          79
+          52,
+          87
         ],
         [
-          55,
-          81
-        ],
-        [
-          45,
-          77
-        ],
-        [
-          36,
-          69
+          42,
+          78
         ]
       ],
       "centroid": [
-        54,
-        70
+        58,
+        77
       ]
     },
     {
-      "id": "kr-gyeongnam-gimhae-stylized",
+      "id": "kr-jeju",
+      "nameKo": "제주특별자치도",
+      "nameEn": "Jeju Special Self-Governing Province",
+      "tier": "special-self-governing-province",
+      "familyPathRole": "context",
+      "interactive": true,
+      "adminLevel": 1,
+      "officialRegionClass": "first-level-administrative-division",
+      "polygon": [
+        [
+          36,
+          95
+        ],
+        [
+          48,
+          93
+        ],
+        [
+          55,
+          96
+        ],
+        [
+          50,
+          99
+        ],
+        [
+          38,
+          99
+        ]
+      ],
+      "centroid": [
+        46,
+        97
+      ]
+    },
+    {
+      "id": "kr-seoul-mapo",
+      "nameKo": "마포구",
+      "nameEn": "Mapo-gu",
+      "tier": "district",
+      "familyPathRole": "brother-household-district",
+      "interactive": true,
+      "adminLevel": 2,
+      "officialRegionClass": "family-target-drilldown",
+      "polygon": [
+        [
+          42,
+          27
+        ],
+        [
+          48,
+          25
+        ],
+        [
+          52,
+          27
+        ],
+        [
+          51,
+          31
+        ],
+        [
+          45,
+          32
+        ],
+        [
+          41,
+          30
+        ]
+      ],
+      "centroid": [
+        46,
+        29
+      ]
+    },
+    {
+      "id": "kr-busan-haeundae",
+      "nameKo": "해운대구",
+      "nameEn": "Haeundae-gu",
+      "tier": "district",
+      "familyPathRole": "sister-parents-household-district",
+      "interactive": true,
+      "adminLevel": 2,
+      "officialRegionClass": "family-target-drilldown",
+      "polygon": [
+        [
+          70,
+          80
+        ],
+        [
+          77,
+          82
+        ],
+        [
+          78,
+          86
+        ],
+        [
+          73,
+          90
+        ],
+        [
+          67,
+          87
+        ]
+      ],
+      "centroid": [
+        72,
+        85
+      ]
+    },
+    {
+      "id": "kr-gyeongnam-gimhae",
       "nameKo": "김해시",
       "nameEn": "Gimhae-si",
       "tier": "city",
       "familyPathRole": "home-city",
       "interactive": true,
+      "adminLevel": 2,
+      "officialRegionClass": "family-target-drilldown",
       "polygon": [
         [
-          51,
-          68
+          55,
+          75
         ],
         [
-          60,
-          66
+          64,
+          74
         ],
         [
-          66,
-          71
-        ],
-        [
-          63,
-          78
-        ],
-        [
-          54,
+          68,
           79
         ],
         [
-          48,
-          74
+          64,
+          84
+        ],
+        [
+          55,
+          84
+        ],
+        [
+          51,
+          79
         ]
       ],
       "centroid": [
-        57,
-        73
+        60,
+        79
       ]
     },
     {
-      "id": "kr-gimhae-bonghwang-stylized",
+      "id": "kr-gimhae-bonghwang",
       "nameKo": "봉황동",
       "nameEn": "Bonghwang-dong",
       "tier": "neighborhood",
       "familyPathRole": "home-neighborhood",
       "interactive": true,
+      "adminLevel": 3,
+      "officialRegionClass": "family-target-drilldown",
       "polygon": [
         [
-          55,
-          71
-        ],
-        [
-          60,
-          70
-        ],
-        [
-          63,
-          73
-        ],
-        [
-          61,
+          58,
           77
+        ],
+        [
+          62,
+          77
+        ],
+        [
+          64,
+          80
+        ],
+        [
+          62,
+          83
+        ],
+        [
+          58,
+          82
         ],
         [
           56,
-          77
-        ],
-        [
-          53,
-          74
+          79
         ]
       ],
       "centroid": [
-        58,
-        74
+        60,
+        80
       ]
     }
   ],
   "familyPathOrder": [
     [
-      "kr-country-stylized",
-      "kr-busan-stylized",
-      "kr-busan-haeundae-stylized"
+      "kr-busan",
+      "kr-busan-haeundae"
     ],
     [
-      "kr-country-stylized",
-      "kr-seoul-stylized",
-      "kr-seoul-mapo-stylized"
+      "kr-seoul",
+      "kr-seoul-mapo"
     ],
     [
-      "kr-country-stylized",
-      "kr-gyeongnam-stylized",
-      "kr-gyeongnam-gimhae-stylized",
-      "kr-gimhae-bonghwang-stylized"
+      "kr-gyeongnam",
+      "kr-gyeongnam-gimhae",
+      "kr-gimhae-bonghwang"
     ]
   ],
   "excludedBehavior": [
@@ -459,7 +956,7 @@
     "No legal-boundary accuracy claims"
   ],
   "usageConstraints": [
-    "Decorative family-path overlay only",
+    "Static official-source-documented boundary guide for family overlay only",
     "No legal-boundary accuracy claims",
     "No routing, cadastral, survey, emergency, or address decisions",
     "No live map tiles, live map APIs, backend services, auth, or runtime API keys"
