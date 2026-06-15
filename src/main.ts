@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { createExplorationOverlay } from './explorationOverlay';
 import { createGlobeRenderer } from './globeRenderer';
 import { createKoreaFamilyOverlay, type KoreaFamilyOverlay } from './koreaFamilyOverlay';
-import { createWeatherAmbience } from './weatherAmbience';
 import './styles.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -23,7 +22,6 @@ app.innerHTML = `
     <section class="globe-stage" aria-label="인터랙티브 3D 지구본" data-earth-state="boot">
       <canvas id="globe" aria-label="마우스나 터치로 회전 가능한 실제 지구 느낌의 3D 지구본"></canvas>
       <div class="halo"></div>
-      <div class="weather-layer" aria-hidden="true"></div>
       <div class="earth-status" aria-live="polite">
         <strong data-state-label>Preparing Earth</strong>
         <span data-state-copy>Loading the globe renderer.</span>
@@ -42,7 +40,6 @@ app.innerHTML = `
       <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
       <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
       <div class="region-list" data-region-list></div>
-      <div class="weather-card" data-weather-card></div>
       <p class="asset-note" data-attribution>Earth imagery policy loading…</p>
     </aside>
   </main>
@@ -57,17 +54,15 @@ const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
 const attribution = document.querySelector<HTMLElement>('[data-attribution]')!;
 const koreaMapHost = document.querySelector<HTMLElement>('.korea-map-host')!;
-const weatherLayer = document.querySelector<HTMLElement>('.weather-layer')!;
-const weatherCard = document.querySelector<HTMLElement>('[data-weather-card]')!;
 
 let koreaFamilyEntryRequested = false;
 let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
-let weatherAmbience: ReturnType<typeof createWeatherAmbience> | null = null;
 
 function updateQaState() {
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
+    globeRotation: globe.getRotation(),
     explorationMode: overlay.getExplorationMode(),
     koreaFamilyEntryRequested,
     koreaOverlayOpen: koreaFamilyOverlay?.getState().open ?? false,
@@ -76,7 +71,6 @@ function updateQaState() {
     selectedHousehold: koreaFamilyOverlay?.getState().selectedHousehold ?? null,
     nameGateState: koreaFamilyOverlay?.getState().nameGateState ?? 'closed',
     unlockedLinkCount: koreaFamilyOverlay?.getState().unlockedLinkCount ?? 0,
-    weatherMode: weatherAmbience?.getState().mode ?? null,
     forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),
   };
 }
@@ -90,12 +84,6 @@ const overlay = createExplorationOverlay(globe, {
   tierCopy: document.querySelector<HTMLElement>('[data-tier-copy]')!,
   visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
   regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
-});
-
-weatherAmbience = createWeatherAmbience({
-  host: weatherLayer,
-  panel: weatherCard,
-  onStateChange: updateQaState,
 });
 
 koreaFamilyOverlay = createKoreaFamilyOverlay({
@@ -205,6 +193,7 @@ function animate() {
     velocityY *= 0.96;
   }
   globe.animateMarkers(performance.now());
+  updateQaState();
   globe.render();
 }
 animate();

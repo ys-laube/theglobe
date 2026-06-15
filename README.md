@@ -17,8 +17,7 @@ The static data contract is locked in `src/mapData/dataProvenance.json` and
 validated by `npm run verify:data`: Korea boundary candidates are build-time
 public-data snapshots only, expanded capitals must exceed the legacy 33-entry
 list, TOP100 city data must contain exactly 100 contiguous ranked rows from
-the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes, and weather starts as simulated/static with
-only optional no-key Open-Meteo enhancement plus fallback disclosure.
+the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
 family display names and the seven Naver Band link slots live in
@@ -32,7 +31,6 @@ Korea must be handled as its own family-map destination, not by reusing the
 existing Seoul city card. Existing city content should remain unchanged unless a
 separate city-content task explicitly owns that edit.
 
-Weather is static-first. `src/weatherPolicy.ts` locks the allowed modes and `src/weatherAmbience.ts` renders simulated cloud/particle ambience by default and discloses that state in the panel. Optional live weather is opt-in only via `?weather=live` or `?weather=auto`; it uses the no-key Open-Meteo endpoint with a short timeout and falls back to unavailable/static disclosure. Do not make weather a required live API, backend, auth, paid endpoint, or runtime-key dependency.
 
 ## Local development
 
@@ -60,8 +58,8 @@ This runs TypeScript checking, bundled boundary/provenance validation, and the
 production Vite build. The boundary/provenance step is `npm run verify:data`; it
 checks the static map JSON contracts, provenance exclusions, README provenance
 notes, and that the aggregate `npm run verify` command still includes the data
-verification gate. The app has no backend or login dependency. Live weather is optional and opt-in only; the default experience has no required live API dependency.
-On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, Korea same-stage morph, Busan → Haeundae drilldown, family marker, weather disclosure, and household name-gate path in headless Chrome.
+verification gate. The app has no backend, login dependency, or required live API dependency.
+On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, Busan → Haeundae drilldown, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
 
 ## Shareable URL
 
@@ -72,8 +70,8 @@ Deploy this Vite app to any static host such as Vercel, Netlify, Cloudflare Page
 
 Latest local G006 gate evidence should include:
 
-- `npm run verify` — TypeScript, static data/provenance/weather validators, production build.
-- `npm run smoke:korea` — production build plus headless Chrome smoke covering all-captals/TOP100 exploration, Korea same-stage morph, Haeundae drilldown, glowing household markers, simulated weather disclosure, and the 건희민하찬희네 name gate.
+- `npm run verify` — TypeScript, static data/provenance validators, production build.
+- `npm run smoke:korea` — production build plus headless Chrome smoke covering all-captals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, Haeundae drilldown, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
 - `git diff --check` — whitespace/static diff hygiene.
 
 The current production bundle emits Vite's large-chunk warning because Three.js and static globe/map data are bundled client-side. This is noted as a performance follow-up, not a functional failure.

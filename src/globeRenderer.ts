@@ -33,6 +33,7 @@ export type GlobeRenderer = {
   loadEarth: () => Promise<void>;
   onStateChange: (listener: StateListener) => void;
   getState: () => GlobeRuntimeState;
+  getRotation: () => { x: number; y: number; z: number };
 };
 
 const radius = 2;
@@ -383,10 +384,13 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeGroup.rotation.x += velocityX;
     },
     animateMarkers: (now) => {
-      const targetRotation = viewMode === 'korea-focus' ? koreaRotation : earthRotation;
-      globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, targetRotation.x, 0.055);
-      globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, targetRotation.y, 0.055);
-      globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, targetRotation.z, 0.055);
+      if (viewMode === 'korea-focus') {
+        globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, koreaRotation.x, 0.055);
+        globeGroup.rotation.y = THREE.MathUtils.lerp(globeGroup.rotation.y, koreaRotation.y, 0.055);
+        globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, koreaRotation.z, 0.055);
+      } else {
+        globeGroup.rotation.z = THREE.MathUtils.lerp(globeGroup.rotation.z, earthRotation.z, 0.055);
+      }
       camera.position.z = THREE.MathUtils.lerp(camera.position.z, viewMode === 'korea-focus' ? koreaCameraZ : earthCameraZ, 0.055);
       koreaPulseObjects.forEach((child, index) => {
         const s = 1 + Math.sin(now * 0.003 + index) * 0.12;
@@ -407,6 +411,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       listener(state, stateMessage, attribution);
     },
     getState: () => state,
+    getRotation: () => ({ x: globeGroup.rotation.x, y: globeGroup.rotation.y, z: globeGroup.rotation.z }),
   };
 }
 

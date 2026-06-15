@@ -6,7 +6,7 @@
     "runtimeDataFetchesRequired": false,
     "backendRequired": false,
     "apiKeyRequired": false,
-    "summary": "All core city, boundary, TOP100, household, and simulated weather data must be bundled as static assets. Live services may only be optional, non-blocking enhancements with visible fallback disclosure."
+    "summary": "All core city, boundary, TOP100, and household data must be bundled as static assets. No live data service is required for the app experience."
   },
   "koreaBoundaries": {
     "committedAssetId": "korea-family-boundaries-stylized-v1",
@@ -96,29 +96,8 @@
       }
     ]
   },
-  "weather": {
-    "baselineMode": "simulated-static",
-    "liveEnhancement": "optional-open-meteo-no-key-only",
-    "requiredFallback": "simulated-or-unavailable-with-disclosure",
-    "uiDisclosureRequired": true,
-    "approvedSources": [
-      {
-        "id": "open-meteo-forecast-api",
-        "name": "Open-Meteo Forecast API",
-        "url": "https://open-meteo.com/en/docs",
-        "publisher": "Open-Meteo",
-        "retrievalPolicy": "optional client enhancement only; never block render; no key in public build",
-        "licenseUsageNote": "Free API is no-key and non-commercial with rate limits/no uptime guarantee; attribution and graceful fallback are required."
-      }
-    ],
-    "forbiddenBehavior": [
-      "required live weather for first render",
-      "secret key or paid endpoint in client bundle",
-      "copy that implies guaranteed real-time weather when simulated or fallback data is shown"
-    ]
-  },
   "validationContract": {
     "cityDataVerifier": "scripts/verify-city-data.mjs must validate capital count > 33, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, and dataset source metadata.",
-    "boundaryWeatherVerifier": "scripts/verify-boundary-data.mjs or successor must validate Korea boundary provenance, household invariants, weather fallback policy, and no live map/API requirement."
+    "boundaryVerifier": "scripts/verify-boundary-data.mjs or successor must validate Korea boundary provenance, household invariants, and no live map/API requirement."
   }
 }

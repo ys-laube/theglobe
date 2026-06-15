@@ -9,7 +9,6 @@ const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataPro
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
-const weatherPolicySource = await readFile(join(root, 'src/weatherPolicy.ts'), 'utf8');
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
@@ -129,13 +128,6 @@ assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id ==
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
 
-assert(dataProvenance.weather.baselineMode === 'simulated-static', 'weather baseline must be simulated/static');
-assert(dataProvenance.weather.liveEnhancement === 'optional-open-meteo-no-key-only', 'weather live enhancement must be optional Open-Meteo no-key only');
-assert(dataProvenance.weather.requiredFallback === 'simulated-or-unavailable-with-disclosure', 'weather fallback disclosure contract is required');
-assert(dataProvenance.weather.uiDisclosureRequired === true, 'weather UI disclosure must be required');
-assert(dataProvenance.weather.approvedSources.some((source) => source.id === 'open-meteo-forecast-api'), 'weather policy must lock Open-Meteo as optional source');
-assert(dataProvenance.weather.forbiddenBehavior.includes('secret key or paid endpoint in client bundle'), 'weather policy must forbid client secrets/paid endpoint');
-
 assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-boundary-data.mjs'), 'npm verify:data must run the boundary/provenance verifier');
 assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-city-data.mjs'), 'npm verify:data must run the city-data verifier');
 assert(packageManifest.scripts?.verify?.includes('npm run verify:data'), 'npm verify must include boundary/provenance verification');
@@ -172,13 +164,6 @@ assert(dataProvenance.top100Cities.rankingDate === '2018-11-01', 'TOP100 ranking
 assert(dataProvenance.top100Cities.approvedSources.some((source) => source.id === 'euromonitor-top100-city-destinations-2018'), 'TOP100 source lock must include Euromonitor Top 100 City Destinations 2018');
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'agoda-partial-public-posts'), 'TOP100 lock must reject partial Agoda public posts');
 assert(dataProvenance.top100Cities.rejectedSources.some((source) => source.id === 'mastercard-gdci-2019-top20-only'), 'TOP100 lock must reject Mastercard top-20-only data for exact 100');
-
-assert(dataProvenance.weather.baselineMode === 'simulated-static', 'weather baseline must be simulated/static');
-assert(dataProvenance.weather.liveEnhancement === 'optional-open-meteo-no-key-only', 'weather live enhancement must be optional Open-Meteo no-key only');
-assert(dataProvenance.weather.requiredFallback === 'simulated-or-unavailable-with-disclosure', 'weather fallback disclosure contract is required');
-assert(dataProvenance.weather.uiDisclosureRequired === true, 'weather UI disclosure must be required');
-assert(dataProvenance.weather.approvedSources.some((source) => source.id === 'open-meteo-forecast-api'), 'weather policy must lock Open-Meteo as optional source');
-assert(dataProvenance.weather.forbiddenBehavior.includes('secret key or paid endpoint in client bundle'), 'weather policy must forbid client secrets/paid endpoint');
 
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
@@ -233,20 +218,9 @@ assert(statusMatches.length === 7, 'all household link slots must remain placeho
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
 assert(householdConfigSource.includes('householdConfigValidation = validateHouseholdConfig(householdConfig)'), 'household config validation result must remain exported');
 
-assert(weatherPolicySource.includes("id: 'static-weather-policy-v1'"), 'weather policy id must be stable');
-assert(weatherPolicySource.includes("defaultMode: 'simulated'"), 'weather policy default mode must be simulated');
-assert(weatherPolicySource.includes("liveProvider: 'open-meteo'"), 'weather live provider must be Open-Meteo');
-for (const requiredWeatherFlag of ['liveEnhancementOptional: true', 'requiresApiKey: false', 'blocksInitialRender: false']) {
-  assert(weatherPolicySource.includes(requiredWeatherFlag), `weather policy must include ${requiredWeatherFlag}`);
-}
-assert(weatherPolicySource.includes("fallbackMode: 'unavailable'"), 'weather fallback mode must be unavailable');
-assert(!weatherPolicySource.includes('fetch('), 'weather policy must not fetch live data');
-assert(!weatherPolicySource.includes('import.meta.env'), 'weather policy must not require runtime environment keys');
-
 for (const docsSource of [mapDataReadme, rootReadme]) {
   assert(docsSource.includes('No backend') || docsSource.includes('no backend'), 'docs must preserve no-backend constraint');
-  assert(docsSource.includes('live API') || docsSource.includes('live weather API'), 'docs must preserve no-live-API constraint');
+  assert(docsSource.includes('live map API') || docsSource.includes('live map APIs'), 'docs must preserve no-live-map-API constraint');
 }
-assert(rootReadme.includes('src/weatherPolicy.ts'), 'README must document the static weather policy');
 
-console.log('PASS boundary/provenance/household/weather validation');
+console.log('PASS boundary/provenance/household validation');
