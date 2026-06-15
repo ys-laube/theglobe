@@ -6,7 +6,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 `dataProvenance.json` is the current source-of-truth contract for static app data. `cityData.json` is the bounded static city asset that satisfies the current capital/TOP100 model. It locks:
 
-- **Korea boundaries**: the committed app asset is `korea-family-boundaries-stylized-v1`, backed by `boundaryProvenance.json`, and classified as `documented-guide` rather than official-derived data. Any official-derived replacement must come from a build-time snapshot such as `국토교통부_일별법정구역정보 SHP` or compatible VWorld legal-boundary downloads, validate the expected 17 first-level Korea regions unless source metadata documents a narrower administrative level, and never use live map APIs, GADM, or NC/ND census derivatives.
+- **Korea boundaries**: the committed app asset is `korea-official-static-family-boundaries-v2`, backed by `boundaryProvenance.json`. G003 uses a static normalized boundary-guide overlay documented from `국토교통부_일별법정구역정보 SHP` / VWorld legal-boundary metadata: 17 first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and Gyeongnam/Gimhae/Bonghwang family drilldowns. Never use live map APIs, GADM, or NC/ND census derivatives.
 - **Capitals**: the next generated capital dataset must use a documented Wikidata Query Service static snapshot, must include source/query/extraction/license metadata, and must exceed the legacy 33 curated entries.
 - **TOP100 cities**: the UI-facing ranked dataset must contain exactly 100 contiguous ranks. The locked exact-100 source is the public Euromonitor Top 100 City Destinations 2018 white paper (`2018-11-01`, 2017 international arrivals metric). Partial Agoda posts, incomplete previews, and Mastercard GDCI 2019 top-20-only tables are not enough for the exact-100 contract.
 
@@ -14,7 +14,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 ## Committed Korea geometry
 
-`koreaFamilyBoundaries.json` is hand-authored, stylized, normalized overlay geometry with `sourceClassification: documented-guide`. It is intentionally **not** copied from external GIS coordinates, is suitable only for decorative family-path navigation, and carries an explicit source-metadata exception because it is not an official 17-region first-level Korea boundary layer.
+`koreaFamilyBoundaries.json` is a static, normalized SVG boundary-guide overlay. It is source-documented from official public-data/VWorld boundary metadata and simplified for decorative family-path navigation; it is not a legal, cadastral, survey, routing, emergency, or address dataset.
 
 `worldCountryBorders.json` is the separate bundled Natural Earth 110m country-border extraction used for non-pickable decorative globe context. It is static app data, not a live service dependency.
 
@@ -24,9 +24,9 @@ It is not legal, cadastral, survey, routing, emergency, or address data.
 
 `boundaryProvenance.json` records the permissive boundary-source strategy:
 
-- committed geometry: project-owned stylized `documented-guide` data with an explicit non-official source-metadata exception;
+- committed geometry: 17-region official-source-documented static boundary-guide data;
 - future world/country boundary candidate: Natural Earth Admin 0 boundary/country layers, which Natural Earth describes as public-domain map data;
-- future Korea legal-boundary candidates: Korean public-data legal-boundary feeds or SHP snapshots, processed at build time into static simplified data;
+- Korea legal-boundary source metadata: `국토교통부_일별법정구역정보 SHP` and VWorld legal-boundary download surfaces, processed/documented only as static simplified data;
 - excluded: GADM and NC/ND census-boundary layers for this public/static app.
 
 Sources reviewed during implementation:

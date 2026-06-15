@@ -177,8 +177,9 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan', 'Busan tier');
         await clickButtonByStrong('해운대구');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae', 'Haeundae tier');
+        const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
+        const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => document.body.textContent?.includes(label)).length;
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
-        const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label')).filter(Boolean);
         const householdMarkerCount = document.querySelectorAll('.household-marker').length;
         const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
@@ -223,6 +224,8 @@ try {
           koreaRegionCount,
           koreaRegionLabels,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
+          renderedFirstLevelCount,
+          koreaRegionCount,
           householdMarkerCount,
           householdMarkerLabels,
           routeChoiceLabels,
@@ -267,6 +270,8 @@ try {
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
   if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
+  if (result.renderedFirstLevelCount !== 17) throw new Error(`Expected 17 first-level Korea labels, found ${result.renderedFirstLevelCount}`);
+  if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
   if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
   for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {

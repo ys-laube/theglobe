@@ -4,21 +4,21 @@ A premium, shareable 3D globe gift for the whole family.
 
 ## Korea family map zoom data notes
 
-G001 keeps the Korea family map zoom fully static and client-side. Boundary or
-map-shape data must come from permissive local sources only: use bundled static
-data with clear provenance notes, or simplified stylized geometry when a
-production boundary source has not been approved. Do not add live map APIs,
-backend services, auth flows, or runtime API keys. The current committed
-family-map geometry lives in `src/mapData/koreaFamilyBoundaries.json`, its
-provenance/source strategy lives in `src/mapData/boundaryProvenance.json`, and
-the decorative globe border asset lives in `src/mapData/worldCountryBorders.json`.
+G003 keeps the Korea family map zoom fully static and client-side. The current
+committed family-map overlay is `korea-official-static-family-boundaries-v2`: 17
+first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and
+Gyeongnam/Gimhae/Bonghwang family drilldowns. It is documented from official
+public-data/VWorld legal-boundary metadata and simplified as a static SVG guide.
+Do not add live map APIs, backend services, auth flows, runtime API keys, or
+legal-boundary accuracy claims. The geometry lives in
+`src/mapData/koreaFamilyBoundaries.json`, its provenance/source strategy lives in
+`src/mapData/boundaryProvenance.json`, and the decorative globe border asset
+lives in `src/mapData/worldCountryBorders.json`.
 
 The static data contract is locked in `src/mapData/dataProvenance.json` and
-validated by `npm run verify:data`: the current Korea family overlay is classified
-as `documented-guide`, any official-derived Korea boundary replacement must
-validate the expected 17 first-level regions unless source metadata documents a
-narrower administrative layer, expanded capitals must exceed the legacy 33-entry
-list, and TOP100 city data must contain exactly 100 contiguous ranked rows from
+validated by `npm run verify:data`: Korea boundary candidates are build-time
+public-data/VWorld static snapshots or documented metadata only, expanded capitals must exceed the legacy 33-entry
+list, TOP100 city data must contain exactly 100 contiguous ranked rows from
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
@@ -61,7 +61,7 @@ production Vite build. The boundary/provenance step is `npm run verify:data`; it
 checks the static map JSON contracts, provenance exclusions, README provenance
 notes, and that the aggregate `npm run verify` command still includes the data
 verification gate. The app has no backend, login dependency, or required live API dependency.
-On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, Busan → Haeundae drilldown, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
+On macOS with Google Chrome installed, run `npm run smoke:korea` to build and then exercise the exploration mode, globe auto-rotation, Korea same-stage morph, 17-region Korea map, Busan → Haeundae drilldown, family marker, removed forecast UI guard, and household name-gate path in headless Chrome.
 
 ## Shareable URL
 
@@ -73,7 +73,7 @@ Deploy this Vite app to any static host such as Vercel, Netlify, Cloudflare Page
 Latest local G006 gate evidence should include:
 
 - `npm run verify` — TypeScript, static data/provenance validators, production build.
-- `npm run smoke:korea` — production build plus headless Chrome smoke covering all-captals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, Haeundae drilldown, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
+- `npm run smoke:korea` — production build plus headless Chrome smoke covering all-captals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, 17-region official/static overlay, Haeundae drilldown, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
 - `git diff --check` — whitespace/static diff hygiene.
 
 The current production bundle emits Vite's large-chunk warning because Three.js and static globe/map data are bundled client-side. This is noted as a performance follow-up, not a functional failure.
