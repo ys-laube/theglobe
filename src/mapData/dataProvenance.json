@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "id": "globe-static-data-provenance-v1",
+  "lockedAt": "2026-06-15",
+  "staticFirstPolicy": {
+    "runtimeDataFetchesRequired": false,
+    "backendRequired": false,
+    "apiKeyRequired": false,
+    "summary": "All core city, boundary, TOP100, household, and simulated weather data must be bundled as static assets. Live services may only be optional, non-blocking enhancements with visible fallback disclosure."
+  },
+  "koreaBoundaries": {
+    "committedAssetId": "korea-family-boundaries-stylized-v1",
+    "committedProvenanceId": "korea-family-boundary-provenance-v1",
+    "sourceLock": "project-owned-stylized-now-official-shp-candidate-for-future-snapshot",
+    "requiredFamilyTargets": [
+      "서울특별시/마포구",
+      "부산광역시/해운대구",
+      "경상남도/김해시/봉황동"
+    ],
+    "approvedSources": [
+      {
+        "id": "data-go-kr-molit-daily-legal-district-shp",
+        "name": "국토교통부_일별법정구역정보 SHP",
+        "url": "https://www.data.go.kr/data/15045881/fileData.do?recommendDataYn=Y",
+        "publisher": "국토교통부 / 공공데이터포털",
+        "retrievalPolicy": "build-time snapshot only; never client runtime fetch",
+        "licenseUsageNote": "공공데이터포털 page lists 무료 and 이용허락범위 제한 없음; verify and preserve snapshot-specific metadata when derived geometry is committed."
+      },
+      {
+        "id": "vworld-legal-boundary-shp",
+        "name": "VWorld 법정경계 SHP download surfaces",
+        "url": "https://www.vworld.kr/dtmk/dtmk_ntads_s002.do",
+        "publisher": "VWorld / 국토교통부",
+        "retrievalPolicy": "build-time snapshot only; simplify before bundling",
+        "licenseUsageNote": "Use only when the selected dataset's current license permits bundled derived visualization with attribution."
+      }
+    ],
+    "excludedSources": [
+      "gadm",
+      "non-commercial-no-derivatives-census-boundaries",
+      "live-map-tiles-or-client-api"
+    ]
+  },
+  "capitals": {
+    "sourceLock": "wikidata-query-service-static-snapshot",
+    "minimumBundledCount": 34,
+    "currentLegacyCount": 33,
+    "inclusionRule": "Bundle sovereign-state capital candidates with coordinates and a safe HTTPS Wikipedia or source URL; generated data must exceed the legacy 33 curated entries.",
+    "snapshotRequiredFields": [
+      "source",
+      "queryUrl",
+      "extractedAt",
+      "licenseUsageNote",
+      "inclusionRule"
+    ],
+    "approvedSources": [
+      {
+        "id": "wikidata-query-service-capitals",
+        "name": "Wikidata Query Service country/capital/coordinate candidates",
+        "url": "https://query.wikidata.org/",
+        "publisher": "Wikidata / Wikimedia Foundation",
+        "retrievalPolicy": "build-time snapshot only; no client runtime query",
+        "licenseUsageNote": "Record the SPARQL query, extraction date, and Wikidata/linked-page attribution notes in the generated dataset metadata."
+      }
+    ]
+  },
+  "top100Cities": {
+    "sourceLock": "mastercard-global-destination-cities-index-2019-public-report",
+    "requiredCount": 100,
+    "requiredRanks": "1-100-contiguous",
+    "rankingDate": "2019-09-04",
+    "metric": "international overnight visitors, 2018 arrivals with 2019 forecast context",
+    "fallbackDecision": "Use the complete public Mastercard Global Destination Cities Index 2019 report unless a later complete public Top 100 travel-city source is approved before UI dependency. Do not infer from partial Agoda/Euromonitor previews.",
+    "approvedSources": [
+      {
+        "id": "mastercard-gdci-2019-global-report",
+        "name": "Mastercard Global Destination Cities Index 2019 global report",
+        "url": "https://www.mastercard.com/news/media/wexffu4b/gdci-global-report-final-1.pdf",
+        "publisher": "Mastercard",
+        "retrievalPolicy": "build-time manual/static transcription with source metadata; no runtime dependency",
+        "licenseUsageNote": "Public report is used as ranking provenance for a static, attributed list; do not bundle report text or assets beyond minimal factual ranking metadata."
+      }
+    ],
+    "rejectedSources": [
+      {
+        "id": "agoda-partial-public-posts",
+        "reason": "Public Agoda materials are partial/promotional and do not provide a legally complete global top-100 dataset for this static app."
+      },
+      {
+        "id": "euromonitor-preview-only",
+        "reason": "Use only if a complete legally accessible Top 100 list is obtained; public preview pages alone are insufficient for exact 100 bundled rows."
+      }
+    ]
+  },
+  "weather": {
+    "baselineMode": "simulated-static",
+    "liveEnhancement": "optional-open-meteo-no-key-only",
+    "requiredFallback": "simulated-or-unavailable-with-disclosure",
+    "uiDisclosureRequired": true,
+    "approvedSources": [
+      {
+        "id": "open-meteo-forecast-api",
+        "name": "Open-Meteo Forecast API",
+        "url": "https://open-meteo.com/en/docs",
+        "publisher": "Open-Meteo",
+        "retrievalPolicy": "optional client enhancement only; never block render; no key in public build",
+        "licenseUsageNote": "Free API is no-key and non-commercial with rate limits/no uptime guarantee; attribution and graceful fallback are required."
+      }
+    ],
+    "forbiddenBehavior": [
+      "required live weather for first render",
+      "secret key or paid endpoint in client bundle",
+      "copy that implies guaranteed real-time weather when simulated or fallback data is shown"
+    ]
+  },
+  "validationContract": {
+    "cityDataVerifier": "scripts/verify-city-data.mjs must validate capital count > 33, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, and dataset source metadata.",
+    "boundaryWeatherVerifier": "scripts/verify-boundary-data.mjs or successor must validate Korea boundary provenance, household invariants, weather fallback policy, and no live map/API requirement."
+  }
+}
