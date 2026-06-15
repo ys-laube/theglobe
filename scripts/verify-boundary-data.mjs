@@ -8,6 +8,10 @@ const provenance = JSON.parse(await readFile(join(root, 'src/mapData/boundaryPro
 const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
 const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8'));
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
+const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
+const weatherPolicySource = await readFile(join(root, 'src/weatherPolicy.ts'), 'utf8');
+const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
+const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
@@ -23,6 +27,14 @@ assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must ma
 assert(Array.isArray(boundaries.features), 'features must be an array');
 assert(boundaries.features.length === 8, 'expected exactly 8 stylized family-path boundary features');
 assert(Array.isArray(boundaries.worldReferenceLines) && boundaries.worldReferenceLines.length === 2, 'expected 2 decorative world reference lines');
+assert(Array.isArray(boundaries.usageConstraints), 'boundary data must publish usage constraints');
+for (const requiredConstraint of [
+  'Decorative family-path overlay only',
+  'No legal-boundary accuracy claims',
+  'No live map tiles, live map APIs, backend services, auth, or runtime API keys',
+]) {
+  assert(boundaries.usageConstraints.includes(requiredConstraint), `missing boundary usage constraint: ${requiredConstraint}`);
+}
 
 const requiredIds = new Set([
   'kr-country-stylized',
@@ -49,15 +61,22 @@ for (const feature of boundaries.features) {
 }
 assert(ids.size === requiredIds.size, 'missing required family-path feature ids');
 
+const expectedTerminalRegions = ['kr-busan-haeundae-stylized', 'kr-gimhae-bonghwang-stylized', 'kr-seoul-mapo-stylized'];
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
-assert(JSON.stringify(pathEnds) === JSON.stringify(['kr-busan-haeundae-stylized', 'kr-gimhae-bonghwang-stylized', 'kr-seoul-mapo-stylized'].sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
+assert(JSON.stringify(pathEnds) === JSON.stringify(expectedTerminalRegions.sort()), 'family paths must end at Haeundae, Mapo, and Bonghwang');
 
 assert(provenance.committedAssetStrategy.status === 'permissive-for-repository', 'committed strategy must be permissive-for-repository');
 assert(provenance.committedAssetStrategy.summary.includes('hand-authored'), 'provenance must document hand-authored committed geometry');
+assert(provenance.committedAssetStrategy.accuracyNotice.includes('Decorative navigation art only'), 'provenance must keep decorative-only accuracy notice');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'natural-earth-admin0-boundary-lines'), 'Natural Earth source candidate is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Committed Natural Earth world border provenance is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korean official legal-boundary source candidate is required');
 assert(provenance.excludedSources.some((source) => source.id === 'gadm'), 'GADM exclusion is required');
+assert(provenance.excludedSources.some((source) => source.id === 'live-map-tiles-or-client-api'), 'live map/API exclusion is required');
+for (const source of provenance.verifiedSourceCandidates) {
+  assert(source.url?.startsWith('https://'), `source ${source.id} must keep an https provenance URL`);
+  assert(source.licenseSummary && source.permittedUseDecision && source.implementationNote, `source ${source.id} must keep license, decision, and implementation notes`);
+}
 
 assert(dataProvenance.schemaVersion === 1, 'data provenance schemaVersion must be 1');
 assert(dataProvenance.id === 'globe-static-data-provenance-v1', 'data provenance id must be stable');
@@ -114,25 +133,47 @@ for (const line of worldBorders.lines) {
 assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
 const expectedHouseholds = {
-  parents: { names: ['한봉수', '이은주'], slots: 2 },
-  sister: { names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3 },
-  brother: { names: ['한동석', '김혜리', '한진주'], slots: 1 },
-  home: { names: ['한영석', '서혜빈', '한은하'], slots: 1 },
+  parents: { label: '부모님네', locationLabel: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
+  sister: { label: '누나네', locationLabel: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
+  brother: { label: '형네', locationLabel: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
+  home: { label: '우리집', locationLabel: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
 };
 
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
   assert(householdConfigSource.includes(`id: '${householdId}'`), `missing household config for ${householdId}`);
+  assert(householdConfigSource.includes(`label: '${expectation.label}'`), `missing household label ${expectation.label} for ${householdId}`);
+  assert(householdConfigSource.includes(`locationLabel: '${expectation.locationLabel}'`), `missing location label ${expectation.locationLabel} for ${householdId}`);
   for (const name of expectation.names) {
     assert(householdConfigSource.includes(`'${name}'`), `missing accepted name ${name} for ${householdId}`);
   }
   const slotMatches = householdConfigSource.match(new RegExp(`householdId: '${householdId}'`, 'g')) ?? [];
   assert(slotMatches.length === expectation.slots, `${householdId} must have ${expectation.slots} Naver Band slot(s)`);
+  assert(koreaOverlaySource.includes(`'${householdId}'`), `Korea overlay must route to household ${householdId}`);
+  assert(koreaOverlaySource.includes(expectation.terminalRegion), `Korea overlay must retain terminal region ${expectation.terminalRegion} for ${householdId}`);
 }
 
+const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
+assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
+assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
 const placeholderMatches = householdConfigSource.match(/placeholderHref: 'https:\/\/band\.us\/band\/[^']+'/g) ?? [];
 const statusMatches = householdConfigSource.match(/, status: 'placeholder' }/g) ?? [];
 assert(placeholderMatches.length === 7, 'household config must expose exactly 7 band.us placeholder links');
 assert(statusMatches.length === 7, 'all household link slots must remain placeholder status until real URLs are supplied');
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
+assert(householdConfigSource.includes("status: 'placeholder'"), 'household Band slots must keep placeholder status in static config');
 
-console.log('PASS boundary/provenance/data-contract/household validation');
+assert(weatherPolicySource.includes("mode: 'static-fallback-only'"), 'weather policy must be static fallback only');
+for (const requiredWeatherFlag of ['liveApiRequired: false', 'backendRequired: false', 'apiKeyRequired: false']) {
+  assert(weatherPolicySource.includes(requiredWeatherFlag), `weather policy must include ${requiredWeatherFlag}`);
+}
+assert(weatherPolicySource.includes('getWeatherFallbackCopy'), 'weather fallback copy helper must remain exported');
+assert(!weatherPolicySource.includes('fetch('), 'weather policy must not fetch live data');
+assert(!weatherPolicySource.includes('import.meta.env'), 'weather policy must not require runtime environment keys');
+
+for (const docsSource of [mapDataReadme, rootReadme]) {
+  assert(docsSource.includes('No backend') || docsSource.includes('no backend'), 'docs must preserve no-backend constraint');
+  assert(docsSource.includes('live API') || docsSource.includes('live weather API'), 'docs must preserve no-live-API constraint');
+}
+assert(rootReadme.includes('src/weatherPolicy.ts'), 'README must document the static weather policy');
+
+console.log('PASS boundary/provenance/household/weather validation');
