@@ -54,6 +54,12 @@ assertHttps(top100.source.url, 'TOP100 source URL');
 assertUnique(top100.cities, 'id', 'TOP100 city');
 const ranks = top100.cities.map((entry) => entry.rank).sort((a, b) => a - b);
 assert(ranks.every((rank, index) => rank === index + 1), 'TOP100 ranks must be contiguous 1-100');
+const rankGroups = Array.from({ length: 10 }, (_, index) => {
+  const start = index * 10 + 1;
+  const end = start + 9;
+  return { start, end, entries: top100.cities.filter((entry) => entry.rank >= start && entry.rank <= end) };
+});
+assert(rankGroups.every((group) => group.entries.length === 10), 'TOP100 ranks must form exactly ten groups of ten cities');
 for (const entry of top100.cities) {
   assert(entry.sourceId === top100.source.id, `TOP100 ${entry.id} sourceId must match dataset source`);
   for (const field of ['id', 'city', 'country', 'region']) {
