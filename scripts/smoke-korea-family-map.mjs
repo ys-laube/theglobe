@@ -156,6 +156,15 @@ try {
         const top100GroupCount = document.querySelectorAll('[data-rank-group]').length;
         const top100ListEntryCount = document.querySelectorAll('[data-rank-group] li[data-city-id]').length;
         const top100RankGroups = [...document.querySelectorAll('[data-rank-group]')].map((group) => group.getAttribute('data-rank-group'));
+        const rotationBeforeCityFocus = window.__GLOBE_QA__?.globeRotation ?? { x: initialRotationX, y: initialRotationY, z: 0 };
+        const top100SeoulButton = document.querySelector('[data-action="focus-city"][data-city-id="top100-seoul"]');
+        top100SeoulButton?.click();
+        await waitFor(() => window.__GLOBE_QA__?.selectedCity?.id === 'top100-seoul', 'TOP100 Seoul selected from list');
+        await waitFor(() => Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y) > 0.08, 'TOP100 list city focus rotation');
+        const focusedCityCardTitle = document.querySelector('.city-card h2')?.textContent?.trim();
+        const focusedCityCardKicker = document.querySelector('.city-card .card-kicker')?.textContent?.trim();
+        const listFocusRotationDeltaY = Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y);
+        const selectedCityFromQa = window.__GLOBE_QA__?.selectedCity;
 
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
@@ -187,6 +196,10 @@ try {
           top100GroupCount,
           top100ListEntryCount,
           top100RankGroups,
+          focusedCityCardTitle,
+          focusedCityCardKicker,
+          listFocusRotationDeltaY,
+          selectedCityFromQa,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
           cityCardPresent: Boolean(document.querySelector('.city-card')),
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
@@ -226,6 +239,10 @@ try {
   if (result.top100ListEntryCount !== 100) throw new Error(`Expected 100 TOP100 list entries, found ${result.top100ListEntryCount}`);
   const expectedRankGroups = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
   if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected TOP100 rank groups ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
+  if (result.selectedCityFromQa?.id !== 'top100-seoul' || result.selectedCityFromQa?.rank !== 24) throw new Error(`Expected QA selected TOP100 Seoul rank 24, found ${JSON.stringify(result.selectedCityFromQa)}`);
+  if (result.listFocusRotationDeltaY <= 0.08) throw new Error(`Expected list click to rotate/focus globe, delta=${result.listFocusRotationDeltaY}`);
+  if (result.focusedCityCardTitle !== '24. Seoul') throw new Error(`Expected existing detail card to open Seoul, found ${result.focusedCityCardTitle}`);
+  if (!result.focusedCityCardKicker?.includes('#24')) throw new Error(`Expected card kicker to include TOP100 rank, found ${result.focusedCityCardKicker}`);
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
   if (result.rotationDeltaY <= 0.006) throw new Error(`Expected globe auto-rotation, delta=${result.rotationDeltaY}`);
