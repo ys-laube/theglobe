@@ -196,7 +196,7 @@ function householdById(id: HouseholdId) {
 
 export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: CreateOptions): KoreaFamilyOverlay {
   let openState = false;
-  let selectedRegion: RegionId = 'kr-korea-overview';
+  let selectedRegion: RegionId = 'kr-country-stylized';
   let selectedHousehold: HouseholdId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
@@ -257,10 +257,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const rootButton = document.createElement('button');
     rootButton.type = 'button';
     rootButton.textContent = '대한민국';
-    rootButton.disabled = selectedRegion === 'kr-korea-overview';
-    rootButton.addEventListener('click', () => setRegion('kr-korea-overview'));
+    rootButton.disabled = selectedRegion === 'kr-country-stylized';
+    rootButton.addEventListener('click', () => setRegion('kr-country-stylized'));
     breadcrumbs.append(rootButton);
-    if (selectedRegion !== 'kr-korea-overview') {
+    if (selectedRegion !== 'kr-country-stylized') {
       const current = appendText(breadcrumbs, 'span', `› ${routeNodes[selectedRegion].label}`);
       current.setAttribute('aria-current', 'page');
     }
@@ -430,8 +430,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       return;
     }
 
-    appendText(routePanel, 'p', selectedRegion === 'kr-korea-overview' ? '17 first-level regions' : 'Next stop', 'map-kicker');
-    appendText(routePanel, 'h3', selectedRegion === 'kr-korea-overview' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
+    appendText(routePanel, 'p', selectedRegion === 'kr-country-stylized' ? '17 first-level regions' : 'Next stop', 'map-kicker');
+    appendText(routePanel, 'h3', selectedRegion === 'kr-country-stylized' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
     const choices = document.createElement('div');
     choices.className = 'route-choice-grid';
     node.next.forEach((nextId) => {
@@ -538,7 +538,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
   closeButton.addEventListener('click', () => {
     openState = false;
-    selectedRegion = 'kr-seoul';
+    selectedRegion = 'kr-country-stylized';
     selectedHousehold = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
@@ -550,7 +550,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   return {
     open: () => {
       openState = true;
-      selectedRegion = 'kr-seoul';
+      selectedRegion = 'kr-country-stylized';
       selectedHousehold = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
