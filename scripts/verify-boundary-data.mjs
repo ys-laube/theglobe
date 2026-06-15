@@ -201,10 +201,10 @@ for (const line of worldBorders.lines) {
 assert(worldBorderPointCount <= 12_500, 'world border point count must stay inside the static app budget');
 
 const expectedHouseholds = {
-  parents: { label: '부모님네', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
-  sister: { label: '누나네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
-  brother: { label: '형네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
-  home: { label: '우리집', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
+  parents: { label: '한가네 본가', location: '부산광역시 해운대구', names: ['한봉수', '이은주'], slots: 2, terminalRegion: 'kr-busan-haeundae-stylized' },
+  sister: { label: '건희민하찬희네', location: '부산광역시 해운대구', names: ['한유진', '박재춘', '박건희', '박민하', '박찬희'], slots: 3, terminalRegion: 'kr-busan-haeundae-stylized' },
+  brother: { label: '진주네', location: '서울특별시 마포구', names: ['한동석', '김혜리', '한진주'], slots: 1, terminalRegion: 'kr-seoul-mapo-stylized' },
+  home: { label: '은하네', location: '경상남도 김해시 봉황동', names: ['한영석', '서혜빈', '한은하'], slots: 1, terminalRegion: 'kr-gimhae-bonghwang-stylized' },
 };
 
 for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
@@ -219,6 +219,9 @@ for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
   assert(koreaOverlaySource.includes(`'${householdId}'`), `Korea overlay must route to household ${householdId}`);
   assert(koreaOverlaySource.includes(expectation.terminalRegion), `Korea overlay must retain terminal region ${expectation.terminalRegion} for ${householdId}`);
 }
+assert(koreaOverlaySource.includes('household-marker'), 'Korea overlay must render glowing household markers on the map');
+assert(koreaOverlaySource.includes('householdMarkers'), 'Korea overlay must keep an explicit household marker model');
+
 
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');

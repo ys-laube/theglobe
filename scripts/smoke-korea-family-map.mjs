@@ -156,6 +156,15 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-stylized', 'Busan tier');
         await clickButtonByStrong('해운대구');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae-stylized', 'Haeundae tier');
+        const householdMarkerCount = document.querySelectorAll('.household-marker').length;
+        await clickButtonByStrong('건희민하찬희네');
+        await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === 'sister', 'sister household');
+        const input = document.querySelector('.name-gate input');
+        input.value = '박건희';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', 'name gate unlock');
+        const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
 
         return {
           qa: window.__GLOBE_QA__,
@@ -175,6 +184,11 @@ try {
           selectedRegion: window.__GLOBE_QA__?.selectedRegion,
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
+          householdMarkerCount,
+          selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
+          nameGateState: window.__GLOBE_QA__?.nameGateState,
+          linkCount: links.length,
+          links,
         };
       })()
     `,
@@ -202,6 +216,11 @@ try {
   if (result.selectedRegion !== 'kr-busan-haeundae-stylized') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
   if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
+  if (result.householdMarkerCount !== 4) throw new Error(`Expected 4 glowing household markers, found ${result.householdMarkerCount}`);
+  if (result.selectedHousehold !== 'sister') throw new Error(`Expected sister household, found ${result.selectedHousehold}`);
+  if (result.nameGateState !== 'unlocked') throw new Error(`Expected unlocked name gate, found ${result.nameGateState}`);
+  if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links, found ${result.linkCount}`);
+  if (!result.links.every((href) => href.startsWith('https://band.us/'))) throw new Error('Expected band.us placeholder links');
   console.log('PASS layout, exploration, and Korea morph headless smoke', JSON.stringify(result));
 } finally {
   await terminate(chrome);

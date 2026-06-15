@@ -297,6 +297,36 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 .korea-region.is-next:hover { fill: rgba(216, 180, 254, 0.42); }
 .korea-region.has-households { fill: rgba(250, 204, 21, 0.24); stroke: rgba(254, 240, 138, 0.9); }
+.household-marker { cursor: pointer; outline: none; }
+.household-marker-glow {
+  fill: rgba(250, 204, 21, 0.18);
+  stroke: rgba(254, 240, 138, 0.75);
+  stroke-width: 0.34;
+  filter: drop-shadow(0 0 0.9rem rgba(250, 204, 21, 0.55));
+  animation: householdPulse 2.4s ease-in-out infinite;
+}
+.household-marker-dot {
+  fill: #fef3c7;
+  stroke: rgba(120, 53, 15, 0.65);
+  stroke-width: 0.24;
+}
+.household-marker-label {
+  fill: #fef9c3;
+  font-size: 2.35px;
+  font-weight: 900;
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: rgba(2, 6, 23, 0.9);
+  stroke-width: 0.7;
+  pointer-events: none;
+}
+.household-marker.is-active .household-marker-glow { fill: rgba(251, 191, 36, 0.26); stroke: rgba(255, 255, 255, 0.92); }
+.household-marker:focus-visible .household-marker-glow,
+.household-marker:hover .household-marker-glow { fill: rgba(254, 240, 138, 0.32); stroke: rgba(255, 255, 255, 0.96); }
+@keyframes householdPulse {
+  0%, 100% { opacity: 0.82; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
 .korea-map-label {
   fill: #f8fafc;
   font-size: 3.2px;
