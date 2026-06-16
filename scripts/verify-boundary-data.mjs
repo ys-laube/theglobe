@@ -10,6 +10,7 @@ const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCoun
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
+const koreaImagerySource = await readFile(join(root, 'src/koreaImagery.ts'), 'utf8');
 const mainSource = await readFile(join(root, 'src/main.ts'), 'utf8');
 const globeRendererSource = await readFile(join(root, 'src/globeRenderer.ts'), 'utf8');
 const assetsPolicySource = await readFile(join(root, 'src/assetsPolicy.ts'), 'utf8');
@@ -292,6 +293,18 @@ assert(koreaOverlaySource.includes('nameGateState') && koreaOverlaySource.includ
 assert(koreaOverlaySource.includes('setHighlightedRegion') && koreaOverlaySource.includes('data-region-id'), 'Korea overlay must cross-highlight route list and map regions');
 assert(koreaOverlaySource.includes('highlightedHouseholdId') && koreaOverlaySource.includes('data-household-id') && koreaOverlaySource.includes('setHighlightedHousehold'), 'Korea overlay must cross-highlight household cards and map markers by household id');
 assert(koreaOverlaySource.includes('pointerenter') && koreaOverlaySource.includes('focus'), 'Korea overlay cross-highlight must support pointer and keyboard focus');
+for (const requiredImageryConstant of [
+  'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi',
+  'BlueMarble_NextGeneration',
+  'EPSG:4326',
+  '33,124,39,132',
+  'image/jpeg',
+  'NASA GIBS · NASA Earth Observatory Blue Marble',
+]) {
+  assert(koreaImagerySource.includes(requiredImageryConstant), `Korea imagery helper must preserve ${requiredImageryConstant}`);
+}
+assert(koreaOverlaySource.includes('dataset.imageryState') && koreaOverlaySource.includes('korea-raster-layer'), 'Korea overlay must expose raster imagery telemetry hooks');
+assert(koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__') || koreaImagerySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea imagery must retain deterministic fallback test hook');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
