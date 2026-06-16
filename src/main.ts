@@ -76,6 +76,7 @@ function updateQaState() {
     selectedCityRank: selectedCity?.rank ?? null,
     selectedCityCardOpen: Boolean(selectedCity),
     selectedCityMarkerGlowVisible: overlayQa.selectedCityMarkerGlowVisible,
+    selectedMarkerGlowCityId: overlayQa.selectedMarkerGlowCityId,
     selectedCityListHighlighted: overlayQa.selectedCityListHighlighted,
     lastFocusedCityId: lastFocus?.cityId ?? null,
     lastFocusRotationDelta: lastFocus?.delta ?? 0,

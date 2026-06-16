@@ -20,6 +20,7 @@ export type ExplorationOverlay = {
     focusedCityId: string | null;
     selectedCityMarkerGlowVisible: boolean;
     selectedCityListHighlighted: boolean;
+    selectedMarkerGlowCityId: string | null;
   };
 };
 
@@ -123,6 +124,7 @@ function makeMarker(capital: Capital, radius: number) {
   selectedGlow.visible = false;
   selectedGlow.userData.capital = capital;
   selectedGlow.userData.selectedCityGlow = true;
+  selectedGlow.userData.selectedMarkerGlow = true;
   return { marker, ring, hitArea, selectedGlow };
 }
 
@@ -338,7 +340,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       selectedCityId: selected?.id ?? null,
       focusedCityId: lastFocus?.cityId ?? null,
       selectedCityMarkerGlowVisible: Boolean(selected && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible)),
-      selectedCityListHighlighted: Boolean(selected && elements.regionList.querySelector(`[data-action="focus-city"][data-city-id="${CSS.escape(selected.id)}"].is-selected[aria-current="true"]`)),
+      selectedMarkerGlowCityId: selected?.id && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible) ? selected.id : null,
+      selectedCityListHighlighted: Boolean(selected && elements.regionList.querySelector(`[data-action="focus-city"][data-city-id="${CSS.escape(selected?.id ?? '')}"].is-selected[aria-current="true"]`)),
     }),
   };
 }
