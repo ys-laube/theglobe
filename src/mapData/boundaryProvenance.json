@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "id": "korea-official-static-boundary-provenance-v2",
+  "id": "korea-real-coordinate-boundary-provenance-v3",
   "committedAssetStrategy": {
-    "assetId": "korea-official-static-family-boundaries-v2",
+    "assetId": "korea-real-coordinate-boundaries-v3",
     "status": "official-source-documented-static",
-    "summary": "G003 commits a static satellite-style Korea family overlay with 17 first-level administrative regions, Jeju/Ulleungdo/Dokdo decorative island references, and family drilldown targets, documented from official public-data/VWorld legal-boundary dataset metadata and bundled without runtime map APIs. The normalized guide polygons and island markers are hand-authored from official-source metadata review and are not legal-boundary coordinates.",
+    "summary": "Commits static WGS84 Korea administrative rings projected into the same NASA GIBS Korea raster bbox, replacing decorative hand-drawn polygons so boundaries naturally overlay the satellite imagery. The asset remains decorative family navigation data, not legal-boundary coordinates.",
     "licenseTreatment": "공공데이터포털 metadata for 국토교통부_일별법정구역정보 lists 무료 and 이용허락범위 제한 없음; VWorld is documented as the official download surface. This app bundles simplified normalized SVG guide geometry, not raw SHP files.",
-    "accuracyNotice": "Decorative navigation art only. Static decorative guide only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions.",
-    "sourceClassification": "documented-guide",
+    "accuracyNotice": "Decorative navigation art only. Static projected boundary overlay only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions.",
+    "sourceClassification": "official-derived",
     "officialFirstLevelRegionPolicy": {
       "expectedOfficialRegionCount": 17,
       "expectedOfficialRegionsKo": [
@@ -29,7 +29,7 @@
         "경상남도",
         "제주특별자치도"
       ],
-      "currentException": "documented-guide static overlay documents the official 17-region set and bundles simplified guide geometry plus family targets; it is not raw official-derived legal-boundary geometry."
+      "currentException": "Static overlay now uses real WGS84 province/municipality rings projected to the NASA GIBS Korea raster bbox; simplified and decorative only, not raw legal-boundary coordinates."
     },
     "islandReferencePolicy": {
       "requiredIslandReferencesKo": [
@@ -68,6 +68,15 @@
       "licenseSummary": "Natural Earth describes its map data as public domain. The bundled asset extracts low-resolution line coordinates for decorative globe borders.",
       "permittedUseDecision": "Committed for static, non-live, decorative country border data outside the Korea family overlay.",
       "implementationNote": "Render as non-pickable GlobeRenderer-owned line geometry; do not use for political/legal boundary claims."
+    },
+    {
+      "id": "southkorea-maps-kostat-2013-simple-geojson",
+      "name": "southkorea/southkorea-maps KOSTAT 2013 simplified GeoJSON",
+      "url": "https://github.com/southkorea/southkorea-maps",
+      "publisher": "Lucy Park / southkorea-maps, sourced from KOSTAT census administrative geodata",
+      "licenseSummary": "Repository README states KOSTAT data is free to share or remix; this app bundles simplified static derived rings with attribution.",
+      "permittedUseDecision": "Approved as a static no-key replacement for decorative hand-drawn polygons so the overlay shares the NASA raster coordinate frame.",
+      "implementationNote": "Use committed projected JSON only; no runtime GitHub, KOSTAT, VWorld, or map-tile calls."
     }
   ],
   "excludedSources": [

@@ -294,12 +294,12 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-overlay[data-map-style="satellite-relief-25d"] .korea-map-canvas {
   background:
     radial-gradient(circle at 32% 22%, rgba(254, 240, 138, 0.17), transparent 14rem),
-    radial-gradient(circle at 66% 72%, rgba(14, 165, 233, 0.28), transparent 19rem),
-    radial-gradient(circle at 50% 50%, rgba(74, 222, 128, 0.15), transparent 13rem),
-    linear-gradient(180deg, rgba(226, 232, 240, 0.08), transparent 34%),
+    radial-gradient(circle at 66% 72%, rgba(56, 189, 248, 0.36), transparent 19rem),
+    radial-gradient(circle at 50% 50%, rgba(134, 239, 172, 0.18), transparent 13rem),
+    linear-gradient(180deg, rgba(226, 232, 240, 0.14), transparent 34%),
     repeating-linear-gradient(118deg, rgba(241, 245, 249, 0.055) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(34deg, rgba(15, 23, 42, 0.18) 0 1px, transparent 1px 9px),
-    linear-gradient(145deg, rgba(20, 83, 45, 0.42), rgba(30, 41, 59, 0.82) 44%, rgba(2, 6, 23, 0.88));
+    linear-gradient(145deg, rgba(20, 184, 166, 0.42), rgba(14, 116, 144, 0.72) 44%, rgba(8, 47, 73, 0.82));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.16),
     inset 0 -1.4rem 3.4rem rgba(2, 6, 23, 0.38),
@@ -310,15 +310,15 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(circle at 42% 34%, rgba(134, 239, 172, 0.30), transparent 16rem),
-    radial-gradient(circle at 62% 72%, rgba(56, 189, 248, 0.28), transparent 17rem),
-    linear-gradient(145deg, rgba(20, 83, 45, 0.58), rgba(15, 23, 42, 0.86) 48%, rgba(2, 6, 23, 0.92));
+    radial-gradient(circle at 42% 34%, rgba(134, 239, 172, 0.34), transparent 16rem),
+    radial-gradient(circle at 62% 72%, rgba(56, 189, 248, 0.46), transparent 17rem),
+    linear-gradient(145deg, rgba(21, 128, 61, 0.48), rgba(14, 116, 144, 0.66) 48%, rgba(8, 47, 73, 0.84));
 }
 .korea-raster-layer::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 48%, transparent 42%, rgba(2, 6, 23, 0.44) 100%);
+  background: radial-gradient(circle at 50% 48%, transparent 52%, rgba(2, 6, 23, 0.24) 100%);
   pointer-events: none;
 }
 .korea-raster-image {
@@ -326,7 +326,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(1.08) contrast(1.04) brightness(0.84);
+  filter: saturate(1.24) contrast(1.06) brightness(1.14);
 }
 .korea-map-canvas svg { position: relative; z-index: 1; width: 100%; height: 100%; min-height: 320px; display: block; }
 .korea-static-texture {
@@ -364,26 +364,28 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   filter: drop-shadow(0 0 0.72rem rgba(56, 189, 248, 0.58));
 }
 .korea-region {
-  fill: rgba(74, 222, 128, 0.10);
-  stroke: rgba(226, 232, 240, 0.62);
-  stroke-width: 0.42;
+  fill: rgba(74, 222, 128, 0.055);
+  stroke: rgba(240, 249, 255, 0.82);
+  stroke-width: 0.5;
   vector-effect: non-scaling-stroke;
+  fill-rule: evenodd;
+  clip-rule: evenodd;
   transition: fill 180ms ease, stroke 180ms ease, filter 180ms ease;
   filter: url("#korea-land-soft-shadow");
 }
 .korea-region.is-selected {
-  fill: rgba(125, 211, 252, 0.26);
+  fill: rgba(125, 211, 252, 0.18);
   stroke: rgba(255, 255, 255, 0.78);
   filter: drop-shadow(0 0 0.9rem rgba(125, 211, 252, 0.35));
 }
 .korea-region.is-next {
-  fill: rgba(192, 132, 252, 0.22);
+  fill: rgba(192, 132, 252, 0.16);
   stroke: rgba(233, 213, 255, 0.9);
   cursor: pointer;
 }
 .korea-region.is-next:hover,
-.korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.34); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
-.korea-region.has-households { fill: rgba(250, 204, 21, 0.30); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
+.korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.26); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
+.korea-region.has-households { fill: rgba(250, 204, 21, 0.22); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
 
 .korea-island-reference-layer { pointer-events: none; }
 .korea-island-reference { filter: drop-shadow(0 0 0.5rem rgba(125, 211, 252, 0.34)); }

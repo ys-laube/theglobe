@@ -10,6 +10,7 @@ type BoundaryFeature = {
   readonly familyPathRole: string;
   readonly interactive: boolean;
   readonly polygon: readonly (readonly [number, number])[];
+  readonly rings?: readonly (readonly (readonly [number, number])[])[];
   readonly centroid: readonly [number, number];
 };
 
@@ -231,8 +232,13 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
   return element;
 }
 
-function polygonPoints(points: readonly (readonly [number, number])[]) {
-  return points.map(([x, y]) => `${x},${y}`).join(' ');
+function closedRingPath(points: readonly (readonly [number, number])[]) {
+  return `${points.map(([x, y], index) => `${index === 0 ? 'M' : 'L'} ${x} ${y}`).join(' ')} Z`;
+}
+
+function featurePath(feature: BoundaryFeature) {
+  const rings = feature.rings?.length ? feature.rings : [feature.polygon];
+  return rings.map(closedRingPath).join(' ');
 }
 
 function pathPoints(points: readonly (readonly [number, number])[]) {
@@ -516,8 +522,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {
       const feature = featureById(id);
-      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-      polygon.setAttribute('points', polygonPoints(feature.polygon));
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      polygon.setAttribute('d', featurePath(feature));
       const isSelected = id === selectedRegion;
       const isNext = nextIds.has(id);
       const isHouseholdTarget = householdTarget.has(id);

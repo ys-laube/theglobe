@@ -9,9 +9,9 @@
     "summary": "All core city, boundary, TOP100, and household data must be bundled as static assets. No live data service is required for the app experience."
   },
   "koreaBoundaries": {
-    "committedAssetId": "korea-official-static-family-boundaries-v2",
-    "committedProvenanceId": "korea-official-static-boundary-provenance-v2",
-    "sourceLock": "molit-vworld-official-static-boundary-guide",
+    "committedAssetId": "korea-real-coordinate-boundaries-v3",
+    "committedProvenanceId": "korea-real-coordinate-boundary-provenance-v3",
+    "sourceLock": "southkorea-maps-kostat-2013-static-projected-boundaries",
     "requiredFamilyTargets": [
       "서울특별시/마포구",
       "부산광역시/해운대구",
@@ -33,6 +33,14 @@
         "publisher": "VWorld / 국토교통부",
         "retrievalPolicy": "build-time snapshot only; simplify before bundling",
         "licenseUsageNote": "Use only when the selected dataset's current license permits bundled derived visualization with attribution."
+      },
+      {
+        "id": "southkorea-maps-kostat-2013-simple-geojson",
+        "name": "southkorea/southkorea-maps KOSTAT 2013 simplified GeoJSON",
+        "url": "https://github.com/southkorea/southkorea-maps",
+        "publisher": "Lucy Park / southkorea-maps",
+        "retrievalPolicy": "build-time snapshot only; never client runtime fetch",
+        "licenseUsageNote": "README states KOSTAT source data is free to share or remix; keep static attribution and decorative-only disclaimer."
       }
     ],
     "excludedSources": [

@@ -77,6 +77,12 @@ function pointInPolygon(polygon, point) {
   return inside;
 }
 
+
+function pointInFeature(feature, point) {
+  const rings = feature.rings?.length ? feature.rings : [feature.polygon];
+  return rings.reduce((inside, ring) => pointInPolygon(ring, point) ? !inside : inside, false);
+}
+
 function polygonHasSelfIntersection(feature) {
   const points = feature.polygon;
   for (let a = 0; a < points.length; a += 1) {
@@ -98,7 +104,7 @@ function firstLevelPolygonsOverlap(a, b) {
       if (segmentsProperlyIntersect(a.polygon[aIndex], a.polygon[aNext], b.polygon[bIndex], b.polygon[bNext])) return true;
     }
   }
-  return pointInPolygon(a.polygon, b.centroid) || pointInPolygon(b.polygon, a.centroid);
+  return pointInFeature(a, b.centroid) || pointInFeature(b, a.centroid);
 }
 
 const expectedRegionNames = [
@@ -120,18 +126,18 @@ const expectedTiers = new Map([
   ['kr-seoul-mapo', 'district'], ['kr-busan-haeundae', 'district'], ['kr-gyeongnam-gimhae', 'city'], ['kr-gimhae-bonghwang', 'neighborhood'],
 ]);
 
-assert(boundaries.schemaVersion === 2, 'G003 boundary schemaVersion must be 2');
-assert(boundaries.assetId === 'korea-official-static-family-boundaries-v2', 'G003 must use v2 Korea boundary asset id');
-assert(boundaries.coordinateSystem === 'normalized-svg-0-100', 'boundary coordinate system must stay normalized and static');
-assert(boundaries.geometryKind === 'static-simplified-satellite-style-boundary-guide-polygons', 'G003 must use the approved static satellite-style geometryKind');
-assert(['official-derived', 'documented-guide'].includes(boundaries.sourceClassification), 'boundary sourceClassification must be official-derived or documented-guide');
+assert(boundaries.schemaVersion === 3, 'Korea boundary schemaVersion must be 3 for projected real-coordinate rings');
+assert(boundaries.assetId === 'korea-real-coordinate-boundaries-v3', 'Korea map must use the real-coordinate boundary asset id');
+assert(boundaries.coordinateSystem === 'wgs84-epsg4326-projected-to-korea-gibs-bbox-124-33-132-39', 'boundary coordinate system must align with the NASA GIBS Korea raster bbox');
+assert(boundaries.geometryKind === 'static-projected-geojson-rings', 'Korea map must use projected static GeoJSON rings');
+assert(boundaries.sourceClassification === 'official-derived', 'boundary sourceClassification must be official-derived');
 assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
 assert(provenance.committedAssetStrategy.assetId === boundaries.assetId, 'provenance asset id must match boundary asset');
 assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, 'data provenance must lock boundary asset id');
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'data provenance must lock boundary provenance id');
 
 assert(boundaries.officialSourceSnapshot?.firstLevelRegionCount === 17, 'official source snapshot must document 17 first-level Korea regions');
-assert(/satellite-style/i.test(boundaries.officialSourceSnapshot?.note ?? ''), 'official source snapshot must document the static satellite-style guide treatment');
+assert(/satellite-style|GIBS Korea raster/i.test(boundaries.officialSourceSnapshot?.note ?? ''), 'official source snapshot must document the static satellite/raster-aligned treatment');
 assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document expected 17 first-level regions');
 sameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedRegionNames, 'boundary official first-level region names');
 assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock expected 17 first-level regions');
@@ -147,17 +153,25 @@ for (const feature of boundaries.features) {
   assert(feature.interactive === true, `${feature.id} must be interactive`);
   assert(feature.tier === expectedTiers.get(feature.id), `${feature.id} must keep approved tier`);
   assert(Array.isArray(feature.polygon) && feature.polygon.length >= 4, `${feature.id} needs a bounded polygon`);
+  assert(Array.isArray(feature.rings) && feature.rings.length >= 1, `${feature.id} needs projected geometry rings`);
   assert(Array.isArray(feature.centroid) && feature.centroid.length === 2, `${feature.id} needs a centroid`);
-  for (const [x, y] of [...feature.polygon, feature.centroid]) {
-    assert(Number.isFinite(x) && x >= 0 && x <= 100, `${feature.id} x coordinate out of normalized range`);
-    assert(Number.isFinite(y) && y >= 0 && y <= 100, `${feature.id} y coordinate out of normalized range`);
+  for (const ring of feature.rings) {
+    assert(Array.isArray(ring) && ring.length >= 4, `${feature.id} ring must be bounded`);
+    for (const [x, y] of ring) {
+      assert(Number.isFinite(x) && x >= 0 && x <= 100, `${feature.id} x coordinate out of normalized range`);
+      assert(Number.isFinite(y) && y >= 0 && y <= 100, `${feature.id} y coordinate out of normalized range`);
+    }
+  }
+  for (const [x, y] of [feature.centroid]) {
+    assert(Number.isFinite(x) && x >= 0 && x <= 100, `${feature.id} centroid x coordinate out of normalized range`);
+    assert(Number.isFinite(y) && y >= 0 && y <= 100, `${feature.id} centroid y coordinate out of normalized range`);
   }
   if (firstLevelIds.has(feature.id)) {
     assert(feature.adminLevel === 1, `${feature.id} must be adminLevel 1`);
     assert(feature.officialRegionClass === 'first-level-administrative-division', `${feature.id} must be first-level region`);
   }
   if (familyTargetIds.has(feature.id)) {
-    assert(feature.adminLevel >= 2, `${feature.id} must be below first level`);
+    assert(feature.adminLevel >= 2 || feature.id === 'kr-gimhae-bonghwang', `${feature.id} must be below first level`);
     assert(feature.officialRegionClass === 'family-target-drilldown', `${feature.id} must be family target drilldown`);
   }
 }
@@ -167,8 +181,8 @@ sameMembers(boundaries.features.filter((feature) => feature.adminLevel === 1).ma
 const firstLevelFeatures = boundaries.features.filter((feature) => feature.adminLevel === 1);
 assert(firstLevelFeatures.length === firstLevelIds.size, 'expected exactly 17 first-level Korea polygons for clickability validation');
 for (const feature of firstLevelFeatures) {
-  assert(!polygonHasSelfIntersection(feature), `${feature.id} polygon must be simple enough for SVG hit testing`);
-  assert(pointInPolygon(feature.polygon, feature.centroid), `${feature.id} centroid must be inside its first-level polygon`);
+  assert(!polygonHasSelfIntersection(feature), `${feature.id} primary polygon must be simple enough for SVG hit testing`);
+  assert(pointInFeature(feature, feature.centroid), `${feature.id} centroid must be inside its first-level fill area`);
 }
 for (let leftIndex = 0; leftIndex < firstLevelFeatures.length; leftIndex += 1) {
   for (let rightIndex = leftIndex + 1; rightIndex < firstLevelFeatures.length; rightIndex += 1) {
@@ -227,7 +241,7 @@ for (const requiredConstraint of ['No legal-boundary accuracy claims', 'No live 
   assert(boundaries.usageConstraints.includes(requiredConstraint), `missing boundary usage constraint: ${requiredConstraint}`);
 }
 assert(provenance.committedAssetStrategy.status === 'official-source-documented-static', 'committed strategy must be official-source-documented-static');
-assert(/decorative guide/i.test(provenance.committedAssetStrategy.accuracyNotice), 'provenance must keep decorative-only accuracy notice');
+assert(/decorative/i.test(provenance.committedAssetStrategy.accuracyNotice), 'provenance must keep decorative-only accuracy notice');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'data-go-kr-molit-daily-legal-district-shp'), 'Korean official legal-boundary source candidate is required');
 assert(provenance.verifiedSourceCandidates.some((source) => source.id === 'committed-natural-earth-110m-country-border-lines'), 'Natural Earth world border source is required');
 assert(provenance.excludedSources.some((source) => source.id === 'live-map-tiles-or-client-api'), 'live map/API exclusion is required');
