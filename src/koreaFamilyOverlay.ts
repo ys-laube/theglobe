@@ -174,10 +174,10 @@ const regionInfoById: Partial<Record<RegionId, RegionInfo>> = {
 };
 
 const householdMarkers: readonly { readonly householdId: HouseholdId; readonly regionId: RegionId; readonly dx: number; readonly dy: number }[] = [
-  { householdId: 'parents', regionId: 'kr-busan-haeundae', dx: -3.4, dy: -2.4 },
-  { householdId: 'sister', regionId: 'kr-busan-haeundae', dx: 3.6, dy: 2.4 },
-  { householdId: 'brother', regionId: 'kr-seoul-mapo', dx: 0, dy: -2.6 },
-  { householdId: 'home', regionId: 'kr-gimhae-bonghwang', dx: 0, dy: 2.8 },
+  { householdId: 'parents', regionId: 'kr-busan-haeundae', dx: -0.55, dy: -0.38 },
+  { householdId: 'sister', regionId: 'kr-busan-haeundae', dx: 0.55, dy: 0.38 },
+  { householdId: 'brother', regionId: 'kr-seoul-mapo', dx: 0, dy: -0.34 },
+  { householdId: 'home', regionId: 'kr-gimhae-bonghwang', dx: 0, dy: 0.18 },
 ];
 
 const familyRouteSegments: readonly FamilyRouteSegment[] = [
