@@ -41,6 +41,64 @@ function sameMembers(actual, expected, label) {
   assert(JSON.stringify(a) === JSON.stringify(e), `${label} mismatch`);
 }
 
+function orientation(a, b, c) {
+  return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+}
+
+function pointOnSegment(a, b, point) {
+  return Math.abs(orientation(a, b, point)) <= 1e-9
+    && point[0] >= Math.min(a[0], b[0]) - 1e-9
+    && point[0] <= Math.max(a[0], b[0]) + 1e-9
+    && point[1] >= Math.min(a[1], b[1]) - 1e-9
+    && point[1] <= Math.max(a[1], b[1]) + 1e-9;
+}
+
+function segmentsProperlyIntersect(a, b, c, d) {
+  const abC = orientation(a, b, c);
+  const abD = orientation(a, b, d);
+  const cdA = orientation(c, d, a);
+  const cdB = orientation(c, d, b);
+  return abC * abD < -1e-9 && cdA * cdB < -1e-9;
+}
+
+function pointInPolygon(polygon, point) {
+  for (let index = 0; index < polygon.length; index += 1) {
+    if (pointOnSegment(polygon[index], polygon[(index + 1) % polygon.length], point)) return true;
+  }
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index, index += 1) {
+    const [xi, yi] = polygon[index];
+    const [xj, yj] = polygon[previous];
+    const crosses = (yi > point[1]) !== (yj > point[1]);
+    if (crosses && point[0] < ((xj - xi) * (point[1] - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+function polygonHasSelfIntersection(feature) {
+  const points = feature.polygon;
+  for (let a = 0; a < points.length; a += 1) {
+    const aNext = (a + 1) % points.length;
+    for (let b = a + 1; b < points.length; b += 1) {
+      const bNext = (b + 1) % points.length;
+      if (a === b || aNext === b || bNext === a) continue;
+      if (segmentsProperlyIntersect(points[a], points[aNext], points[b], points[bNext])) return true;
+    }
+  }
+  return false;
+}
+
+function firstLevelPolygonsOverlap(a, b) {
+  for (let aIndex = 0; aIndex < a.polygon.length; aIndex += 1) {
+    const aNext = (aIndex + 1) % a.polygon.length;
+    for (let bIndex = 0; bIndex < b.polygon.length; bIndex += 1) {
+      const bNext = (bIndex + 1) % b.polygon.length;
+      if (segmentsProperlyIntersect(a.polygon[aIndex], a.polygon[aNext], b.polygon[bIndex], b.polygon[bNext])) return true;
+    }
+  }
+  return pointInPolygon(a.polygon, b.centroid) || pointInPolygon(b.polygon, a.centroid);
+}
+
 const expectedRegionNames = [
   '서울특별시', '부산광역시', '대구광역시', '인천광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시',
   '경기도', '강원특별자치도', '충청북도', '충청남도', '전북특별자치도', '전라남도', '경상북도', '경상남도', '제주특별자치도',
@@ -103,6 +161,20 @@ for (const feature of boundaries.features) {
 }
 assert(ids.size === requiredIds.size, 'missing required Korea boundary-guide feature ids');
 sameMembers(boundaries.features.filter((feature) => feature.adminLevel === 1).map((feature) => feature.nameKo), expectedRegionNames, 'rendered first-level region names');
+
+const firstLevelFeatures = boundaries.features.filter((feature) => feature.adminLevel === 1);
+assert(firstLevelFeatures.length === firstLevelIds.size, 'expected exactly 17 first-level Korea polygons for clickability validation');
+for (const feature of firstLevelFeatures) {
+  assert(!polygonHasSelfIntersection(feature), `${feature.id} polygon must be simple enough for SVG hit testing`);
+  assert(pointInPolygon(feature.polygon, feature.centroid), `${feature.id} centroid must be inside its first-level polygon`);
+}
+for (let leftIndex = 0; leftIndex < firstLevelFeatures.length; leftIndex += 1) {
+  for (let rightIndex = leftIndex + 1; rightIndex < firstLevelFeatures.length; rightIndex += 1) {
+    const left = firstLevelFeatures[leftIndex];
+    const right = firstLevelFeatures[rightIndex];
+    assert(!firstLevelPolygonsOverlap(left, right), `${left.id} and ${right.id} first-level polygons must not overlap or capture each other's safe click point`);
+  }
+}
 
 assert(Array.isArray(boundaries.islandReferences), 'boundary data must declare Jeju/Ulleungdo/Dokdo island references');
 assert(boundaries.islandReferences.length === expectedIslandReferencesKo.length, 'boundary data must declare exactly 3 static island references');
@@ -199,8 +271,8 @@ for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
   assert(slotMatches.length === expectation.slots, `${householdId} must have ${expectation.slots} Naver Band slot(s)`);
   assert(koreaOverlaySource.includes(expectation.terminalRegion), `Korea overlay must retain terminal region ${expectation.terminalRegion}`);
 }
-assert(koreaOverlaySource.includes('household-marker'), 'Korea overlay must render glowing household markers');
-assert(koreaOverlaySource.includes('householdMarkers'), 'Korea overlay must keep explicit household marker model');
+assert(koreaOverlaySource.includes('renderHouseholdCards'), 'Korea overlay must retain terminal household-card rendering');
+assert(koreaOverlaySource.includes('nameGateState') && koreaOverlaySource.includes('암구호를 대시오!') && koreaOverlaySource.includes('암구호 틀림'), 'Korea overlay must retain terminal family passphrase gate flow');
 assert(koreaOverlaySource.includes('setHighlightedRegion') && koreaOverlaySource.includes('data-region-id'), 'Korea overlay must cross-highlight route list and map regions');
 assert(koreaOverlaySource.includes('pointerenter') && koreaOverlaySource.includes('focus'), 'Korea overlay cross-highlight must support pointer and keyboard focus');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
