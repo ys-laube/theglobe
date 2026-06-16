@@ -22,6 +22,9 @@ assert(buckets.every((bucket) => bucket.length === 10), 'TOP100 data must split 
 assert(overlaySource.includes('data-rank-group'), 'overlay must render rank group elements for TOP100');
 assert(overlaySource.includes('button.dataset.cityId = capital.id'), 'overlay must render clickable city list buttons');
 assert(overlaySource.includes('focusCity(capital)'), 'overlay list/marker selection must focus and open the card');
+assert(overlaySource.includes('selectedCityGlow'), 'overlay must add a selected city marker glow mesh');
+assert(overlaySource.includes("button.setAttribute('aria-current', 'true')"), 'overlay must mark the selected TOP100 list city');
+assert(overlaySource.includes('selectedGlow.visible = visible && isSelected'), 'overlay must only show marker glow for the selected visible city');
 assert(rendererSource.includes('focusLocation'), 'renderer must expose focusLocation for city focus');
 assert(rendererSource.includes('focusRotation'), 'renderer must animate toward focusRotation city target');
 

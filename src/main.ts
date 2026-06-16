@@ -59,7 +59,7 @@ let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
 function updateQaState() {
   const selectedCity = overlay.getSelectedCity();
   const lastFocus = overlay.getLastFocus();
-  const explorationQa = overlay.getQaState();
+  const overlayQa = overlay.getQaState();
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
@@ -74,7 +74,8 @@ function updateQaState() {
     selectedCityName: selectedCity?.city ?? null,
     selectedCityRank: selectedCity?.rank ?? null,
     selectedCityCardOpen: Boolean(selectedCity),
-    selectedMarkerGlowCityId: explorationQa.selectedMarkerGlowCityId,
+    selectedCityMarkerGlowVisible: overlayQa.selectedCityMarkerGlowVisible,
+    selectedCityListHighlighted: overlayQa.selectedCityListHighlighted,
     lastFocusedCityId: lastFocus?.cityId ?? null,
     lastFocusRotationDelta: lastFocus?.delta ?? 0,
     koreaFamilyEntryRequested,

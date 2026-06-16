@@ -18,7 +18,8 @@ export type ExplorationOverlay = {
     top100GroupCount: number;
     selectedCityId: string | null;
     focusedCityId: string | null;
-    selectedMarkerGlowCityId: string | null;
+    selectedCityMarkerGlowVisible: boolean;
+    selectedCityListHighlighted: boolean;
   };
 };
 
@@ -62,6 +63,15 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
   return element;
 }
 
+function setMeshOpacity(mesh: THREE.Mesh, opacity: number) {
+  const material = mesh.material;
+  if (Array.isArray(material)) {
+    material.forEach((item) => { item.opacity = opacity; item.needsUpdate = true; });
+    return;
+  }
+  material.opacity = opacity;
+  material.needsUpdate = true;
+}
 
 function makeMarker(capital: Capital, radius: number) {
   const markerMaterial = new THREE.MeshBasicMaterial({
@@ -96,14 +106,31 @@ function makeMarker(capital: Capital, radius: number) {
   ring.position.copy(marker.position.clone().multiplyScalar(1.002));
   ring.lookAt(new THREE.Vector3(0, 0, 0));
   ring.userData.capital = capital;
-  return { marker, markerMaterial, ring, ringMaterial, hitArea };
+
+  const selectedGlow = new THREE.Mesh(
+    new THREE.RingGeometry(capital.mode === 'top100' ? 0.062 : 0.072, capital.mode === 'top100' ? 0.092 : 0.105, 40),
+    new THREE.MeshBasicMaterial({
+      color: capital.accent,
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+  );
+  selectedGlow.position.copy(marker.position.clone().multiplyScalar(1.004));
+  selectedGlow.lookAt(new THREE.Vector3(0, 0, 0));
+  selectedGlow.visible = false;
+  selectedGlow.userData.capital = capital;
+  selectedGlow.userData.selectedCityGlow = true;
+  return { marker, ring, hitArea, selectedGlow };
 }
 
 export function createExplorationOverlay(globe: GlobeRenderer, elements: OverlayElements): ExplorationOverlay {
   const cityData = [...capitalCities, ...top100PopularCities];
   const markerObjects = cityData.map((capital) => ({ capital, ...makeMarker(capital, globe.radius) }));
-  markerObjects.forEach(({ marker, ring, hitArea }) => {
-    globe.addMarkerObjects(marker, ring, hitArea);
+  markerObjects.forEach(({ marker, ring, hitArea, selectedGlow }) => {
+    globe.addMarkerObjects(marker, ring, hitArea, selectedGlow);
   });
 
   let cityMode: CityExplorationMode = 'capitals';
@@ -176,24 +203,23 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     showCard(capital);
     const focus = globe.focusLocation(capital.lat, capital.lng);
     lastFocus = { cityId: capital.id, delta: focus.delta };
+    syncUi();
     emitSelectionChange();
   }
 
   function syncUi() {
     const canShowMarkers = explorationMode && earthReady;
     globe.setMarkerLayerVisible(canShowMarkers);
-    markerObjects.forEach(({ capital, marker, markerMaterial, ring, ringMaterial, hitArea }) => {
+    markerObjects.forEach(({ capital, marker, ring, hitArea, selectedGlow }) => {
       const visible = canShowMarkers && capital.mode === cityMode;
-      const selectedMarker = Boolean(selected && selected.id === capital.id && visible);
+      const isSelected = selected?.id === capital.id;
       marker.visible = visible;
       ring.visible = visible;
       hitArea.visible = visible;
-      marker.userData.selectedMarkerGlow = selectedMarker;
-      ring.userData.selectedMarkerGlow = selectedMarker;
-      markerMaterial.opacity = selectedMarker ? 1 : (capital.mode === 'top100' ? 0.72 : 0.82);
-      ringMaterial.opacity = selectedMarker ? 0.82 : (capital.mode === 'top100' ? 0.22 : 0.28);
-      marker.scale.setScalar(selectedMarker ? selectedMarkerScale : markerBaseScale);
-      ring.scale.setScalar(selectedMarker ? selectedRingScale : markerBaseScale);
+      selectedGlow.visible = visible && isSelected;
+      setMeshOpacity(marker, isSelected ? 1 : (capital.mode === 'top100' ? 0.72 : 0.82));
+      setMeshOpacity(ring, isSelected ? 0.72 : (capital.mode === 'top100' ? 0.22 : 0.28));
+      setMeshOpacity(selectedGlow, isSelected ? 0.58 : 0);
     });
 
     const data = visibleData();
@@ -230,6 +256,11 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
           button.className = 'rank-city-button';
           button.dataset.action = 'focus-city';
           button.dataset.cityId = capital.id;
+          if (selected?.id === capital.id) {
+            item.classList.add('is-selected');
+            button.classList.add('is-selected');
+            button.setAttribute('aria-current', 'true');
+          }
           appendText(button, 'span', `${capital.rank}. ${capital.city}`, 'rank-city');
           appendText(button, 'span', capital.country, 'rank-country');
           button.addEventListener('click', () => focusCity(capital));
@@ -306,7 +337,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
       selectedCityId: selected?.id ?? null,
       focusedCityId: lastFocus?.cityId ?? null,
-      selectedMarkerGlowCityId: markerObjects.find(({ marker }) => marker.userData.selectedMarkerGlow)?.capital.id ?? null,
+      selectedCityMarkerGlowVisible: Boolean(selected && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible)),
+      selectedCityListHighlighted: Boolean(selected && elements.regionList.querySelector(`[data-action="focus-city"][data-city-id="${CSS.escape(selected.id)}"].is-selected[aria-current="true"]`)),
     }),
   };
 }

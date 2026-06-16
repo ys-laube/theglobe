@@ -196,6 +196,13 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .rank-group ol { display: grid; gap: 0.35rem; margin: 0; padding-left: 1.2rem; }
 .rank-group li { color: #64748b; }
 .rank-group button { min-height: 34px; width: 100%; padding: 0.42rem 0.58rem; border-radius: 0.7rem; text-align: left; background: rgba(255,255,255,0.06); color: #e0f2fe; }
+.rank-group li.is-selected { color: #fde68a; }
+.rank-group button.is-selected {
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.30), rgba(56, 189, 248, 0.18));
+  color: #fff7ed;
+  box-shadow: 0 0 0 1px rgba(254, 240, 138, 0.34), 0 0 1.1rem rgba(250, 204, 21, 0.22);
+}
+.rank-group button.is-selected .rank-country { color: #fef3c7; }
 .asset-note { margin-top: 1rem; font-size: 0.76rem; color: #94a3b8; }
 
 @media (max-width: 1080px) {

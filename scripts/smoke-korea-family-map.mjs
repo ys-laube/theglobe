@@ -161,6 +161,8 @@ try {
         const top100HongKongButton = document.querySelector('[data-action="focus-city"][data-city-id="top100-hong-kong"]');
         top100HongKongButton?.click();
         await waitFor(() => window.__GLOBE_QA__?.selectedCityId === 'top100-hong-kong', 'TOP100 Hong Kong selected from list');
+        await waitFor(() => window.__GLOBE_QA__?.selectedCityMarkerGlowVisible, 'TOP100 Hong Kong selected marker glow');
+        await waitFor(() => window.__GLOBE_QA__?.selectedCityListHighlighted, 'TOP100 Hong Kong selected list highlight');
         await waitFor(() => window.__GLOBE_QA__?.lastFocusRotationDelta > 0.006, 'TOP100 list city focus target delta');
         await waitFor(() => Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y) > 0.08, 'TOP100 list city focus rotation');
         const focusedCityCardTitle = document.querySelector('.city-card h2')?.textContent?.trim();
@@ -169,7 +171,8 @@ try {
         const focusedCityCardLink = document.querySelector('.city-card a[href^="https://"]')?.href;
         const listFocusRotationDeltaY = Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y);
         const selectedCityFromQa = window.__GLOBE_QA__?.selectedCity;
-        const selectedMarkerGlowFromQa = window.__GLOBE_QA__?.selectedMarkerGlowCityId;
+        const listSelectedGlowVisible = window.__GLOBE_QA__?.selectedCityMarkerGlowVisible;
+        const listSelectedHighlighted = window.__GLOBE_QA__?.selectedCityListHighlighted;
 
         const canvas = document.querySelector('#globe');
         const clickProjectedCity = async (cityId, lat, lng, label) => {
@@ -183,10 +186,16 @@ try {
           }, label + ' projected on visible globe');
           canvas.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: point.clientX, clientY: point.clientY, pointerId: 77, pointerType: 'mouse' }));
           await waitFor(() => window.__GLOBE_QA__?.selectedCityId === cityId && window.__GLOBE_QA__?.viewMode === 'earth', label + ' marker click priority');
+          await waitFor(() => window.__GLOBE_QA__?.selectedCityMarkerGlowVisible, label + ' selected marker glow');
+          await waitFor(() => window.__GLOBE_QA__?.selectedCityListHighlighted, label + ' selected TOP100 list highlight');
           return document.querySelector('.city-card h2')?.textContent?.trim();
         };
         const seoulMarkerCardTitle = await clickProjectedCity('top100-seoul', 37.5665, 126.978, 'Seoul');
+        const seoulMarkerGlowVisible = window.__GLOBE_QA__?.selectedCityMarkerGlowVisible;
+        const seoulListHighlighted = window.__GLOBE_QA__?.selectedCityListHighlighted;
         const jejuMarkerCardTitle = await clickProjectedCity('top100-jeju', 33.4996, 126.5312, 'Jeju');
+        const jejuMarkerGlowVisible = window.__GLOBE_QA__?.selectedCityMarkerGlowVisible;
+        const jejuListHighlighted = window.__GLOBE_QA__?.selectedCityListHighlighted;
 
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
@@ -230,9 +239,14 @@ try {
           focusedCityCardLink,
           listFocusRotationDeltaY,
           selectedCityFromQa,
-          selectedMarkerGlowFromQa,
+          listSelectedGlowVisible,
+          listSelectedHighlighted,
           seoulMarkerCardTitle,
+          seoulMarkerGlowVisible,
+          seoulListHighlighted,
           jejuMarkerCardTitle,
+          jejuMarkerGlowVisible,
+          jejuListHighlighted,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
           cityCardPresent: Boolean(document.querySelector('.city-card')),
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
@@ -278,14 +292,17 @@ try {
   const expectedRankGroups = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
   if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected TOP100 rank groups ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
   if (result.selectedCityFromQa?.id !== 'top100-hong-kong' || result.selectedCityFromQa?.rank !== 1) throw new Error(`Expected QA selected TOP100 Hong Kong rank 1, found ${JSON.stringify(result.selectedCityFromQa)}`);
-  if (result.selectedMarkerGlowFromQa !== 'top100-hong-kong') throw new Error(`Expected selected marker glow for top100-hong-kong, found ${result.selectedMarkerGlowFromQa}`);
+  if (!result.listSelectedGlowVisible) throw new Error('Expected TOP100 list selection to show selected city marker glow');
+  if (!result.listSelectedHighlighted) throw new Error('Expected TOP100 list selection to highlight selected list row');
   if (result.listFocusRotationDeltaY <= 0.08) throw new Error(`Expected list click to rotate/focus globe, delta=${result.listFocusRotationDeltaY}`);
   if (!result.focusedCityCardOpen) throw new Error('Expected existing detail card to be open after TOP100 list click');
   if (result.focusedCityCardTitle !== '1. Hong Kong') throw new Error(`Expected existing detail card to open Hong Kong, found ${result.focusedCityCardTitle}`);
   if (!result.focusedCityCardKicker?.includes('#1')) throw new Error(`Expected card kicker to include TOP100 rank, found ${result.focusedCityCardKicker}`);
   if (!result.focusedCityCardLink?.startsWith('https://')) throw new Error(`Expected focused card HTTPS link, found ${result.focusedCityCardLink}`);
   if (result.seoulMarkerCardTitle !== '24. Seoul') throw new Error(`Expected Seoul marker click to keep TOP100 city priority, found ${result.seoulMarkerCardTitle}`);
+  if (!result.seoulMarkerGlowVisible || !result.seoulListHighlighted) throw new Error('Expected Seoul marker selection to keep glow and TOP100 list highlight');
   if (result.jejuMarkerCardTitle !== '87. Jeju') throw new Error(`Expected Jeju marker click to keep TOP100 city priority, found ${result.jejuMarkerCardTitle}`);
+  if (!result.jejuMarkerGlowVisible || !result.jejuListHighlighted) throw new Error('Expected Jeju marker selection to keep glow and TOP100 list highlight');
   if (result.panelHasStatsLanguage) throw new Error('Expected old stats/premium panel language to be removed');
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
   if (result.rotationDeltaY <= 0.006) throw new Error(`Expected globe auto-rotation, delta=${result.rotationDeltaY}`);
