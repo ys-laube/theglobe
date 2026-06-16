@@ -179,7 +179,7 @@ const friendlyStateLabels: Record<string, string> = {
 };
 
 globe.onStateChange((state, message, credit) => {
-  stateLabel.textContent = friendlyStateLabels[state] ?? 'Earth ready';
+  stateLabel.textContent = friendlyStateLabels[state] ?? 'Our Earth';
   stateCopy.textContent = message;
   overlay?.updateState(state);
   updateQaState();
