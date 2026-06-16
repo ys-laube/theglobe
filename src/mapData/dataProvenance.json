@@ -67,7 +67,23 @@
       "제주도",
       "울릉도",
       "독도"
-    ]
+    ],
+    "islandAdministrativeContext": {
+      "제주도": [
+        "제주특별자치도"
+      ],
+      "울릉도": [
+        "경상북도",
+        "울릉군",
+        "울릉읍"
+      ],
+      "독도": [
+        "경상북도",
+        "울릉군",
+        "울릉읍",
+        "독도리"
+      ]
+    }
   },
   "capitals": {
     "sourceLock": "un-member-states-plus-capital-coordinates-static-2026-06-16",
@@ -140,13 +156,13 @@
     ]
   },
   "validationContract": {
-    "cityDataVerifier": "scripts/verify-city-data.mjs must validate capital count > 33, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, and dataset source metadata.",
+    "cityDataVerifier": "scripts/verify-city-data.mjs must validate exactly 193 UN member-state capital markers, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, explicit TOP100 and UN193 capital Landmark/Food overrides, no generic runtime fallbacks, build-time failure for missing content, and dataset source metadata.",
     "boundaryVerifier": "scripts/verify-boundary-data.mjs must validate Korea boundary sourceClassification, official 17-region contract or documented source-metadata exception, household target coverage, provenance exclusions, and no live map/API requirement."
   },
   "cityContent": {
     "sourceLock": "city-card-content-curated-static-2026-06-16",
     "artifact": "src/data/cityContent.json",
-    "fallbackPolicy": "Explicit high-priority city overrides plus validator-recognized non-placeholder regional fallbacks for remaining visible cards.",
+    "fallbackPolicy": "Explicit city-level Landmark/Food overrides for every visible UN193 capital and every TOP100 city; missing content is a verification/build failure.",
     "licenseUsageNote": "Short original labels only; no copied prose or imagery."
   }
 }

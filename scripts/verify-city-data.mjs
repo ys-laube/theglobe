@@ -37,20 +37,16 @@ function assertContentValue(value, label) {
 }
 function contentFor(mode, entry) {
   const prefix = mode === 'capitals' ? 'capital' : 'top100';
-  return cityContent.overrides[`${prefix}:${entry.id}`]
-    ?? cityContent.fallbacks[prefix]?.[entry.region]
-    ?? cityContent.fallbacks[prefix]?.Global;
+  return cityContent.overrides[`${prefix}:${entry.id}`];
 }
 assert(cityContent.schemaVersion === 1, 'city content schemaVersion must be 1');
 assert(cityContent.source.id === dataProvenance.cityContent.sourceLock, 'city content source id must match provenance lock');
 assert(cityContent.source.licenseUsageNote?.length > 0, 'city content license/usage note is required');
-assert(cityContent.fallbackPolicy?.includes('non-placeholder'), 'city content fallback policy must document non-placeholder fallback use');
-for (const [mode, regionMap] of Object.entries(cityContent.fallbacks)) {
-  for (const [region, content] of Object.entries(regionMap)) {
-    assertContentValue(content.landmark, `${mode} ${region} fallback landmark`);
-    assertContentValue(content.food, `${mode} ${region} fallback food`);
-  }
-}
+assert(cityContent.fallbackPolicy?.includes('explicit city-level overrides'), 'city content policy must require explicit city-level overrides');
+assert(Object.keys(cityContent.fallbacks ?? {}).length === 0, 'city content must not use generic runtime fallbacks');
+assert(!/regional fallback/i.test(dataProvenance.cityContent?.fallbackPolicy ?? ''), 'data provenance city content policy must not mention regional fallbacks');
+const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
+assert(!/regional fallback/i.test(mapDataReadme), 'map data README must not mention regional fallbacks');
 for (const [key, content] of Object.entries(cityContent.overrides)) {
   assertContentValue(content.landmark, `${key} override landmark`);
   assertContentValue(content.food, `${key} override food`);
@@ -81,7 +77,7 @@ for (const entry of capitals.capitals) {
   assertCoordinate(entry, `capital ${entry.id}`);
   assertHttps(entry.link, `capital ${entry.id} link`);
   const content = contentFor('capitals', entry);
-  assert(content, `capital ${entry.id} must have city content override or fallback`);
+  assert(content, `capital ${entry.id} must have explicit city content override`);
   assertContentValue(content.landmark, `capital ${entry.id} landmark`);
   assertContentValue(content.food, `capital ${entry.id} food`);
 }
@@ -112,9 +108,22 @@ for (const entry of top100.cities) {
   assertCoordinate(entry, `TOP100 ${entry.id}`);
   assertHttps(entry.link, `TOP100 ${entry.id} link`);
   const content = contentFor('top100', entry);
-  assert(content, `TOP100 ${entry.id} must have city content override or fallback`);
+  assert(content, `TOP100 ${entry.id} must have explicit city content override`);
   assertContentValue(content.landmark, `TOP100 ${entry.id} landmark`);
   assertContentValue(content.food, `TOP100 ${entry.id} food`);
+  assert(!/heritage district|local signature dish|popular travel dining|local food culture|notable landmark|signature local dish|highlights?/i.test(`${content.landmark} ${content.food}`), `TOP100 ${entry.id} must use specific Landmark/Food content, not generic placeholders`);
+}
+
+
+const top100OverrideIds = new Set(Object.keys(cityContent.overrides).filter((key) => key.startsWith('top100:')).map((key) => key.slice('top100:'.length)));
+assert(top100OverrideIds.size === top100.cities.length, 'every TOP100 city must have explicit city-level Landmark/Food content');
+for (const entry of top100.cities) {
+  assert(top100OverrideIds.has(entry.id), `TOP100 ${entry.id} must have explicit city content override`);
+}
+const capitalOverrideIds = new Set(Object.keys(cityContent.overrides).filter((key) => key.startsWith('capital:')).map((key) => key.slice('capital:'.length)));
+assert(capitalOverrideIds.size === capitals.capitals.length, 'every UN193 capital must have explicit city-level Landmark/Food content');
+for (const entry of capitals.capitals) {
+  assert(capitalOverrideIds.has(entry.id), `capital ${entry.id} must have explicit city content override`);
 }
 
 assert(packageManifest.scripts?.['verify:city-data'] === 'node scripts/verify-city-data.mjs', 'npm verify:city-data must run city data verifier');

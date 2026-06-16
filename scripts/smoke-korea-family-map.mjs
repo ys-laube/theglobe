@@ -159,7 +159,7 @@ try {
         await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '193', 'all UN member-state capitals visible');
         const capitalsTitle = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const capitalsCopy = document.querySelector('[data-tier-copy]')?.textContent?.trim();
-        const capitalFocusOk = window.__GLOBE_QA_FOCUS_CITY__?.('capital-seoul', 'capitals');
+        const capitalFocusOk = await window.__GLOBE_QA_FOCUS_CITY__?.('capital-seoul', 'capitals');
         await waitFor(() => window.__GLOBE_QA__?.selectedCityId === 'capital-seoul', 'capital Seoul rendered card');
         const capitalCardText = document.querySelector('.city-card')?.textContent ?? '';
         const capitalCardTitle = document.querySelector('.city-card h2')?.textContent?.trim();
@@ -219,7 +219,9 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
-        const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => document.body.textContent?.includes(label)).length;
+        await waitFor(() => officialFirstLevelLabels.every((label) => [...document.querySelectorAll('.route-choice strong, .korea-region')].some((node) => (node.textContent ?? node.getAttribute('aria-label') ?? '').includes(label))), 'all 17 first-level Korea labels rendered');
+        const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => [...document.querySelectorAll('.route-choice strong, .korea-region')].some((node) => (node.textContent ?? node.getAttribute('aria-label') ?? '').includes(label))).length;
+        await waitFor(() => document.querySelector('.route-choice[data-region-id="kr-busan"]') && document.querySelector('.korea-region[data-region-id="kr-busan"]'), 'Busan route choice and map region rendered');
         const busanChoice = document.querySelector('.route-choice[data-region-id="kr-busan"]');
         const busanRegion = document.querySelector('.korea-region[data-region-id="kr-busan"]');
         busanChoice?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
@@ -232,6 +234,14 @@ try {
         busanRegion?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
+        await clickButtonByStrong('대구광역시');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-daegu', 'Daegu non-family region tier');
+        const daeguInfoText = document.querySelector('.korea-route-panel')?.textContent ?? '';
+        const daeguInfoHref = document.querySelector('.region-info-link')?.href ?? '';
+        const daeguSelectedRegion = document.querySelector('.korea-region[data-region-id="kr-daegu"]');
+        daeguSelectedRegion?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Daegu selected-region toggle-up');
+        const selectedRegionToggleUpOk = window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview';
         const householdMarkerCount = document.querySelectorAll('.household-marker').length;
         const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
@@ -329,6 +339,9 @@ try {
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           koreaRegionCount,
           koreaRegionLabels,
+          daeguInfoText,
+          daeguInfoHref,
+          selectedRegionToggleUpOk,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           renderedFirstLevelCount,
           listHoverHighlightsMap,
@@ -398,6 +411,9 @@ try {
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
+  if (!result.daeguInfoText?.includes('Landmark') || !result.daeguInfoText?.includes('Food') || !result.daeguInfoText?.includes('서문시장') || !result.daeguInfoText?.includes('막창구이')) throw new Error(`Expected non-family region Landmark/Food panel, found ${result.daeguInfoText}`);
+  if (!result.daeguInfoHref?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected non-family region Namuwiki link, found ${result.daeguInfoHref}`);
+  if (!result.selectedRegionToggleUpOk) throw new Error('Expected selected active Korea region to toggle back to its parent tier');
   if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
   for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);

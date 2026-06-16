@@ -109,6 +109,11 @@ assert(boundaries.islandReferences.length === expectedIslandReferencesKo.length,
 sameMembers(boundaries.islandReferences.map((island) => island.nameKo), expectedIslandReferencesKo, 'static island reference names');
 sameMembers(dataProvenance.koreaBoundaries.requiredIslandReferencesKo, expectedIslandReferencesKo, 'data provenance static island reference names');
 sameMembers(provenance.committedAssetStrategy.islandReferencePolicy?.requiredIslandReferencesKo, expectedIslandReferencesKo, 'boundary provenance island reference names');
+const expectedIslandContexts = new Map([
+  ['제주도', { relatedFeatureId: 'kr-jeju', adminContextKo: ['제주특별자치도'] }],
+  ['울릉도', { relatedFeatureId: 'kr-gyeongbuk', adminContextKo: ['경상북도', '울릉군', '울릉읍'] }],
+  ['독도', { relatedFeatureId: 'kr-gyeongbuk', adminContextKo: ['경상북도', '울릉군', '울릉읍', '독도리'] }],
+]);
 for (const island of boundaries.islandReferences) {
   assert(island.kind === 'decorative-island-reference', `${island.nameKo} must be decorative island reference data`);
   assert(Array.isArray(island.point) && island.point.length === 2, `${island.nameKo} needs a static normalized point`);
@@ -119,6 +124,11 @@ for (const island of boundaries.islandReferences) {
   }
   assert(/static|정적/i.test(island.sourceNote ?? ''), `${island.nameKo} must document static source treatment`);
   assert(/not a legal coordinate/i.test(island.sourceNote ?? '') || island.nameKo === '제주도', `${island.nameKo} must reject legal-coordinate use`);
+  const expectedContext = expectedIslandContexts.get(island.nameKo);
+  assert(expectedContext, `${island.nameKo} must have an expected administrative context`);
+  assert(island.relatedFeatureId === expectedContext.relatedFeatureId, `${island.nameKo} must be associated with ${expectedContext.relatedFeatureId}`);
+  sameMembers(island.adminContextKo, expectedContext.adminContextKo, `${island.nameKo} administrative context`);
+  sameMembers(dataProvenance.koreaBoundaries.islandAdministrativeContext?.[island.nameKo], expectedContext.adminContextKo, `${island.nameKo} data provenance administrative context`);
 }
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
 assert(koreaOverlaySource.includes('제주·울릉도·독도'), 'Korea overlay copy must name Jeju/Ulleungdo/Dokdo references');

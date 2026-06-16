@@ -1029,7 +1029,10 @@
         5.5,
         -2.8
       ],
-      "sourceNote": "Included through the official first-level 제주특별자치도 feature and repeated as a static island reference label for the satellite-style guide; not a legal coordinate."
+      "sourceNote": "Included through the official first-level 제주특별자치도 feature and repeated as a static island reference label for the satellite-style guide; not a legal coordinate.",
+      "adminContextKo": [
+        "제주특별자치도"
+      ]
     },
     {
       "id": "island-ulleungdo-reference",
@@ -1045,7 +1048,13 @@
         3.2,
         -1.8
       ],
-      "sourceNote": "Static decorative island marker documented from official legal-boundary metadata review; not a legal coordinate."
+      "sourceNote": "울릉도는 경상북도 울릉군 울릉읍 행정 맥락으로 문서화한 정적 섬 기준점입니다; not a legal coordinate.",
+      "relatedFeatureId": "kr-gyeongbuk",
+      "adminContextKo": [
+        "경상북도",
+        "울릉군",
+        "울릉읍"
+      ]
     },
     {
       "id": "island-dokdo-reference",
@@ -1061,7 +1070,14 @@
         2.6,
         1.9
       ],
-      "sourceNote": "Static decorative island marker documented from official legal-boundary metadata review; not a legal coordinate."
+      "sourceNote": "독도는 경상북도 울릉군 울릉읍 독도리 행정 맥락으로 문서화한 정적 섬 기준점입니다; not a legal coordinate.",
+      "relatedFeatureId": "kr-gyeongbuk",
+      "adminContextKo": [
+        "경상북도",
+        "울릉군",
+        "울릉읍",
+        "독도리"
+      ]
     }
   ]
 }

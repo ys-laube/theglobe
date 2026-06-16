@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createExplorationOverlay } from './explorationOverlay';
+import type { ExplorationOverlay } from './explorationOverlay';
 import { createGlobeRenderer } from './globeRenderer';
-import { createKoreaFamilyOverlay, type KoreaFamilyOverlay } from './koreaFamilyOverlay';
+import type { KoreaFamilyOverlay } from './koreaFamilyOverlay';
 import './styles.css';
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -56,16 +56,23 @@ const koreaMapHost = document.querySelector<HTMLElement>('.korea-map-host')!;
 
 let koreaFamilyEntryRequested = false;
 let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
+let koreaOverlayLoad: Promise<KoreaFamilyOverlay> | null = null;
+let overlay: ExplorationOverlay | null = null;
+let explorationOverlayLoad: Promise<ExplorationOverlay> | null = null;
 
 function updateQaState() {
-  const selectedCity = overlay.getSelectedCity();
-  const lastFocus = overlay.getLastFocus();
-  const overlayQa = overlay.getQaState();
+  const selectedCity = overlay?.getSelectedCity() ?? null;
+  const lastFocus = overlay?.getLastFocus() ?? null;
+  const overlayQa = overlay?.getQaState() ?? {
+    selectedCityMarkerGlowVisible: false,
+    selectedMarkerGlowCityId: null,
+    selectedCityListHighlighted: false,
+  };
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
     globeRotation: globe.getRotation(),
-    explorationMode: overlay.getExplorationMode(),
+    explorationMode: overlay?.getExplorationMode() ?? false,
     selectedCity: selectedCity ? {
       id: selectedCity.id,
       city: selectedCity.city,
@@ -94,51 +101,75 @@ function updateQaState() {
 const globe = createGlobeRenderer(canvas, stage);
 (window as Window & { __GLOBE_QA_PROJECT_LOCATION__?: (lat: number, lng: number) => { clientX: number; clientY: number; visible: boolean } | null }).__GLOBE_QA_PROJECT_LOCATION__ = (lat: number, lng: number) => globe.projectLocation(lat, lng, canvas);
 
-const overlay = createExplorationOverlay(globe, {
-  card: document.querySelector<HTMLElement>('.city-card')!,
-  explorationButton,
-  tierButton,
-  tierTitle: document.querySelector<HTMLElement>('[data-tier-title]')!,
-  tierCopy: document.querySelector<HTMLElement>('[data-tier-copy]')!,
-  visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
-  regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
-});
-(window as Window & { __GLOBE_QA_FOCUS_CITY__?: (cityId: string, mode: 'capitals' | 'top100') => boolean }).__GLOBE_QA_FOCUS_CITY__ = (cityId, mode) => {
-  overlay.setCityMode(mode);
-  overlay.setExplorationMode(true);
-  return overlay.focusCityById(cityId);
-};
+function ensureExplorationOverlay() {
+  if (overlay) return Promise.resolve(overlay);
+  if (!explorationOverlayLoad) {
+    explorationOverlayLoad = import('./explorationOverlay').then(({ createExplorationOverlay }) => {
+      overlay = createExplorationOverlay(globe, {
+        card: document.querySelector<HTMLElement>('.city-card')!,
+        explorationButton,
+        tierButton,
+        tierTitle: document.querySelector<HTMLElement>('[data-tier-title]')!,
+        tierCopy: document.querySelector<HTMLElement>('[data-tier-copy]')!,
+        visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
+        regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
+      });
+      overlay.updateState(globe.getState());
+      updateQaState();
+      return overlay;
+    });
+  }
+  return explorationOverlayLoad;
+}
 
-koreaFamilyOverlay = createKoreaFamilyOverlay({
-  host: koreaMapHost,
-  onStateChange: updateQaState,
-  onClose: () => {
-    koreaFamilyEntryRequested = false;
-    globe.setKoreaFocus(false);
-  },
-});
+function ensureKoreaFamilyOverlay() {
+  if (koreaFamilyOverlay) return Promise.resolve(koreaFamilyOverlay);
+  if (!koreaOverlayLoad) {
+    koreaOverlayLoad = import('./koreaFamilyOverlay').then(({ createKoreaFamilyOverlay }) => {
+      koreaFamilyOverlay = createKoreaFamilyOverlay({
+        host: koreaMapHost,
+        onStateChange: updateQaState,
+        onClose: () => {
+          koreaFamilyEntryRequested = false;
+          globe.setKoreaFocus(false);
+        },
+      });
+      updateQaState();
+      return koreaFamilyOverlay;
+    });
+  }
+  return koreaOverlayLoad;
+}
+
+(window as Window & { __GLOBE_QA_FOCUS_CITY__?: (cityId: string, mode: 'capitals' | 'top100') => Promise<boolean> }).__GLOBE_QA_FOCUS_CITY__ = async (cityId, mode) => {
+  const loadedOverlay = await ensureExplorationOverlay();
+  loadedOverlay.setCityMode(mode);
+  loadedOverlay.setExplorationMode(true);
+  return loadedOverlay.focusCityById(cityId);
+};
 
 globe.onViewChange(updateQaState);
 
-function enterKoreaFamilyMap() {
+async function enterKoreaFamilyMap() {
   koreaFamilyEntryRequested = true;
-  overlay.setExplorationMode(false);
+  overlay?.setExplorationMode(false);
   globe.setMarkerLayerVisible(false);
   globe.setKoreaFocus(true);
-  koreaFamilyOverlay?.open();
+  const loadedKoreaOverlay = await ensureKoreaFamilyOverlay();
+  loadedKoreaOverlay.open();
   updateQaState();
 }
 
 function handleGlobeTap(event: PointerEvent) {
   const hit = globe.pickVisibleObject(event, canvas);
   if (hit?.userData.koreaHotspot) {
-    enterKoreaFamilyMap();
+    void enterKoreaFamilyMap();
     return true;
   }
   return false;
 }
 
-window.addEventListener('korea-family-map-request', enterKoreaFamilyMap);
+window.addEventListener('korea-family-map-request', () => { void enterKoreaFamilyMap(); });
 
 const friendlyStateLabels: Record<string, string> = {
   boot: 'Preparing Earth',
@@ -151,7 +182,7 @@ const friendlyStateLabels: Record<string, string> = {
 globe.onStateChange((state, message, credit) => {
   stateLabel.textContent = friendlyStateLabels[state] ?? 'Earth ready';
   stateCopy.textContent = message;
-  overlay.updateState(state);
+  overlay?.updateState(state);
   updateQaState();
 });
 
@@ -187,7 +218,7 @@ canvas.addEventListener('pointermove', (event) => {
     lastX = event.clientX;
     lastY = event.clientY;
   }
-  if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerMove(event, isDragging);
+  if (!koreaFamilyOverlay?.getState().open) overlay?.handlePointerMove(event, isDragging);
 });
 
 canvas.addEventListener('pointerup', (event) => {
@@ -195,7 +226,7 @@ canvas.addEventListener('pointerup', (event) => {
   if (movedDistance <= 6 && !koreaFamilyOverlay?.getState().open) {
     if (handleGlobeTap(event)) return;
   }
-  if (!koreaFamilyOverlay?.getState().open) overlay.handlePointerUp(event, movedDistance);
+  if (!koreaFamilyOverlay?.getState().open) overlay?.handlePointerUp(event, movedDistance);
 });
 
 canvas.addEventListener('pointercancel', () => {
@@ -209,8 +240,23 @@ canvas.addEventListener('pointerleave', () => {
 });
 
 startButton.addEventListener('click', () => stage.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-explorationButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
-tierButton.addEventListener('click', () => window.setTimeout(updateQaState, 0));
+explorationButton.addEventListener('click', () => {
+  if (!overlay) {
+    void ensureExplorationOverlay().then((loadedOverlay) => {
+      loadedOverlay.setExplorationMode(true);
+      updateQaState();
+    });
+    return;
+  }
+  window.setTimeout(updateQaState, 0);
+});
+tierButton.addEventListener('click', () => {
+  if (!overlay) {
+    void ensureExplorationOverlay().then(updateQaState);
+    return;
+  }
+  window.setTimeout(updateQaState, 0);
+});
 window.addEventListener('city-selection-change', () => window.setTimeout(updateQaState, 0));
 
 function resize() {

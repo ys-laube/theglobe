@@ -41,7 +41,7 @@ export type CityContentDataset = {
   datasetId: string;
   source: CitySourceMetadata;
   fallbackPolicy: string;
-  fallbacks: Record<string, Record<string, CityCardContent>>;
+  fallbacks: Record<string, never>;
   overrides: Record<string, CityCardContent>;
 };
 

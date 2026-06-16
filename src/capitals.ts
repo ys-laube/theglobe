@@ -20,13 +20,10 @@ export type Capital = {
 
 const accents = ['#7dd3fc', '#f9a8d4', '#f87171', '#fbbf24', '#34d399', '#5eead4', '#fb923c', '#c4b5fd', '#93c5fd', '#bef264'];
 function contentFor(mode: CityExplorationMode, id: string, region: string): CityCardContent {
-  const override = cityContent.overrides[`${mode === 'capitals' ? 'capital' : 'top100'}:${id}`];
-  if (override) return override;
-  const modeFallbacks = cityContent.fallbacks[mode === 'capitals' ? 'capital' : 'top100'];
-  return modeFallbacks?.[region] ?? modeFallbacks?.Global ?? {
-    landmark: 'historic center or signature viewpoint',
-    food: 'beloved local dish',
-  };
+  const prefix = mode === 'capitals' ? 'capital' : 'top100';
+  const override = cityContent.overrides[`${prefix}:${id}`];
+  if (!override) throw new Error(`Missing explicit city content for ${mode}:${id} (${region})`);
+  return override;
 }
 
 function accentFor(index: number) {

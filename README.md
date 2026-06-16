@@ -17,7 +17,7 @@ lives in `src/mapData/worldCountryBorders.json`.
 
 The static data contract is locked in `src/mapData/dataProvenance.json` and
 validated by `npm run verify:data`: Korea boundary candidates are build-time
-public-data/VWorld static snapshots or documented metadata only, the capital dataset must contain the locked 194 sovereign-state capital markers, and TOP100 city data must contain exactly 100 contiguous ranked rows from
+public-data/VWorld static snapshots or documented metadata only, the capital dataset must contain the locked 193 UN member-state capital markers, and TOP100 city data must contain exactly 100 contiguous ranked rows from
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
@@ -71,7 +71,7 @@ Deploy this Vite app to any static host such as Vercel, Netlify, Cloudflare Page
 Latest local final gate evidence should include:
 
 - `npm run verify` — TypeScript, static data/provenance validators, production build.
-- `npm run smoke:korea` — production build plus headless Chrome smoke covering 194-capitals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, 17-region official/static satellite-style overlay with Jeju/Ulleungdo/Dokdo references, Haeundae drilldown, Seoul/Jeju marker priority, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
+- `npm run smoke:korea` — production build plus headless Chrome smoke covering 193-UN-member-state-capitals/TOP100 exploration, globe auto-rotation, Korea same-stage morph, 17-region official/static satellite-style overlay with Jeju/Ulleungdo/Dokdo references, Haeundae drilldown, Seoul/Jeju marker priority, glowing household markers, removed forecast UI guard, and the 건희민하찬희네 name gate.
 - `git diff --check` — whitespace/static diff hygiene.
 
-The current production bundle emits Vite's large-chunk warning because Three.js and static globe/map data are bundled client-side. This is noted as a performance follow-up, not a functional failure.
+The production build isolates Three.js as a vendor chunk and lazy-loads dense exploration/Korea/world-border data chunks. If first-load size becomes visible on the final hosting target, the next performance step is deeper route-level preloading or optional asset compression.

@@ -3,84 +3,47 @@
   "datasetId": "city-card-content-static-2026-06-16",
   "source": {
     "id": "city-card-content-curated-static-2026-06-16",
-    "name": "Curated static city card landmark and food labels with regional fallback policy",
+    "name": "Curated static city card landmark and food labels with explicit per-city coverage",
     "extractedAt": "2026-06-16",
-    "licenseUsageNote": "Short original landmark/food labels only; priority overrides use linked public reference pages, with no copied prose or imagery. Regional fallbacks are intentionally marked and validated as non-placeholder fallback copy."
+    "licenseUsageNote": "Short original landmark/food labels only; city overrides use linked public reference pages, with no copied prose or imagery. Validators require explicit capital and TOP100 overrides so runtime cards never depend on generic placeholder text."
   },
-  "fallbackPolicy": "Use explicit city overrides for priority/family/render-smoke cities. Remaining cards use non-placeholder regional fallback labels that avoid city-name templates and generic placeholder terms.",
-  "fallbacks": {
-    "capital": {
-      "Asia": {
-        "landmark": "historic royal quarter",
-        "food": "signature noodle, rice, or market dish"
-      },
-      "Europe": {
-        "landmark": "old town square or national monument",
-        "food": "classic café plate or regional pastry"
-      },
-      "Africa": {
-        "landmark": "central heritage district or national monument",
-        "food": "spiced stew, grilled dish, or shared grain plate"
-      },
-      "North America": {
-        "landmark": "national mall or civic plaza",
-        "food": "neighborhood classic or market favorite"
-      },
-      "South America": {
-        "landmark": "historic plaza or cathedral quarter",
-        "food": "grilled specialty or local street snack"
-      },
-      "Oceania": {
-        "landmark": "harbor, parliament, or waterfront site",
-        "food": "island produce or ocean-side dish"
-      },
-      "Global": {
-        "landmark": "historic center or skyline viewpoint",
-        "food": "beloved local dish"
-      }
-    },
-    "top100": {
-      "Global": {
-        "landmark": "signature skyline, old town, or waterfront viewpoint",
-        "food": "well-known local dish or market favorite"
-      }
-    }
-  },
+  "fallbackPolicy": "All visible capital and TOP100 entries require explicit city-level overrides. Missing city content is a build-time error, not a runtime fallback.",
+  "fallbacks": {},
   "overrides": {
     "capital:seoul": {
       "landmark": "Gyeongbokgung Palace",
       "food": "kimchi jjigae",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Gyeongbokgung"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Seoul"
     },
     "capital:tokyo": {
       "landmark": "Tokyo Tower",
       "food": "sushi",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Tokyo_Tower"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tokyo"
     },
     "capital:singapore": {
       "landmark": "Marina Bay Sands",
       "food": "Hainanese chicken rice",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Marina_Bay_Sands"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Singapore"
     },
     "capital:bangkok": {
       "landmark": "Grand Palace",
       "food": "pad thai",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Grand_Palace"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bangkok"
     },
     "capital:paris": {
       "landmark": "Eiffel Tower",
       "food": "croissant",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Paris"
     },
     "capital:london": {
       "landmark": "Tower Bridge",
       "food": "fish and chips",
-      "sourceUrl": "https://en.wikipedia.org/wiki/Tower_Bridge"
+      "sourceUrl": "https://en.wikipedia.org/wiki/London"
     },
     "capital:washington-d-c": {
       "landmark": "National Mall",
       "food": "half-smoke",
-      "sourceUrl": "https://en.wikipedia.org/wiki/National_Mall"
+      "sourceUrl": "https://en.wikipedia.org/wiki/Washington,_D.C."
     },
     "top100:hong-kong": {
       "landmark": "Victoria Peak",
@@ -111,6 +74,1406 @@
       "landmark": "Seongsan Ilchulbong",
       "food": "black pork barbecue",
       "sourceUrl": "https://en.wikipedia.org/wiki/Seongsan_Ilchulbong"
+    },
+    "top100:macau": {
+      "landmark": "Ruins of St. Paul’s",
+      "food": "Portuguese egg tart",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Macau"
+    },
+    "top100:paris": {
+      "landmark": "Eiffel Tower",
+      "food": "croissant",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Paris"
+    },
+    "top100:dubai": {
+      "landmark": "Burj Khalifa",
+      "food": "shawarma",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dubai"
+    },
+    "top100:new-york-city": {
+      "landmark": "Statue of Liberty",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/New_York_City"
+    },
+    "top100:kuala-lumpur": {
+      "landmark": "Petronas Twin Towers",
+      "food": "nasi lemak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kuala_Lumpur"
+    },
+    "top100:shenzhen": {
+      "landmark": "Window of the World",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Shenzhen"
+    },
+    "top100:phuket": {
+      "landmark": "Patong Beach",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Phuket"
+    },
+    "top100:istanbul": {
+      "landmark": "Hagia Sophia",
+      "food": "kebab",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Istanbul"
+    },
+    "top100:delhi": {
+      "landmark": "Red Fort",
+      "food": "biryani",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Delhi"
+    },
+    "top100:tokyo": {
+      "landmark": "Tokyo Tower",
+      "food": "ramen",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tokyo"
+    },
+    "top100:rome": {
+      "landmark": "Colosseum",
+      "food": "pizza",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Rome"
+    },
+    "top100:antalya": {
+      "landmark": "Hadrian’s Gate",
+      "food": "kebab",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Antalya"
+    },
+    "top100:taipei": {
+      "landmark": "Taipei 101",
+      "food": "beef noodle soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Taipei"
+    },
+    "top100:guangzhou": {
+      "landmark": "Canton Tower",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Guangzhou"
+    },
+    "top100:mumbai": {
+      "landmark": "Gateway of India",
+      "food": "biryani",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mumbai"
+    },
+    "top100:prague": {
+      "landmark": "Charles Bridge",
+      "food": "trdelník",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Prague"
+    },
+    "top100:mecca": {
+      "landmark": "Masjid al-Haram",
+      "food": "kabsa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mecca"
+    },
+    "top100:miami": {
+      "landmark": "South Beach",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Miami"
+    },
+    "top100:amsterdam": {
+      "landmark": "Rijksmuseum",
+      "food": "stroopwafel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Amsterdam"
+    },
+    "top100:pattaya": {
+      "landmark": "Sanctuary of Truth",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Pattaya"
+    },
+    "top100:shanghai": {
+      "landmark": "The Bund",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Shanghai"
+    },
+    "top100:los-angeles": {
+      "landmark": "Hollywood Sign",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Los_Angeles"
+    },
+    "top100:las-vegas": {
+      "landmark": "Las Vegas Strip",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Las_Vegas"
+    },
+    "top100:agra": {
+      "landmark": "Taj Mahal",
+      "food": "petha",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Agra"
+    },
+    "top100:osaka": {
+      "landmark": "Osaka Castle",
+      "food": "takoyaki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Osaka"
+    },
+    "top100:barcelona": {
+      "landmark": "Sagrada Família",
+      "food": "tapas",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Barcelona"
+    },
+    "top100:milan": {
+      "landmark": "Duomo di Milano",
+      "food": "risotto alla Milanese",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Milan"
+    },
+    "top100:denpasar": {
+      "landmark": "Tanah Lot",
+      "food": "nasi goreng",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Denpasar"
+    },
+    "top100:vienna": {
+      "landmark": "Schönbrunn Palace",
+      "food": "sachertorte",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vienna"
+    },
+    "top100:canc-n": {
+      "landmark": "Chichén Itzá day-trip gateway",
+      "food": "cochinita pibil",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Cancún"
+    },
+    "top100:berlin": {
+      "landmark": "Brandenburg Gate",
+      "food": "pretzel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Berlin"
+    },
+    "top100:johor-bahru": {
+      "landmark": "Sultan Abu Bakar State Mosque",
+      "food": "nasi lemak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Johor_Bahru"
+    },
+    "top100:johannesburg": {
+      "landmark": "Constitution Hill",
+      "food": "bunny chow",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Johannesburg"
+    },
+    "top100:ho-chi-minh-city": {
+      "landmark": "Notre-Dame Cathedral Basilica of Saigon",
+      "food": "pho noodle soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ho_Chi_Minh_City"
+    },
+    "top100:riyadh": {
+      "landmark": "Kingdom Centre",
+      "food": "kabsa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Riyadh"
+    },
+    "top100:venice": {
+      "landmark": "St. Mark’s Basilica",
+      "food": "pizza",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Venice"
+    },
+    "top100:jaipur": {
+      "landmark": "Hawa Mahal",
+      "food": "dal baati churma",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Jaipur"
+    },
+    "top100:madrid": {
+      "landmark": "Royal Palace of Madrid",
+      "food": "tapas",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Madrid"
+    },
+    "top100:orlando": {
+      "landmark": "Walt Disney World",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Orlando"
+    },
+    "top100:chennai": {
+      "landmark": "Kapaleeshwarar Temple",
+      "food": "biryani",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Chennai"
+    },
+    "top100:dublin": {
+      "landmark": "Trinity College",
+      "food": "Irish stew",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dublin"
+    },
+    "top100:florence": {
+      "landmark": "Cathedral of Santa Maria del Fiore",
+      "food": "pizza",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Florence"
+    },
+    "top100:moscow": {
+      "landmark": "Red Square",
+      "food": "borscht",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Moscow"
+    },
+    "top100:athens": {
+      "landmark": "Acropolis of Athens",
+      "food": "souvlaki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Athens"
+    },
+    "top100:cairo": {
+      "landmark": "Pyramids of Giza",
+      "food": "koshari",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Cairo"
+    },
+    "top100:ha-noi": {
+      "landmark": "Hoàn Kiếm Lake",
+      "food": "pho noodle soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ha_Noi"
+    },
+    "top100:toronto": {
+      "landmark": "CN Tower",
+      "food": "poutine",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Toronto"
+    },
+    "top100:ha-long": {
+      "landmark": "Hạ Long Bay",
+      "food": "pho noodle soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ha_Long"
+    },
+    "top100:beijing": {
+      "landmark": "Forbidden City",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Beijing"
+    },
+    "top100:sydney": {
+      "landmark": "Sydney Opera House",
+      "food": "meat pie",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Sydney"
+    },
+    "top100:munich": {
+      "landmark": "Marienplatz",
+      "food": "pretzel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Munich"
+    },
+    "top100:budapest": {
+      "landmark": "Buda Castle",
+      "food": "goulash",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Budapest"
+    },
+    "top100:punta-cana": {
+      "landmark": "Bávaro Beach",
+      "food": "mofongo",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Punta_Cana"
+    },
+    "top100:st-petersburg": {
+      "landmark": "Hermitage Museum",
+      "food": "borscht",
+      "sourceUrl": "https://en.wikipedia.org/wiki/St._Petersburg"
+    },
+    "top100:jakarta": {
+      "landmark": "National Monument",
+      "food": "nasi goreng",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Jakarta"
+    },
+    "top100:dammam-city": {
+      "landmark": "Dammam Corniche",
+      "food": "kabsa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dammam_City"
+    },
+    "top100:lisbon": {
+      "landmark": "Belém Tower",
+      "food": "pastel de nata",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lisbon"
+    },
+    "top100:jerusalem": {
+      "landmark": "Western Wall",
+      "food": "falafel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Jerusalem"
+    },
+    "top100:chiang-mai": {
+      "landmark": "Wat Phra That Doi Suthep",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Chiang_Mai"
+    },
+    "top100:zhuhai": {
+      "landmark": "Fisher Girl Statue",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Zhuhai"
+    },
+    "top100:penang-island": {
+      "landmark": "George Town UNESCO heritage streets",
+      "food": "char kway teow",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Penang_Island"
+    },
+    "top100:kyoto": {
+      "landmark": "Kiyomizu-dera",
+      "food": "kaiseki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kyoto"
+    },
+    "top100:heraklion": {
+      "landmark": "Knossos Palace",
+      "food": "dakos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Heraklion"
+    },
+    "top100:phnom-penh": {
+      "landmark": "Royal Palace of Cambodia",
+      "food": "fish amok",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Phnom_Penh"
+    },
+    "top100:brussels": {
+      "landmark": "Grand-Place",
+      "food": "Belgian waffles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Brussels"
+    },
+    "top100:vancouver": {
+      "landmark": "Stanley Park",
+      "food": "poutine",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vancouver"
+    },
+    "top100:copenhagen": {
+      "landmark": "Nyhavn",
+      "food": "smørrebrød",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Copenhagen"
+    },
+    "top100:san-francisco": {
+      "landmark": "Golden Gate Bridge",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/San_Francisco"
+    },
+    "top100:warsaw": {
+      "landmark": "Old Town Market Place",
+      "food": "pierogi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Warsaw"
+    },
+    "top100:krakow": {
+      "landmark": "Wawel Castle",
+      "food": "pierogi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Krakow"
+    },
+    "top100:melbourne": {
+      "landmark": "Flinders Street Station",
+      "food": "meat pie",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Melbourne"
+    },
+    "top100:honolulu": {
+      "landmark": "Waikiki Beach",
+      "food": "local deli sandwich",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Honolulu"
+    },
+    "top100:marrakech": {
+      "landmark": "Jemaa el-Fnaa",
+      "food": "tagine",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Marrakech"
+    },
+    "top100:auckland": {
+      "landmark": "Sky Tower",
+      "food": "hangi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Auckland"
+    },
+    "top100:lviv": {
+      "landmark": "Rynok Square",
+      "food": "Lviv cheesecake",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lviv"
+    },
+    "top100:tel-aviv": {
+      "landmark": "White City",
+      "food": "shakshuka",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tel_Aviv"
+    },
+    "top100:kolkata": {
+      "landmark": "Victoria Memorial",
+      "food": "kathi roll",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kolkata"
+    },
+    "top100:frankfurt": {
+      "landmark": "Römerberg",
+      "food": "Frankfurter sausages",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Frankfurt"
+    },
+    "top100:guilin": {
+      "landmark": "Li River",
+      "food": "regional noodles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Guilin"
+    },
+    "top100:stockholm": {
+      "landmark": "Gamla Stan",
+      "food": "meatballs",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Stockholm"
+    },
+    "top100:siem-reap": {
+      "landmark": "Angkor Wat gateway",
+      "food": "fish amok",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Siem_Reap"
+    },
+    "top100:mexico-city": {
+      "landmark": "Zócalo",
+      "food": "tacos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mexico_City"
+    },
+    "top100:buenos-aires-city": {
+      "landmark": "Teatro Colón",
+      "food": "asado",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Buenos_Aires_City"
+    },
+    "top100:chiba": {
+      "landmark": "Chiba Port Tower",
+      "food": "ramen",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Chiba"
+    },
+    "top100:lima": {
+      "landmark": "Plaza Mayor of Lima",
+      "food": "ceviche",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lima"
+    },
+    "top100:nice": {
+      "landmark": "Promenade des Anglais",
+      "food": "croissant",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nice"
+    },
+    "top100:santiago": {
+      "landmark": "Cerro San Cristóbal",
+      "food": "empanada",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Santiago"
+    },
+    "top100:rio-de-janeiro": {
+      "landmark": "Christ the Redeemer",
+      "food": "feijoada",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Rio_de_Janeiro"
+    },
+    "top100:abu-dhabi": {
+      "landmark": "Sheikh Zayed Grand Mosque",
+      "food": "shawarma",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Abu_Dhabi"
+    },
+    "top100:porto": {
+      "landmark": "Dom Luís I Bridge",
+      "food": "pastel de nata",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Porto"
+    },
+    "top100:batam": {
+      "landmark": "Barelang Bridge",
+      "food": "nasi goreng",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Batam"
+    },
+    "top100:doha": {
+      "landmark": "Museum of Islamic Art",
+      "food": "machboos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Doha"
+    },
+    "top100:rhodes": {
+      "landmark": "Palace of the Grand Master",
+      "food": "souvlaki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Rhodes"
+    },
+    "top100:krabi": {
+      "landmark": "Railay Beach",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Krabi"
+    },
+    "capital:algiers": {
+      "landmark": "Casbah of Algiers",
+      "food": "couscous",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Algiers"
+    },
+    "capital:luanda": {
+      "landmark": "Fortress of São Miguel",
+      "food": "muamba de galinha",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Luanda"
+    },
+    "capital:cotonou": {
+      "landmark": "Dantokpa Market",
+      "food": "akassa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Cotonou"
+    },
+    "capital:gaborone": {
+      "landmark": "Three Dikgosi Monument",
+      "food": "seswaa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Gaborone"
+    },
+    "capital:ouagadougou": {
+      "landmark": "Ouagadougou Grand Mosque",
+      "food": "riz gras",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ouagadougou"
+    },
+    "capital:bujumbura": {
+      "landmark": "Livingstone-Stanley Monument",
+      "food": "mukeke",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bujumbura"
+    },
+    "capital:yaounde": {
+      "landmark": "Reunification Monument",
+      "food": "ndolé",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Yaound%C3%A9"
+    },
+    "capital:praia": {
+      "landmark": "Plateau of Praia",
+      "food": "cachupa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Praia"
+    },
+    "capital:bangui": {
+      "landmark": "Notre-Dame Cathedral of Bangui",
+      "food": "kanda",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bangui"
+    },
+    "capital:n-djamena": {
+      "landmark": "N'Djamena Grand Mosque",
+      "food": "daraba",
+      "sourceUrl": "https://en.wikipedia.org/wiki/N%27Djam%C3%A9na"
+    },
+    "capital:moroni": {
+      "landmark": "Old Friday Mosque",
+      "food": "Comorian pilao",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Moroni"
+    },
+    "capital:brazzaville": {
+      "landmark": "Basilique Sainte-Anne du Congo",
+      "food": "saka-saka",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Brazzaville"
+    },
+    "capital:kinshasa": {
+      "landmark": "Palais de la Nation",
+      "food": "moambe chicken",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kinshasa"
+    },
+    "capital:djibouti": {
+      "landmark": "Place Menelik",
+      "food": "skoudehkaris",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Djibouti"
+    },
+    "capital:cairo": {
+      "landmark": "Pyramids of Giza",
+      "food": "koshari",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Cairo"
+    },
+    "capital:malabo": {
+      "landmark": "Santa Isabel Cathedral",
+      "food": "succotash",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Malabo"
+    },
+    "capital:asmara": {
+      "landmark": "Cinema Impero",
+      "food": "injera",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Asmara"
+    },
+    "capital:mbabane": {
+      "landmark": "Sibebe Rock",
+      "food": "sishwala",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mbabane"
+    },
+    "capital:addis-ababa": {
+      "landmark": "National Museum of Ethiopia",
+      "food": "doro wat",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Addis_Ababa"
+    },
+    "capital:libreville": {
+      "landmark": "Léon-Mba Memorial",
+      "food": "nyembwe chicken",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Libreville"
+    },
+    "capital:banjul": {
+      "landmark": "Arch 22",
+      "food": "domoda",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Banjul"
+    },
+    "capital:accra": {
+      "landmark": "Independence Arch",
+      "food": "jollof rice",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Accra"
+    },
+    "capital:conakry": {
+      "landmark": "Grand Mosque of Conakry",
+      "food": "poulet yassa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Conakry"
+    },
+    "capital:bissau": {
+      "landmark": "Fortaleza de São José da Amura",
+      "food": "caldo de mancarra",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bissau"
+    },
+    "capital:abidjan": {
+      "landmark": "St. Paul's Cathedral",
+      "food": "attiéké",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Abidjan"
+    },
+    "capital:nairobi": {
+      "landmark": "Nairobi National Park",
+      "food": "nyama choma",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nairobi"
+    },
+    "capital:maseru": {
+      "landmark": "Thaba Bosiu",
+      "food": "papa le moroho",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Maseru"
+    },
+    "capital:monrovia": {
+      "landmark": "Centennial Pavilion",
+      "food": "jollof rice",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Monrovia"
+    },
+    "capital:tripoli": {
+      "landmark": "Red Castle Museum",
+      "food": "bazeen",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tripoli"
+    },
+    "capital:antananarivo": {
+      "landmark": "Rova of Antananarivo",
+      "food": "romazava",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Antananarivo"
+    },
+    "capital:lilongwe": {
+      "landmark": "Lilongwe Wildlife Centre",
+      "food": "nsima",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lilongwe"
+    },
+    "capital:bamako": {
+      "landmark": "Bamako Grand Mosque",
+      "food": "maafe",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bamako"
+    },
+    "capital:nouakchott": {
+      "landmark": "Saudi Mosque",
+      "food": "thieboudienne",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nouakchott"
+    },
+    "capital:port-louis": {
+      "landmark": "Aapravasi Ghat",
+      "food": "dholl puri",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Port_Louis"
+    },
+    "capital:rabat": {
+      "landmark": "Hassan Tower",
+      "food": "tagine",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Rabat"
+    },
+    "capital:maputo": {
+      "landmark": "Maputo Railway Station",
+      "food": "matapa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Maputo"
+    },
+    "capital:windhoek": {
+      "landmark": "Christuskirche",
+      "food": "kapana",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Windhoek"
+    },
+    "capital:niamey": {
+      "landmark": "Grand Mosque of Niamey",
+      "food": "djerma stew",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Niamey"
+    },
+    "capital:abuja": {
+      "landmark": "Abuja National Mosque",
+      "food": "suya",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Abuja"
+    },
+    "capital:kigali": {
+      "landmark": "Kigali Genocide Memorial",
+      "food": "brochettes",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kigali"
+    },
+    "capital:dakar": {
+      "landmark": "African Renaissance Monument",
+      "food": "thieboudienne",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dakar"
+    },
+    "capital:victoria": {
+      "landmark": "Victoria Clocktower",
+      "food": "octopus curry",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Victoria"
+    },
+    "capital:freetown": {
+      "landmark": "Cotton Tree",
+      "food": "cassava leaves stew",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Freetown"
+    },
+    "capital:mogadishu": {
+      "landmark": "Arba-Rucun Mosque",
+      "food": "bariis iskukaris",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mogadishu"
+    },
+    "capital:cape-town": {
+      "landmark": "Table Mountain",
+      "food": "bobotie",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Cape_Town"
+    },
+    "capital:juba": {
+      "landmark": "John Garang Mausoleum",
+      "food": "kisra",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Juba"
+    },
+    "capital:khartoum": {
+      "landmark": "Confluence of the Blue and White Nile",
+      "food": "ful medames",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Khartoum"
+    },
+    "capital:sao-tome": {
+      "landmark": "São Sebastião Museum",
+      "food": "calulu",
+      "sourceUrl": "https://en.wikipedia.org/wiki/S%C3%A3o_Tom%C3%A9"
+    },
+    "capital:dodoma": {
+      "landmark": "Gaddafi Mosque",
+      "food": "ugali",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dodoma"
+    },
+    "capital:lome": {
+      "landmark": "Monument de l’Indépendance",
+      "food": "fufu",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lom%C3%A9"
+    },
+    "capital:tunis": {
+      "landmark": "Medina of Tunis",
+      "food": "brik",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tunis"
+    },
+    "capital:kampala": {
+      "landmark": "Kasubi Tombs",
+      "food": "matoke",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kampala"
+    },
+    "capital:lusaka": {
+      "landmark": "Lusaka National Museum",
+      "food": "nshima",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lusaka"
+    },
+    "capital:harare": {
+      "landmark": "National Gallery of Zimbabwe",
+      "food": "sadza",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Harare"
+    },
+    "capital:st-john-s": {
+      "landmark": "St. John's Cathedral",
+      "food": "fungie and pepperpot",
+      "sourceUrl": "https://en.wikipedia.org/wiki/St._John%27s"
+    },
+    "capital:buenos-aires": {
+      "landmark": "Obelisco de Buenos Aires",
+      "food": "asado",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Buenos_Aires"
+    },
+    "capital:nassau": {
+      "landmark": "Queen's Staircase",
+      "food": "conch salad",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nassau"
+    },
+    "capital:bridgetown": {
+      "landmark": "Parliament Buildings of Barbados",
+      "food": "cou-cou and flying fish",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bridgetown"
+    },
+    "capital:belmopan": {
+      "landmark": "National Assembly Building",
+      "food": "rice and beans",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Belmopan"
+    },
+    "capital:la-paz": {
+      "landmark": "Valle de la Luna",
+      "food": "salteñas",
+      "sourceUrl": "https://en.wikipedia.org/wiki/La_Paz"
+    },
+    "capital:brasilia": {
+      "landmark": "Cathedral of Brasília",
+      "food": "pão de queijo",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bras%C3%ADlia"
+    },
+    "capital:ottawa-gatineau": {
+      "landmark": "Parliament Hill",
+      "food": "poutine",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ottawa-Gatineau"
+    },
+    "capital:santiago": {
+      "landmark": "Cerro San Cristóbal",
+      "food": "empanada",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Santiago"
+    },
+    "capital:bogota": {
+      "landmark": "Monserrate",
+      "food": "ajiaco",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bogot%C3%A1"
+    },
+    "capital:san-jose": {
+      "landmark": "National Theatre of Costa Rica",
+      "food": "gallo pinto",
+      "sourceUrl": "https://en.wikipedia.org/wiki/San_Jos%C3%A9"
+    },
+    "capital:havana": {
+      "landmark": "El Capitolio",
+      "food": "ropa vieja",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Havana"
+    },
+    "capital:roseau": {
+      "landmark": "Morne Bruce",
+      "food": "callaloo soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Roseau"
+    },
+    "capital:santo-domingo": {
+      "landmark": "Alcázar de Colón",
+      "food": "mangú",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Santo_Domingo"
+    },
+    "capital:quito": {
+      "landmark": "Church of the Society of Jesus",
+      "food": "locro de papa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Quito"
+    },
+    "capital:san-salvador": {
+      "landmark": "Metropolitan Cathedral of San Salvador",
+      "food": "pupusa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/San_Salvador"
+    },
+    "capital:st-george-s": {
+      "landmark": "Fort George",
+      "food": "oil down",
+      "sourceUrl": "https://en.wikipedia.org/wiki/St.George%27s"
+    },
+    "capital:guatemala-city": {
+      "landmark": "National Palace of Culture",
+      "food": "pepian",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Guatemala_City"
+    },
+    "capital:georgetown": {
+      "landmark": "St. George's Cathedral",
+      "food": "pepperpot",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Georgetown"
+    },
+    "capital:port-au-prince": {
+      "landmark": "Iron Market",
+      "food": "griot",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Port-au-Prince"
+    },
+    "capital:tegucigalpa": {
+      "landmark": "Basilica of Suyapa",
+      "food": "baleada",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tegucigalpa"
+    },
+    "capital:kingston": {
+      "landmark": "Devon House",
+      "food": "jerk chicken",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kingston"
+    },
+    "capital:mexico-city": {
+      "landmark": "Zócalo",
+      "food": "tacos al pastor",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Mexico_City"
+    },
+    "capital:managua": {
+      "landmark": "Old Cathedral of Managua",
+      "food": "gallo pinto",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Managua"
+    },
+    "capital:panama-city": {
+      "landmark": "Casco Viejo",
+      "food": "sancocho",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Panama_City"
+    },
+    "capital:asuncion": {
+      "landmark": "Palacio de los López",
+      "food": "sopa paraguaya",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Asunci%C3%B3n"
+    },
+    "capital:lima": {
+      "landmark": "Plaza Mayor of Lima",
+      "food": "ceviche",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lima"
+    },
+    "capital:basseterre": {
+      "landmark": "Brimstone Hill Fortress",
+      "food": "goat water stew",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Basseterre"
+    },
+    "capital:castries": {
+      "landmark": "Castries Market",
+      "food": "green fig and saltfish",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Castries"
+    },
+    "capital:kingstown": {
+      "landmark": "Fort Charlotte",
+      "food": "roasted breadfruit",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kingstown"
+    },
+    "capital:paramaribo": {
+      "landmark": "Saint Peter and Paul Cathedral",
+      "food": "Surinamese pom casserole",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Paramaribo"
+    },
+    "capital:port-of-spain": {
+      "landmark": "Queen’s Park Savannah",
+      "food": "doubles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Port_of_Spain"
+    },
+    "capital:montevideo": {
+      "landmark": "Plaza Independencia",
+      "food": "chivito",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Montevideo"
+    },
+    "capital:caracas": {
+      "landmark": "El Ávila National Park",
+      "food": "arepa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Caracas"
+    },
+    "capital:kabul": {
+      "landmark": "Babur Garden",
+      "food": "kabuli palaw",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kabul"
+    },
+    "capital:yerevan": {
+      "landmark": "Cascade Complex",
+      "food": "lavash",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Yerevan"
+    },
+    "capital:baku": {
+      "landmark": "Maiden Tower",
+      "food": "plov",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Baku"
+    },
+    "capital:manama": {
+      "landmark": "Bahrain National Museum",
+      "food": "machboos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Manama"
+    },
+    "capital:dhaka": {
+      "landmark": "Lalbagh Fort",
+      "food": "hilsa curry",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dhaka"
+    },
+    "capital:thimphu": {
+      "landmark": "Tashichho Dzong",
+      "food": "ema datshi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Thimphu"
+    },
+    "capital:bandar-seri-begawan": {
+      "landmark": "Sultan Omar Ali Saifuddien Mosque",
+      "food": "ambuyat",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bandar_Seri_Begawan"
+    },
+    "capital:phnom-penh": {
+      "landmark": "Royal Palace of Cambodia",
+      "food": "fish amok",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Phnom_Penh"
+    },
+    "capital:beijing": {
+      "landmark": "Forbidden City",
+      "food": "Peking duck",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Beijing"
+    },
+    "capital:tbilisi": {
+      "landmark": "Narikala Fortress",
+      "food": "khachapuri",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tbilisi"
+    },
+    "capital:delhi": {
+      "landmark": "Red Fort",
+      "food": "butter chicken",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Delhi"
+    },
+    "capital:jakarta": {
+      "landmark": "National Monument",
+      "food": "nasi goreng",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Jakarta"
+    },
+    "capital:tehran": {
+      "landmark": "Golestan Palace",
+      "food": "chelo kebab",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tehran"
+    },
+    "capital:baghdad": {
+      "landmark": "Al-Mutanabbi Street",
+      "food": "masgouf",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Baghdad"
+    },
+    "capital:jerusalem": {
+      "landmark": "Western Wall",
+      "food": "falafel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Jerusalem"
+    },
+    "capital:amman": {
+      "landmark": "Amman Citadel",
+      "food": "mansaf",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Amman"
+    },
+    "capital:astana": {
+      "landmark": "Bayterek Tower",
+      "food": "beshbarmak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Astana"
+    },
+    "capital:kuwait-city": {
+      "landmark": "Kuwait Towers",
+      "food": "machboos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kuwait_City"
+    },
+    "capital:bishkek": {
+      "landmark": "Ala-Too Square",
+      "food": "beshbarmak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bishkek"
+    },
+    "capital:vientiane": {
+      "landmark": "Pha That Luang",
+      "food": "laap",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vientiane"
+    },
+    "capital:beirut": {
+      "landmark": "Pigeon Rocks",
+      "food": "tabbouleh",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Beirut"
+    },
+    "capital:kuala-lumpur": {
+      "landmark": "Petronas Twin Towers",
+      "food": "nasi lemak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kuala_Lumpur"
+    },
+    "capital:male": {
+      "landmark": "Hukuru Miskiy",
+      "food": "mas huni",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Male"
+    },
+    "capital:ulaanbaatar": {
+      "landmark": "Gandantegchinlen Monastery",
+      "food": "buuz",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ulaanbaatar"
+    },
+    "capital:nay-pyi-taw": {
+      "landmark": "Uppatasanti Pagoda",
+      "food": "mohinga",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nay_Pyi_Taw"
+    },
+    "capital:kathmandu": {
+      "landmark": "Boudhanath Stupa",
+      "food": "momo",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kathmandu"
+    },
+    "capital:p-yongyang": {
+      "landmark": "Juche Tower",
+      "food": "naengmyeon",
+      "sourceUrl": "https://en.wikipedia.org/wiki/P%27yongyang"
+    },
+    "capital:muscat": {
+      "landmark": "Sultan Qaboos Grand Mosque",
+      "food": "shuwa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Muscat"
+    },
+    "capital:islamabad": {
+      "landmark": "Faisal Mosque",
+      "food": "nihari",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Islamabad"
+    },
+    "capital:manila": {
+      "landmark": "Intramuros",
+      "food": "adobo",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Manila"
+    },
+    "capital:doha": {
+      "landmark": "Museum of Islamic Art",
+      "food": "machboos",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Doha"
+    },
+    "capital:riyadh": {
+      "landmark": "Kingdom Centre",
+      "food": "kabsa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Riyadh"
+    },
+    "capital:colombo": {
+      "landmark": "Gangaramaya Temple",
+      "food": "kottu roti",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Colombo"
+    },
+    "capital:damascus": {
+      "landmark": "Umayyad Mosque",
+      "food": "kibbeh",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Damascus"
+    },
+    "capital:dushanbe": {
+      "landmark": "Rudaki Park",
+      "food": "qurutob",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dushanbe"
+    },
+    "capital:dili": {
+      "landmark": "Cristo Rei of Dili",
+      "food": "ikan sabuko",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dili"
+    },
+    "capital:ashgabat": {
+      "landmark": "Neutrality Monument",
+      "food": "dograma",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ashgabat"
+    },
+    "capital:ankara": {
+      "landmark": "Anıtkabir",
+      "food": "Ankara tava",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ankara"
+    },
+    "capital:abu-dhabi": {
+      "landmark": "Sheikh Zayed Grand Mosque",
+      "food": "harees",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Abu_Dhabi"
+    },
+    "capital:tashkent": {
+      "landmark": "Khast Imam Complex",
+      "food": "plov",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tashkent"
+    },
+    "capital:ha-noi": {
+      "landmark": "Hoàn Kiếm Lake",
+      "food": "pho noodle soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/H%C3%A0_Noi"
+    },
+    "capital:sana-a": {
+      "landmark": "Old City of Sana’a",
+      "food": "saltah",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Sana%27a%27"
+    },
+    "capital:tirana": {
+      "landmark": "Skanderbeg Square",
+      "food": "byrek",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tirana"
+    },
+    "capital:andorra-la-vella": {
+      "landmark": "Casa de la Vall",
+      "food": "trinxat",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Andorra_la_Vella"
+    },
+    "capital:vienna": {
+      "landmark": "Schönbrunn Palace",
+      "food": "Wiener schnitzel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vienna"
+    },
+    "capital:minsk": {
+      "landmark": "Victory Square",
+      "food": "draniki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Minsk"
+    },
+    "capital:bruxelles-brussel": {
+      "landmark": "Grand-Place",
+      "food": "Belgian waffles",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bruxelles-Brussel"
+    },
+    "capital:sarajevo": {
+      "landmark": "Baščaršija",
+      "food": "ćevapi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Sarajevo"
+    },
+    "capital:sofia": {
+      "landmark": "Alexander Nevsky Cathedral",
+      "food": "banitsa",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Sofia"
+    },
+    "capital:zagreb": {
+      "landmark": "Ban Jelačić Square",
+      "food": "štrukli",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Zagreb"
+    },
+    "capital:nicosia": {
+      "landmark": "Venetian Walls of Nicosia",
+      "food": "halloumi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nicosia"
+    },
+    "capital:prague": {
+      "landmark": "Charles Bridge",
+      "food": "svíčková",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Prague"
+    },
+    "capital:copenhagen": {
+      "landmark": "Nyhavn",
+      "food": "smørrebrød",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Copenhagen"
+    },
+    "capital:tallinn": {
+      "landmark": "Tallinn Old Town",
+      "food": "kama dessert",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tallinn"
+    },
+    "capital:helsinki": {
+      "landmark": "Helsinki Cathedral",
+      "food": "salmon soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Helsinki"
+    },
+    "capital:berlin": {
+      "landmark": "Brandenburg Gate",
+      "food": "currywurst",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Berlin"
+    },
+    "capital:athens": {
+      "landmark": "Acropolis of Athens",
+      "food": "souvlaki",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Athens"
+    },
+    "capital:budapest": {
+      "landmark": "Buda Castle",
+      "food": "goulash",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Budapest"
+    },
+    "capital:reykjavik": {
+      "landmark": "Hallgrímskirkja",
+      "food": "lamb soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Reykjav%C3%ADk"
+    },
+    "capital:dublin": {
+      "landmark": "Trinity College Library",
+      "food": "Irish stew",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Dublin"
+    },
+    "capital:rome": {
+      "landmark": "Colosseum",
+      "food": "carbonara",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Rome"
+    },
+    "capital:riga": {
+      "landmark": "House of the Blackheads",
+      "food": "grey peas with bacon",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Riga"
+    },
+    "capital:vaduz": {
+      "landmark": "Vaduz Castle",
+      "food": "käsknöpfle",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vaduz"
+    },
+    "capital:vilnius": {
+      "landmark": "Gediminas Tower",
+      "food": "cepelinai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Vilnius"
+    },
+    "capital:luxembourg": {
+      "landmark": "Bock Casemates",
+      "food": "judd mat gaardebounen",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Luxembourg"
+    },
+    "capital:valletta": {
+      "landmark": "St. John's Co-Cathedral",
+      "food": "pastizzi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Valletta"
+    },
+    "capital:chisinau": {
+      "landmark": "Nativity Cathedral",
+      "food": "mămăligă",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Chi%C5%9Fin%C4%83u"
+    },
+    "capital:monaco": {
+      "landmark": "Prince’s Palace of Monaco",
+      "food": "barbagiuan",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Monaco"
+    },
+    "capital:podgorica": {
+      "landmark": "Millennium Bridge",
+      "food": "kačamak",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Podgorica"
+    },
+    "capital:amsterdam": {
+      "landmark": "Rijksmuseum",
+      "food": "stroopwafel",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Amsterdam"
+    },
+    "capital:skopje": {
+      "landmark": "Stone Bridge",
+      "food": "tavče gravče",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Skopje"
+    },
+    "capital:oslo": {
+      "landmark": "Oslo Opera House",
+      "food": "fårikål",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Oslo"
+    },
+    "capital:warsaw": {
+      "landmark": "Royal Castle in Warsaw",
+      "food": "pierogi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Warsaw"
+    },
+    "capital:lisbon": {
+      "landmark": "Belém Tower",
+      "food": "pastel de nata",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Lisbon"
+    },
+    "capital:bucharest": {
+      "landmark": "Palace of the Parliament",
+      "food": "sarmale",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bucharest"
+    },
+    "capital:moscow": {
+      "landmark": "Red Square",
+      "food": "borscht",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Moscow"
+    },
+    "capital:san-marino": {
+      "landmark": "Guaita Tower",
+      "food": "torta tre monti",
+      "sourceUrl": "https://en.wikipedia.org/wiki/San_Marino"
+    },
+    "capital:belgrade": {
+      "landmark": "Belgrade Fortress",
+      "food": "pljeskavica",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Belgrade"
+    },
+    "capital:bratislava": {
+      "landmark": "Bratislava Castle",
+      "food": "bryndzové halušky",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bratislava"
+    },
+    "capital:ljubljana": {
+      "landmark": "Ljubljana Castle",
+      "food": "potica",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Ljubljana"
+    },
+    "capital:madrid": {
+      "landmark": "Royal Palace of Madrid",
+      "food": "bocadillo de calamares",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Madrid"
+    },
+    "capital:stockholm": {
+      "landmark": "Stockholm City Hall",
+      "food": "meatballs",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Stockholm"
+    },
+    "capital:bern": {
+      "landmark": "Zytglogge",
+      "food": "rösti",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Bern"
+    },
+    "capital:kiev": {
+      "landmark": "Saint Sophia Cathedral",
+      "food": "chicken Kyiv",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Kiev"
+    },
+    "capital:canberra": {
+      "landmark": "Parliament House",
+      "food": "meat pie",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Canberra"
+    },
+    "capital:suva": {
+      "landmark": "Suva Municipal Market",
+      "food": "kokoda",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Suva"
+    },
+    "capital:tarawa": {
+      "landmark": "Bairiki National Stadium",
+      "food": "palusami",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tarawa"
+    },
+    "capital:majuro": {
+      "landmark": "Alele Museum",
+      "food": "breadfruit with coconut",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Majuro"
+    },
+    "capital:palikir": {
+      "landmark": "Palikir National Government Complex",
+      "food": "taro with coconut",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Palikir"
+    },
+    "capital:nauru": {
+      "landmark": "Buada Lagoon",
+      "food": "coconut fish",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nauru"
+    },
+    "capital:wellington": {
+      "landmark": "Beehive Parliament Building",
+      "food": "pavlova",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Wellington"
+    },
+    "capital:koror": {
+      "landmark": "Belau National Museum",
+      "food": "taro soup",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Koror"
+    },
+    "capital:port-moresby": {
+      "landmark": "National Parliament House",
+      "food": "mumu",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Port_Moresby"
+    },
+    "capital:apia": {
+      "landmark": "Robert Louis Stevenson Museum",
+      "food": "palusami",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Apia"
+    },
+    "capital:honiara": {
+      "landmark": "Honiara Central Market",
+      "food": "Solomon Islands poi pudding",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Honiara"
+    },
+    "capital:nuku-alofa": {
+      "landmark": "Royal Palace of Tonga",
+      "food": "ota ika",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Nuku%27alofa"
+    },
+    "capital:funafuti": {
+      "landmark": "Funafuti Conservation Area",
+      "food": "pulaka",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Funafuti"
+    },
+    "capital:port-vila": {
+      "landmark": "Mele Cascades",
+      "food": "laplap",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Port_Vila"
     }
   }
 }

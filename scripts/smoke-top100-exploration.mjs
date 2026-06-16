@@ -18,8 +18,8 @@ function assert(condition, message) {
 assert(top100.cities.length === 100, 'TOP100 data must contain exactly 100 cities');
 const placeholderPattern = /landmarks?|highlights?|popular travel dining|local food culture|\$\{?city\}?/i;
 for (const city of top100.cities) {
-  const content = cityContent.overrides[`top100:${city.id}`] ?? cityContent.fallbacks.top100?.[city.region] ?? cityContent.fallbacks.top100?.Global;
-  assert(content, `TOP100 ${city.id} must have content`);
+  const content = cityContent.overrides[`top100:${city.id}`];
+  assert(content, `TOP100 ${city.id} must have explicit content override`);
   assert(!placeholderPattern.test(content.landmark), `TOP100 ${city.id} landmark must be non-placeholder`);
   assert(!placeholderPattern.test(content.food), `TOP100 ${city.id} food must be non-placeholder`);
 }
@@ -41,7 +41,9 @@ assert(rendererSource.includes('new THREE.SphereGeometry(0.105, 20, 20)'), 'Kore
 assert(rendererSource.includes('intersections.find((intersection) => intersection.object.userData.capital)'), 'renderer picking must prioritize city markers over Korea hotspot');
 assert(rendererSource.includes('projectLocation'), 'renderer must expose deterministic projected city coordinates for Seoul/Jeju smoke fixtures');
 assert(mainSource.includes('__GLOBE_QA_PROJECT_LOCATION__'), 'QA helper must expose projected marker coordinates for browser smoke fixtures');
-assert(mainSource.includes('__GLOBE_QA_FOCUS_CITY__'), 'QA helper must expose rendered card city focus for capital-card smoke');
+assert(mainSource.includes("import('./explorationOverlay')"), 'main bundle must lazy-load exploration overlay and dense city content');
+assert(mainSource.includes("import('./koreaFamilyOverlay')"), 'main bundle must lazy-load Korea overlay and boundary data');
+assert(mainSource.includes('__GLOBE_QA_FOCUS_CITY__'), 'QA helper must expose async rendered card city focus for capital-card smoke');
 assert(mainSource.includes('selectedCityId') && mainSource.includes('lastFocusRotationDelta') && mainSource.includes('selectedCityCardOpen'), 'QA state must expose exploration list/focus/card contract');
 assert(overlaySource.includes('selectedMarkerGlow') && overlaySource.includes('selectedMarkerGlowCityId'), 'overlay must expose selected marker glow state for QA');
 assert(rendererSource.includes('selectedMarkerGlow') && rendererSource.includes('selectedPulse'), 'renderer must pulse the selected marker more strongly than nearby markers');

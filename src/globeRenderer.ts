@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, shouldForcePrimaryTextureFailure, shouldForcePrimaryTextureTimeout } from './assetsPolicy';
-import worldCountryBorders from './mapData/worldCountryBorders.json';
 
 export type GlobeRuntimeState = 'boot' | 'loading-earth' | 'earth-ready' | 'fallback-earth' | 'asset-enhancement-ready';
 export type GlobeViewMode = 'earth' | 'korea-focus';
@@ -245,7 +244,8 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   );
   globeGroup.add(atmosphere);
 
-  const countryBorders = makeCountryBorderLayer(worldCountryBorders as unknown as BorderLineAsset);
+  const countryBorders = new THREE.Group();
+  countryBorders.name = 'renderer-owned-country-borders-host';
   countryBorders.visible = false;
   globeGroup.add(countryBorders);
 
@@ -280,6 +280,19 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   let attribution = EARTH_ASSETS.day.attribution;
   let failureReason: string | undefined;
 
+  let countryBordersLoad: Promise<void> | null = null;
+  function loadCountryBorders() {
+    if (!countryBordersLoad) {
+      countryBordersLoad = import('./mapData/worldCountryBorders.json').then((module) => {
+        const borderLayer = makeCountryBorderLayer(module.default as unknown as BorderLineAsset);
+        borderLayer.visible = true;
+        countryBorders.add(borderLayer);
+        countryBorders.visible = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state);
+      });
+    }
+    return countryBordersLoad;
+  }
+
   function emit(nextState: GlobeRuntimeState, message: string, nextAttribution = attribution, meta: StateMeta = {}) {
     state = nextState;
     stateMessage = message;
@@ -287,7 +300,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     failureReason = meta.failureReason;
     host.dataset.earthState = state;
     const ready = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'].includes(state);
-    countryBorders.visible = ready;
+    countryBorders.visible = ready && countryBorders.children.length > 0;
     koreaHotspot.visible = ready && viewMode === 'earth';
     const detail = { state, message, attribution, failureReason };
     listeners.forEach((listener) => listener(state, stateMessage, attribution, detail));
@@ -323,6 +336,8 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeMaterial.needsUpdate = true;
       emit('fallback-earth', 'A warm illustrated Earth is ready for exploration.', FALLBACK_ATTRIBUTION, { failureReason: reason });
     }
+
+    void loadCountryBorders();
 
     Promise.allSettled([
       loadTexture(loader, EARTH_ASSETS.clouds.url, EARTH_ASSETS.clouds.label).then((texture) => {

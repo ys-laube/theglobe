@@ -71,7 +71,14 @@ type RouteNode = {
   readonly id: RegionId;
   readonly label: string;
   readonly next: readonly RegionId[];
+  readonly parent?: RegionId;
   readonly households?: readonly HouseholdId[];
+};
+
+type RegionInfo = {
+  readonly namuUrl: string;
+  readonly landmark: string;
+  readonly food: string;
 };
 
 type FamilyRouteSegment = {
@@ -119,27 +126,45 @@ const routeNodes: Record<RegionId, RouteNode> = {
     label: '대한민국',
     next: firstLevelRegionOrder,
   },
-  'kr-seoul': { id: 'kr-seoul', label: '서울특별시', next: ['kr-seoul-mapo'] },
-  'kr-busan': { id: 'kr-busan', label: '부산광역시', next: ['kr-busan-haeundae'] },
-  'kr-daegu': { id: 'kr-daegu', label: '대구광역시', next: [] },
-  'kr-incheon': { id: 'kr-incheon', label: '인천광역시', next: [] },
-  'kr-gwangju': { id: 'kr-gwangju', label: '광주광역시', next: [] },
-  'kr-daejeon': { id: 'kr-daejeon', label: '대전광역시', next: [] },
-  'kr-ulsan': { id: 'kr-ulsan', label: '울산광역시', next: [] },
-  'kr-sejong': { id: 'kr-sejong', label: '세종특별자치시', next: [] },
-  'kr-gyeonggi': { id: 'kr-gyeonggi', label: '경기도', next: [] },
-  'kr-gangwon': { id: 'kr-gangwon', label: '강원특별자치도', next: [] },
-  'kr-chungbuk': { id: 'kr-chungbuk', label: '충청북도', next: [] },
-  'kr-chungnam': { id: 'kr-chungnam', label: '충청남도', next: [] },
-  'kr-jeonbuk': { id: 'kr-jeonbuk', label: '전북특별자치도', next: [] },
-  'kr-jeonnam': { id: 'kr-jeonnam', label: '전라남도', next: [] },
-  'kr-gyeongbuk': { id: 'kr-gyeongbuk', label: '경상북도', next: [] },
-  'kr-gyeongnam': { id: 'kr-gyeongnam', label: '경상남도', next: ['kr-gyeongnam-gimhae'] },
-  'kr-jeju': { id: 'kr-jeju', label: '제주특별자치도', next: [] },
-  'kr-busan-haeundae': { id: 'kr-busan-haeundae', label: '해운대구', next: [], households: ['sister', 'parents'] },
-  'kr-seoul-mapo': { id: 'kr-seoul-mapo', label: '마포구', next: [], households: ['brother'] },
-  'kr-gyeongnam-gimhae': { id: 'kr-gyeongnam-gimhae', label: '김해시', next: ['kr-gimhae-bonghwang'] },
-  'kr-gimhae-bonghwang': { id: 'kr-gimhae-bonghwang', label: '봉황동', next: [], households: ['home'] },
+  'kr-seoul': { id: 'kr-seoul', label: '서울특별시', next: ['kr-seoul-mapo'], parent: 'kr-korea-overview' },
+  'kr-busan': { id: 'kr-busan', label: '부산광역시', next: ['kr-busan-haeundae'], parent: 'kr-korea-overview' },
+  'kr-daegu': { id: 'kr-daegu', label: '대구광역시', next: [], parent: 'kr-korea-overview' },
+  'kr-incheon': { id: 'kr-incheon', label: '인천광역시', next: [], parent: 'kr-korea-overview' },
+  'kr-gwangju': { id: 'kr-gwangju', label: '광주광역시', next: [], parent: 'kr-korea-overview' },
+  'kr-daejeon': { id: 'kr-daejeon', label: '대전광역시', next: [], parent: 'kr-korea-overview' },
+  'kr-ulsan': { id: 'kr-ulsan', label: '울산광역시', next: [], parent: 'kr-korea-overview' },
+  'kr-sejong': { id: 'kr-sejong', label: '세종특별자치시', next: [], parent: 'kr-korea-overview' },
+  'kr-gyeonggi': { id: 'kr-gyeonggi', label: '경기도', next: [], parent: 'kr-korea-overview' },
+  'kr-gangwon': { id: 'kr-gangwon', label: '강원특별자치도', next: [], parent: 'kr-korea-overview' },
+  'kr-chungbuk': { id: 'kr-chungbuk', label: '충청북도', next: [], parent: 'kr-korea-overview' },
+  'kr-chungnam': { id: 'kr-chungnam', label: '충청남도', next: [], parent: 'kr-korea-overview' },
+  'kr-jeonbuk': { id: 'kr-jeonbuk', label: '전북특별자치도', next: [], parent: 'kr-korea-overview' },
+  'kr-jeonnam': { id: 'kr-jeonnam', label: '전라남도', next: [], parent: 'kr-korea-overview' },
+  'kr-gyeongbuk': { id: 'kr-gyeongbuk', label: '경상북도', next: [], parent: 'kr-korea-overview' },
+  'kr-gyeongnam': { id: 'kr-gyeongnam', label: '경상남도', next: ['kr-gyeongnam-gimhae'], parent: 'kr-korea-overview' },
+  'kr-jeju': { id: 'kr-jeju', label: '제주특별자치도', next: [], parent: 'kr-korea-overview' },
+  'kr-busan-haeundae': { id: 'kr-busan-haeundae', label: '해운대구', next: [], parent: 'kr-busan', households: ['sister', 'parents'] },
+  'kr-seoul-mapo': { id: 'kr-seoul-mapo', label: '마포구', next: [], parent: 'kr-seoul', households: ['brother'] },
+  'kr-gyeongnam-gimhae': { id: 'kr-gyeongnam-gimhae', label: '김해시', next: ['kr-gimhae-bonghwang'], parent: 'kr-gyeongnam' },
+  'kr-gimhae-bonghwang': { id: 'kr-gimhae-bonghwang', label: '봉황동', next: [], parent: 'kr-gyeongnam-gimhae', households: ['home'] },
+};
+
+
+const regionInfoById: Partial<Record<RegionId, RegionInfo>> = {
+  'kr-daegu': { namuUrl: 'https://namu.wiki/w/대구광역시', landmark: '서문시장', food: '막창구이' },
+  'kr-incheon': { namuUrl: 'https://namu.wiki/w/인천광역시', landmark: '인천 차이나타운', food: '짜장면' },
+  'kr-gwangju': { namuUrl: 'https://namu.wiki/w/광주광역시', landmark: '국립아시아문화전당', food: '광주 상추튀김' },
+  'kr-daejeon': { namuUrl: 'https://namu.wiki/w/대전광역시', landmark: '엑스포과학공원', food: '칼국수' },
+  'kr-ulsan': { namuUrl: 'https://namu.wiki/w/울산광역시', landmark: '대왕암공원', food: '언양불고기' },
+  'kr-sejong': { namuUrl: 'https://namu.wiki/w/세종특별자치시', landmark: '세종호수공원', food: '복숭아 디저트' },
+  'kr-gyeonggi': { namuUrl: 'https://namu.wiki/w/경기도', landmark: '수원화성', food: '수원 왕갈비' },
+  'kr-gangwon': { namuUrl: 'https://namu.wiki/w/강원특별자치도', landmark: '설악산', food: '막국수' },
+  'kr-chungbuk': { namuUrl: 'https://namu.wiki/w/충청북도', landmark: '속리산 법주사', food: '올갱이국' },
+  'kr-chungnam': { namuUrl: 'https://namu.wiki/w/충청남도', landmark: '공주 공산성', food: '게국지' },
+  'kr-jeonbuk': { namuUrl: 'https://namu.wiki/w/전북특별자치도', landmark: '전주 한옥마을', food: '전주비빔밥' },
+  'kr-jeonnam': { namuUrl: 'https://namu.wiki/w/전라남도', landmark: '순천만습지', food: '떡갈비' },
+  'kr-gyeongbuk': { namuUrl: 'https://namu.wiki/w/경상북도', landmark: '불국사', food: '안동찜닭' },
+  'kr-jeju': { namuUrl: 'https://namu.wiki/w/제주특별자치도', landmark: '성산일출봉', food: '흑돼지구이' },
 };
 
 const householdMarkers: readonly { readonly householdId: HouseholdId; readonly regionId: RegionId; readonly dx: number; readonly dy: number }[] = [
@@ -284,6 +309,14 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     onStateChange();
   }
 
+  function activateRegion(region: RegionId) {
+    if (region === selectedRegion && routeNodes[region].parent) {
+      setRegion(routeNodes[region].parent);
+      return;
+    }
+    setRegion(region);
+  }
+
   function setHousehold(householdId: HouseholdId) {
     selectedHousehold = householdId;
     nameGateState = 'locked';
@@ -372,18 +405,19 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       polygon.setAttribute('class', ['korea-region', isSelected ? 'is-selected' : '', isNext ? 'is-next' : '', isHouseholdTarget ? 'has-households' : ''].filter(Boolean).join(' '));
       polygon.dataset.regionId = id;
       polygon.setAttribute('aria-label', isNext ? `${feature.nameKo}로 확대` : isSelected ? `${feature.nameKo} 선택됨` : feature.nameKo);
-      if (isNext) {
+      const isToggleTarget = isSelected && Boolean(selectedNode.parent);
+      if (isNext || isToggleTarget) {
         polygon.setAttribute('tabindex', '0');
         polygon.setAttribute('role', 'button');
         polygon.addEventListener('pointerenter', () => setHighlightedRegion(id));
         polygon.addEventListener('pointerleave', () => setHighlightedRegion(null));
         polygon.addEventListener('focus', () => setHighlightedRegion(id));
         polygon.addEventListener('blur', () => setHighlightedRegion(null));
-        polygon.addEventListener('click', () => setRegion(id));
+        polygon.addEventListener('click', () => activateRegion(id));
         polygon.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
-            setRegion(id);
+            activateRegion(id);
           }
         });
       }
@@ -501,9 +535,26 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     }
 
     if (!node.next.length) {
+      const regionInfo = regionInfoById[selectedRegion];
       appendText(routePanel, 'p', '관할 기초자치단체', 'map-kicker');
       appendText(routePanel, 'h3', node.label);
-      appendText(routePanel, 'p', '이 지역은 지금 단계에서 한눈에 둘러보는 카드로 남겨두고, 가족 목적지가 있는 곳만 더 깊게 열립니다.');
+      if (regionInfo) {
+        const details = document.createElement('dl');
+        details.className = 'region-info-list';
+        appendText(details, 'dt', 'Landmark');
+        appendText(details, 'dd', regionInfo.landmark);
+        appendText(details, 'dt', 'Food');
+        appendText(details, 'dd', regionInfo.food);
+        const link = document.createElement('a');
+        link.href = regionInfo.namuUrl;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.className = 'region-info-link';
+        link.textContent = '나무위키에서 더 보기 ↗';
+        routePanel.append(details, link);
+      } else {
+        appendText(routePanel, 'p', '가족 목적지가 있는 곳만 더 깊게 열립니다.');
+      }
       return;
     }
 
@@ -523,7 +574,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       button.addEventListener('blur', () => setHighlightedRegion(null));
       appendText(button, 'strong', feature.nameKo);
       appendText(button, 'span', feature.nameEn);
-      button.addEventListener('click', () => setRegion(nextId));
+      button.addEventListener('click', () => activateRegion(nextId));
       choices.append(button);
     });
     routePanel.append(choices);

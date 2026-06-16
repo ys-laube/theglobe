@@ -410,6 +410,26 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 .korea-route-panel h3 { margin: 0 0 0.7rem; font-size: 1.35rem; }
 .korea-route-panel p { color: #cbd5e1; line-height: 1.6; }
+.region-info-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.8rem 0;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.42);
+  border: 1px solid rgba(186, 230, 253, 0.14);
+}
+.region-info-list { grid-template-columns: 5.2rem 1fr; align-items: baseline; }
+.region-info-list dt { color: #bae6fd; font-weight: 900; letter-spacing: 0.04em; }
+.region-info-list dd { margin: 0; color: #f8fafc; font-weight: 700; }
+.region-info-link {
+  display: inline-flex;
+  margin-top: 0.35rem;
+  color: #fde68a;
+  font-weight: 900;
+  text-decoration: none;
+}
+.region-info-link:hover, .region-info-link:focus-visible { color: #fff7ed; text-decoration: underline; }
 .route-choice-grid, .household-card-grid { display: grid; gap: 0.75rem; }
 .route-choice, .household-card {
   width: 100%;
