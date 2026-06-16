@@ -151,6 +151,7 @@ try {
           '로그인이나 개인정보 저장 없이',
           '초대 링크 열기',
           '이름을 다시 확인해 주세요',
+          '이름 확인 후 가족 밴드로 연결됩니다',
         ].filter((text) => bodyText.includes(text));
         const koreaButtonPresent = Boolean(document.querySelector('[data-action="korea-family"]'));
 
@@ -251,6 +252,28 @@ try {
           await clickButtonByStrong('대한민국');
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
         };
+        const checkFamilyRegionInfo = async ({ label, region, nextLabel, landmark, food }) => {
+          await openRoot();
+          await clickButtonByStrong(label);
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === region, region + ' first-level info tier');
+          const panelText = document.querySelector('.korea-route-panel')?.textContent ?? '';
+          const href = document.querySelector('.region-info-link')?.href ?? '';
+          const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          const householdCardLabels = [...document.querySelectorAll('.household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          return {
+            label,
+            region,
+            selectedRegion: window.__GLOBE_QA__?.selectedRegion,
+            panelText,
+            href,
+            routeChoiceLabels,
+            householdCardLabels,
+            hasLandmark: panelText.includes('Landmark') && panelText.includes(landmark),
+            hasFood: panelText.includes('Food') && panelText.includes(food),
+            hasNextStep: panelText.includes('가족이 있는 지역으로 한 단계 더 들어가기') && routeChoiceLabels.includes(nextLabel),
+            householdCardCount: householdCardLabels.length,
+          };
+        };
         const unlockFamilyPath = async ({ labels, terminalRegion, householdLabel, householdId, acceptedName }) => {
           for (const label of labels) await clickButtonByStrong(label);
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === terminalRegion, terminalRegion + ' tier');
@@ -285,6 +308,10 @@ try {
             links,
           };
         };
+        const busanFirstLevelInfo = await checkFamilyRegionInfo({ label: '부산광역시', region: 'kr-busan', nextLabel: '해운대구', landmark: '해운대해수욕장', food: '돼지국밥' });
+        const seoulFirstLevelInfo = await checkFamilyRegionInfo({ label: '서울특별시', region: 'kr-seoul', nextLabel: '마포구', landmark: '남산서울타워', food: '떡볶이' });
+        const gyeongnamFirstLevelInfo = await checkFamilyRegionInfo({ label: '경상남도', region: 'kr-gyeongnam', nextLabel: '김해시', landmark: '진해 경화역', food: '진주냉면' });
+        await openRoot();
         const seoulFamilyPath = await unlockFamilyPath({ labels: ['서울특별시', '마포구'], terminalRegion: 'kr-seoul-mapo', householdLabel: '진주네', householdId: 'brother', acceptedName: '한진주' });
         await openRoot();
         const gyeongnamFamilyPath = await unlockFamilyPath({ labels: ['경상남도', '김해시', '봉황동'], terminalRegion: 'kr-gimhae-bonghwang', householdLabel: '은하네', householdId: 'home', acceptedName: '한은하' });
@@ -352,6 +379,9 @@ try {
           islandReferenceLabels,
           satelliteStyleCopyPresent,
           routeChoiceLabels,
+          busanFirstLevelInfo,
+          seoulFirstLevelInfo,
+          gyeongnamFirstLevelInfo,
           seoulFamilyPath,
           gyeongnamFamilyPath,
           busanParentsPath,
@@ -427,6 +457,19 @@ try {
   if (!result.satelliteStyleCopyPresent) throw new Error('Expected static satellite-style Korea overlay copy');
   for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
     if (!result.householdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected household marker label ${requiredHouseholdLabel}, found ${result.householdMarkerLabels?.join(', ')}`);
+  }
+  const expectedFirstLevelInfos = [
+    { key: 'busanFirstLevelInfo', label: '부산광역시', region: 'kr-busan', nextLabel: '해운대구' },
+    { key: 'seoulFirstLevelInfo', label: '서울특별시', region: 'kr-seoul', nextLabel: '마포구' },
+    { key: 'gyeongnamFirstLevelInfo', label: '경상남도', region: 'kr-gyeongnam', nextLabel: '김해시' },
+  ];
+  for (const expectedInfo of expectedFirstLevelInfos) {
+    const actualInfo = result[expectedInfo.key];
+    if (actualInfo?.selectedRegion !== expectedInfo.region) throw new Error(`Expected ${expectedInfo.label} first-level region ${expectedInfo.region}, found ${actualInfo?.selectedRegion}`);
+    if (!actualInfo?.hasLandmark || !actualInfo?.hasFood) throw new Error(`Expected ${expectedInfo.label} Landmark/Food panel, found ${actualInfo?.panelText}`);
+    if (!actualInfo?.href?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected ${expectedInfo.label} Namuwiki link, found ${actualInfo?.href}`);
+    if (!actualInfo?.hasNextStep) throw new Error(`Expected ${expectedInfo.label} next-step ${expectedInfo.nextLabel}, found ${actualInfo?.routeChoiceLabels?.join(', ')}`);
+    if (actualInfo?.householdCardCount !== 0) throw new Error(`Expected no household cards before ${expectedInfo.label} terminal drilldown, found ${actualInfo?.householdCardLabels?.join(', ')}`);
   }
   const expectedFamilyPaths = [
     { key: 'seoulFamilyPath', terminalRegion: 'kr-seoul-mapo', householdId: 'brother', householdLabel: '진주네', linkCount: 1 },

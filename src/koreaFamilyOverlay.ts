@@ -151,6 +151,9 @@ const routeNodes: Record<RegionId, RouteNode> = {
 
 
 const regionInfoById: Partial<Record<RegionId, RegionInfo>> = {
+  'kr-seoul': { namuUrl: 'https://namu.wiki/w/서울특별시', landmark: '남산서울타워', food: '떡볶이' },
+  'kr-busan': { namuUrl: 'https://namu.wiki/w/부산광역시', landmark: '해운대해수욕장', food: '돼지국밥' },
+  'kr-gyeongnam': { namuUrl: 'https://namu.wiki/w/경상남도', landmark: '진해 경화역', food: '진주냉면' },
   'kr-daegu': { namuUrl: 'https://namu.wiki/w/대구광역시', landmark: '서문시장', food: '막창구이' },
   'kr-incheon': { namuUrl: 'https://namu.wiki/w/인천광역시', landmark: '인천 차이나타운', food: '짜장면' },
   'kr-gwangju': { namuUrl: 'https://namu.wiki/w/광주광역시', landmark: '국립아시아문화전당', food: '광주 상추튀김' },
@@ -542,53 +545,28 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     mapMount.append(svg);
   }
 
-  function renderRoutePanel() {
-    routePanel.replaceChildren();
-    const node = routeNodes[selectedRegion];
-    if (node.households?.length) {
-      appendText(routePanel, 'p', 'Family homes', 'map-kicker');
-      appendText(routePanel, 'h3', `${node.label}에 있는 가족`);
-      const cards = document.createElement('div');
-      cards.className = 'household-card-grid';
-      node.households.forEach((householdId) => {
-        const household = householdById(householdId);
-        const card = document.createElement('button');
-        card.type = 'button';
-        card.className = 'household-card';
-        appendText(card, 'strong', household.label);
-        appendText(card, 'span', household.locationLabel);
-        appendText(card, 'em', '이름 확인 후 가족 밴드로 연결됩니다');
-        card.addEventListener('click', () => setHousehold(household.id));
-        cards.append(card);
-      });
-      routePanel.append(cards);
-      return;
-    }
+  function renderRegionInfo(node: RouteNode, regionInfo: RegionInfo) {
+    const section = document.createElement('section');
+    section.className = 'region-info-section';
+    appendText(section, 'p', '관할 기초자치단체', 'map-kicker');
+    appendText(section, 'h3', node.label);
+    const details = document.createElement('dl');
+    details.className = 'region-info-list';
+    appendText(details, 'dt', 'Landmark');
+    appendText(details, 'dd', regionInfo.landmark);
+    appendText(details, 'dt', 'Food');
+    appendText(details, 'dd', regionInfo.food);
+    const link = document.createElement('a');
+    link.href = regionInfo.namuUrl;
+    link.target = '_blank';
+    link.rel = 'noreferrer';
+    link.className = 'region-info-link';
+    link.textContent = '나무위키에서 더 보기 ↗';
+    section.append(details, link);
+    routePanel.append(section);
+  }
 
-    if (!node.next.length) {
-      const regionInfo = regionInfoById[selectedRegion];
-      appendText(routePanel, 'p', '관할 기초자치단체', 'map-kicker');
-      appendText(routePanel, 'h3', node.label);
-      if (regionInfo) {
-        const details = document.createElement('dl');
-        details.className = 'region-info-list';
-        appendText(details, 'dt', 'Landmark');
-        appendText(details, 'dd', regionInfo.landmark);
-        appendText(details, 'dt', 'Food');
-        appendText(details, 'dd', regionInfo.food);
-        const link = document.createElement('a');
-        link.href = regionInfo.namuUrl;
-        link.target = '_blank';
-        link.rel = 'noreferrer';
-        link.className = 'region-info-link';
-        link.textContent = '나무위키에서 더 보기 ↗';
-        routePanel.append(details, link);
-      } else {
-        appendText(routePanel, 'p', '가족 목적지가 있는 곳만 더 깊게 열립니다.');
-      }
-      return;
-    }
-
+  function renderNextStep(node: RouteNode) {
     appendText(routePanel, 'p', selectedRegion === 'kr-korea-overview' ? '17 광역자치단체' : 'Next stop', 'map-kicker');
     appendText(routePanel, 'h3', selectedRegion === 'kr-korea-overview' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
     const choices = document.createElement('div');
@@ -610,6 +588,44 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     });
     routePanel.append(choices);
     syncHighlightState();
+  }
+
+  function renderHouseholdCards(node: RouteNode) {
+    appendText(routePanel, 'p', 'Family homes', 'map-kicker');
+    appendText(routePanel, 'h3', `${node.label}에 있는 가족`);
+    const cards = document.createElement('div');
+    cards.className = 'household-card-grid';
+    node.households?.forEach((householdId) => {
+      const household = householdById(householdId);
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'household-card';
+      appendText(card, 'strong', household.label);
+      appendText(card, 'span', household.locationLabel);
+      card.addEventListener('click', () => setHousehold(household.id));
+      cards.append(card);
+    });
+    routePanel.append(cards);
+  }
+
+  function renderRoutePanel() {
+    routePanel.replaceChildren();
+    const node = routeNodes[selectedRegion];
+    const regionInfo = regionInfoById[selectedRegion];
+    if (regionInfo) renderRegionInfo(node, regionInfo);
+    if (node.next.length) {
+      renderNextStep(node);
+      return;
+    }
+    if (node.households?.length) {
+      renderHouseholdCards(node);
+      return;
+    }
+    if (!regionInfo) {
+      appendText(routePanel, 'p', '관할 기초자치단체', 'map-kicker');
+      appendText(routePanel, 'h3', node.label);
+      appendText(routePanel, 'p', '가족 목적지가 있는 곳만 더 깊게 열립니다.');
+    }
   }
 
   function renderHouseholdDetail(household: Household) {
