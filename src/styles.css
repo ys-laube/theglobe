@@ -387,6 +387,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   stroke-width: 0.68;
 }
 
+.korea-map-overlay[data-family-traces="hidden"] .household-marker { display: none; }
 .household-marker { cursor: default; outline: none; pointer-events: none; }
 .household-marker-glow {
   fill: rgba(250, 204, 21, 0.18);

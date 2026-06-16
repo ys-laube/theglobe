@@ -332,8 +332,8 @@ try {
         daeguSelectedRegion?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Daegu selected-region toggle-up');
         const selectedRegionToggleUpOk = window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview';
-        const householdMarkerCount = document.querySelectorAll('.household-marker').length;
-        const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+        const overviewHouseholdMarkerCount = document.querySelectorAll('.household-marker').length;
+        const overviewHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const satelliteTextureLayerPresent = Boolean(
@@ -368,6 +368,8 @@ try {
           for (const label of labels) await clickButtonByStrong(label);
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === terminalRegion, terminalRegion + ' tier');
           const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          const terminalHouseholdMarkerCount = document.querySelectorAll('.household-marker').length;
+          const terminalHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
           await clickButtonByStrong(householdLabel);
           await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === householdId, householdLabel + ' household');
           const input = document.querySelector('.name-gate input');
@@ -394,6 +396,8 @@ try {
             selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
             nameGateState: window.__GLOBE_QA__?.nameGateState,
             routeChoiceLabels,
+            terminalHouseholdMarkerCount,
+            terminalHouseholdMarkerLabels,
             familyTraceState: familyTraceState(),
             linkCount: links.length,
             links,
@@ -466,8 +470,8 @@ try {
           firstLevelCoordinateHits,
           listHoverHighlightsMap,
           mapHoverHighlightsList,
-          householdMarkerCount,
-          householdMarkerLabels,
+          overviewHouseholdMarkerCount,
+          overviewHouseholdMarkerLabels,
           islandReferenceCount,
           islandReferenceLabels,
           satelliteTextureLayerPresent,
@@ -549,16 +553,13 @@ try {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
-  if (result.householdMarkerCount !== 4) throw new Error(`Expected 4 glowing household markers, found ${result.householdMarkerCount}`);
+  if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
   if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
   for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
   }
   if (!result.satelliteTextureLayerPresent) throw new Error('Expected static satellite-style Korea texture layers');
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');
-  for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
-    if (!result.householdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected household marker label ${requiredHouseholdLabel}, found ${result.householdMarkerLabels?.join(', ')}`);
-  }
   const expectedFirstLevelInfos = [
     { key: 'busanFirstLevelInfo', label: '부산광역시', region: 'kr-busan', nextLabel: '해운대구' },
     { key: 'seoulFirstLevelInfo', label: '서울특별시', region: 'kr-seoul', nextLabel: '마포구' },
@@ -587,6 +588,10 @@ try {
     if (actualPath?.linksBeforeUnlock !== 0) throw new Error(`Expected ${expectedPath.householdLabel} links hidden before unlock, found ${actualPath?.linksBeforeUnlock}`);
     if (!actualPath?.gateBeforeUnlockCopy?.includes('암구호를 대시오!') || !actualPath?.gateBeforeUnlockCopy?.includes('암구호 확인')) throw new Error(`Expected ${expectedPath.householdLabel} passphrase gate copy, found ${actualPath?.gateBeforeUnlockCopy}`);
     if (actualPath?.familyTraceState?.overlay !== 'terminal' || actualPath?.familyTraceState?.canvas !== 'terminal' || !actualPath?.familyTraceState?.routeLayerPresent || actualPath?.familyTraceState?.activeRouteCount < 1) throw new Error(`Expected terminal family traces for ${expectedPath.householdLabel}, found ${JSON.stringify(actualPath?.familyTraceState)}`);
+    if (actualPath?.terminalHouseholdMarkerCount !== 4) throw new Error(`Expected 4 terminal household markers for ${expectedPath.householdLabel}, found ${actualPath?.terminalHouseholdMarkerCount}`);
+    for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
+      if (!actualPath?.terminalHouseholdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected terminal household marker label ${requiredHouseholdLabel}, found ${actualPath?.terminalHouseholdMarkerLabels?.join(', ')}`);
+    }
     if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band placeholder links, found ${actualPath?.linkCount}`);
     if (!actualPath?.links?.every((href) => href.startsWith('https://band.us/band/') && href.includes('-placeholder-'))) throw new Error(`Expected placeholder-only band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
   }

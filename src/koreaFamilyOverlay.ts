@@ -507,48 +507,50 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     });
     svg.append(islandLayer);
 
-    householdMarkers.forEach((markerModel) => {
-      const feature = featureById(markerModel.regionId);
-      const household = householdById(markerModel.householdId);
-      const [cx, cy] = feature.centroid;
-      const x = cx + markerModel.dx;
-      const y = cy + markerModel.dy;
-      const activeRegion = selectedRegion === markerModel.regionId;
-      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      group.setAttribute('class', ['household-marker', activeRegion ? 'is-active' : ''].filter(Boolean).join(' '));
-      group.setAttribute('tabindex', '0');
-      group.setAttribute('role', 'button');
-      group.setAttribute('aria-label', `${household.label} 열기`);
-      const openMarker = () => {
-        if (selectedRegion !== markerModel.regionId) setRegion(markerModel.regionId);
-        setHousehold(markerModel.householdId);
-      };
-      group.addEventListener('click', openMarker);
-      group.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          openMarker();
-        }
-      });
+    if (familyTraceState === 'terminal') {
+      householdMarkers.forEach((markerModel) => {
+        const feature = featureById(markerModel.regionId);
+        const household = householdById(markerModel.householdId);
+        const [cx, cy] = feature.centroid;
+        const x = cx + markerModel.dx;
+        const y = cy + markerModel.dy;
+        const activeRegion = selectedRegion === markerModel.regionId;
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('class', ['household-marker', activeRegion ? 'is-active' : ''].filter(Boolean).join(' '));
+        group.setAttribute('tabindex', '0');
+        group.setAttribute('role', 'button');
+        group.setAttribute('aria-label', `${household.label} 열기`);
+        const openMarker = () => {
+          if (selectedRegion !== markerModel.regionId) setRegion(markerModel.regionId);
+          setHousehold(markerModel.householdId);
+        };
+        group.addEventListener('click', openMarker);
+        group.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openMarker();
+          }
+        });
 
-      const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      glow.setAttribute('cx', String(x));
-      glow.setAttribute('cy', String(y));
-      glow.setAttribute('r', activeRegion ? '3.9' : '3.2');
-      glow.setAttribute('class', 'household-marker-glow');
-      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      dot.setAttribute('cx', String(x));
-      dot.setAttribute('cy', String(y));
-      dot.setAttribute('r', activeRegion ? '1.35' : '1.05');
-      dot.setAttribute('class', 'household-marker-dot');
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', String(x));
-      label.setAttribute('y', String(y - 4.2));
-      label.setAttribute('class', 'household-marker-label');
-      label.textContent = household.label;
-      group.append(glow, dot, label);
-      svg.append(group);
-    });
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('cx', String(x));
+        glow.setAttribute('cy', String(y));
+        glow.setAttribute('r', activeRegion ? '3.9' : '3.2');
+        glow.setAttribute('class', 'household-marker-glow');
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', String(x));
+        dot.setAttribute('cy', String(y));
+        dot.setAttribute('r', activeRegion ? '1.35' : '1.05');
+        dot.setAttribute('class', 'household-marker-dot');
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', String(x));
+        label.setAttribute('y', String(y - 4.2));
+        label.setAttribute('class', 'household-marker-label');
+        label.textContent = household.label;
+        group.append(glow, dot, label);
+        svg.append(group);
+      });
+    }
 
     const vignette = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     vignette.setAttribute('x', '0');
