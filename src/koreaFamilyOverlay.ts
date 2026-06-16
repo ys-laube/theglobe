@@ -213,6 +213,14 @@ function buildActiveRouteSegmentIdsByRegion() {
 const activeRouteSegmentIdsByRegion = buildActiveRouteSegmentIdsByRegion();
 const regionOrder: RegionId[] = [...firstLevelRegionOrder, ...familyTargetRegionOrder];
 
+function polygonArea(points: readonly (readonly [number, number])[]) {
+  const doubledArea = points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + point[0] * next[1] - next[0] * point[1];
+  }, 0);
+  return Math.abs(doubledArea) / 2;
+}
+
 function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, tagName: K, text: string, className?: string) {
   const element = document.createElement(tagName);
   element.textContent = text;
@@ -428,7 +436,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       svg.append(routeLayer);
     }
 
-    for (const id of regionOrder) {
+    const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
+    for (const id of paintOrder) {
       const feature = featureById(id);
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
       polygon.setAttribute('points', polygonPoints(feature.polygon));

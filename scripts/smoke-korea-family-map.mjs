@@ -255,6 +255,14 @@ try {
           await clickButtonByStrong('대한민국');
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
         };
+        const closestRegion = (node) => {
+          let current = node;
+          while (current && current !== document) {
+            if (current.classList?.contains('korea-region')) return current;
+            current = current.parentElement ?? current.parentNode;
+          }
+          return null;
+        };
         const findViewportHitForRegion = (regionId) => {
           const region = document.querySelector('.korea-region[data-region-id="' + regionId + '"]');
           if (!region) throw new Error('Missing SVG polygon for ' + regionId);
@@ -272,9 +280,9 @@ try {
             const clientY = rect.top + rect.height * fy;
             const hit = document.elementFromPoint(clientX, clientY);
             const stackRegion = [...document.elementsFromPoint(clientX, clientY)]
-              .map((node) => node.closest?.('.korea-region'))
+              .map((node) => closestRegion(node))
               .find((candidate) => candidate?.getAttribute('data-region-id') === regionId);
-            const hitRegion = hit?.closest?.('.korea-region');
+            const hitRegion = closestRegion(hit);
             if (hitRegion?.getAttribute('data-region-id') === regionId) {
               return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id'), elementFromPointVerified: true };
             }
@@ -290,7 +298,7 @@ try {
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'overview before coordinate click ' + regionId);
           const hitPoint = findViewportHitForRegion(regionId);
           const hitElement = document.elementFromPoint(hitPoint.clientX, hitPoint.clientY);
-          if (!hitElement?.closest?.('.korea-region[data-region-id="' + regionId + '"]')) throw new Error('Coordinate hit drifted before click for ' + regionId);
+          if (closestRegion(hitElement)?.getAttribute('data-region-id') !== regionId) throw new Error('Coordinate hit drifted before click for ' + regionId);
           hitElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY, pointerId: 301, pointerType: 'mouse' }));
           hitElement.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY, pointerId: 301, pointerType: 'mouse' }));
           hitElement.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY }));
