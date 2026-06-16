@@ -331,9 +331,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function renderHeader() {
     header.replaceChildren();
     const copy = document.createElement('div');
-    appendText(copy, 'p', 'Static satellite-style Korea family map', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 문서화한 정적 위성풍 17개 광역 행정구역 안내에서 제주·울릉도·독도 기준점과 가족이 있는 자리까지 확대됩니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');

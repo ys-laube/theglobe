@@ -247,7 +247,12 @@ try {
         const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
-        const satelliteStyleCopyPresent = /satellite-style|위성풍/.test(document.body.textContent ?? '');
+        const satelliteTextureLayerPresent = Boolean(
+          document.querySelector('.korea-static-texture')
+          && document.querySelector('.korea-map-vignette')
+          && document.querySelector('#korea-static-grain')
+        );
+        const removedSatelliteCopyAbsent = !/static satellite-style Korea family map|공식 공공데이터 경계 데이터셋|위성풍/.test(document.body.textContent ?? '');
         const openRoot = async () => {
           await clickButtonByStrong('대한민국');
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
@@ -377,7 +382,8 @@ try {
           householdMarkerLabels,
           islandReferenceCount,
           islandReferenceLabels,
-          satelliteStyleCopyPresent,
+          satelliteTextureLayerPresent,
+          removedSatelliteCopyAbsent,
           routeChoiceLabels,
           busanFirstLevelInfo,
           seoulFirstLevelInfo,
@@ -454,7 +460,8 @@ try {
   for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
   }
-  if (!result.satelliteStyleCopyPresent) throw new Error('Expected static satellite-style Korea overlay copy');
+  if (!result.satelliteTextureLayerPresent) throw new Error('Expected static satellite-style Korea texture layers');
+  if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');
   for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
     if (!result.householdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected household marker label ${requiredHouseholdLabel}, found ${result.householdMarkerLabels?.join(', ')}`);
   }

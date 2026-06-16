@@ -131,7 +131,7 @@ for (const island of boundaries.islandReferences) {
   sameMembers(dataProvenance.koreaBoundaries.islandAdministrativeContext?.[island.nameKo], expectedContext.adminContextKo, `${island.nameKo} data provenance administrative context`);
 }
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
-assert(koreaOverlaySource.includes('제주·울릉도·독도'), 'Korea overlay copy must name Jeju/Ulleungdo/Dokdo references');
+assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
