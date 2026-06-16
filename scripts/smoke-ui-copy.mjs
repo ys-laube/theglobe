@@ -59,6 +59,7 @@ const forbiddenKoreaCopy = [
   '초대 링크 열기',
   '이름을 다시 확인해 주세요',
   'The globe is glowing with its final details.',
+  '이름 확인 후 가족 밴드로 연결됩니다',
 ];
 for (const copy of forbiddenKoreaCopy) {
   assert(!combined.includes(copy), `old visible UI copy must be absent: ${copy}`);
