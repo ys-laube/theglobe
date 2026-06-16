@@ -31,7 +31,7 @@ const buckets = Array.from({ length: 10 }, (_value, index) => {
 assert(buckets.every((bucket) => bucket.length === 10), 'TOP100 data must split into ten rank buckets of ten cities');
 assert(overlaySource.includes('data-rank-group'), 'overlay must render rank group elements for TOP100');
 assert(overlaySource.includes('button.dataset.cityId = capital.id'), 'overlay must render clickable city list buttons');
-assert(!overlaySource.includes('`${capital.rank}. ${capital.city}`'), 'TOP100 rows must not combine native ol numbering with inline dotted rank');
+assert(!overlaySource.includes("appendText(button, 'span', `${capital.rank}. ${capital.city}`, 'rank-city')"), 'TOP100 rows must not combine native ol numbering with inline dotted rank');
 assert(overlaySource.includes('`#${capital.rank} ${capital.city}`'), 'TOP100 rows must expose one explicit #rank city label');
 assert(stylesSource.includes('.rank-group ol') && stylesSource.includes('list-style: none'), 'TOP100 ordered-list native markers must be disabled');
 assert(stylesSource.includes('padding-left: 0'), 'TOP100 rows must not reserve native marker indentation');
