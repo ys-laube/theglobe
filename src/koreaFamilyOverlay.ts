@@ -276,6 +276,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   closeButton.textContent = '지구본으로 돌아가기';
 
   host.classList.add('korea-map-overlay');
+  host.dataset.mapStyle = 'satellite-relief-25d';
+  host.dataset.familyTraces = 'hidden';
+  mapMount.dataset.mapStyle = 'satellite-relief-25d';
+  mapMount.dataset.familyTraces = 'hidden';
   host.hidden = true;
   host.setAttribute('aria-hidden', 'true');
   host.append(header, mapMount, routePanel);
@@ -404,18 +408,25 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
     const activeRouteSegmentIds = new Set(activeRouteSegmentIdsByRegion[selectedRegion]);
+    const familyTraceState = selectedNode.households?.length ? 'terminal' : 'hidden';
+    host.dataset.familyTraces = familyTraceState;
+    mapMount.dataset.familyTraces = familyTraceState;
 
-    const routeLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    routeLayer.setAttribute('class', 'korea-family-route-layer');
-    routeLayer.setAttribute('aria-hidden', 'true');
-    familyRouteSegments.forEach((segment) => {
-      const route = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      route.setAttribute('d', routePath(segment));
-      route.setAttribute('class', ['korea-family-route', activeRouteSegmentIds.has(segment.id) ? 'is-active' : ''].filter(Boolean).join(' '));
-      route.setAttribute('aria-label', segment.label);
-      routeLayer.append(route);
-    });
-    svg.append(routeLayer);
+    if (familyTraceState === 'terminal') {
+      const routeLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      routeLayer.setAttribute('class', 'korea-family-route-layer');
+      routeLayer.setAttribute('aria-label', '선택한 가족 목적지까지의 경로');
+      familyRouteSegments
+        .filter((segment) => activeRouteSegmentIds.has(segment.id))
+        .forEach((segment) => {
+          const route = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          route.setAttribute('d', routePath(segment));
+          route.setAttribute('class', 'korea-family-route is-active');
+          route.setAttribute('aria-label', segment.label);
+          routeLayer.append(route);
+        });
+      svg.append(routeLayer);
+    }
 
     for (const id of regionOrder) {
       const feature = featureById(id);
@@ -705,7 +716,11 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function render() {
     host.hidden = !openState;
     host.setAttribute('aria-hidden', String(!openState));
-    if (!openState) return;
+    if (!openState) {
+      host.dataset.familyTraces = 'hidden';
+      mapMount.dataset.familyTraces = 'hidden';
+      return;
+    }
     renderHeader();
     renderMap();
     renderRoutePanel();
