@@ -268,6 +268,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   let selectedRegion: RegionId = 'kr-korea-overview';
   let selectedHousehold: HouseholdId | null = null;
   let highlightedRegion: RegionId | null = null;
+  let highlightedHouseholdId: HouseholdId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
 
@@ -307,6 +308,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     host.querySelectorAll<HTMLElement | SVGElement>('[data-region-id]').forEach((element) => {
       element.classList.toggle('is-highlighted', Boolean(highlightedRegion && element.dataset.regionId === highlightedRegion));
     });
+    host.querySelectorAll<HTMLElement | SVGElement>('[data-household-id]').forEach((element) => {
+      const householdId = element.dataset.householdId as HouseholdId | undefined;
+      const isHighlighted = Boolean(highlightedHouseholdId && householdId === highlightedHouseholdId);
+      const isSelected = Boolean(selectedHousehold && householdId === selectedHousehold);
+      element.classList.toggle('is-highlighted', isHighlighted);
+      element.classList.toggle('is-selected-household', isSelected);
+    });
   }
 
   function setHighlightedRegion(region: RegionId | null) {
@@ -314,10 +322,17 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     syncHighlightState();
   }
 
+  function setHighlightedHousehold(householdId: HouseholdId | null) {
+    highlightedHouseholdId = householdId;
+    syncHighlightState();
+  }
+
   function setRegion(region: RegionId) {
     highlightedRegion = null;
+    highlightedHouseholdId = null;
     selectedRegion = region;
     selectedHousehold = null;
+    highlightedHouseholdId = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
     render();
@@ -334,9 +349,11 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
   function setHousehold(householdId: HouseholdId) {
     selectedHousehold = householdId;
+    highlightedHouseholdId = householdId;
     nameGateState = 'locked';
     unlockedHousehold = null;
     renderHouseholdDetail(householdById(householdId));
+    syncHighlightState();
     onStateChange();
   }
 
@@ -515,15 +532,21 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
         const x = cx + markerModel.dx;
         const y = cy + markerModel.dy;
         const activeRegion = selectedRegion === markerModel.regionId;
+        const isSelectedHousehold = selectedHousehold === markerModel.householdId;
         const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        group.setAttribute('class', ['household-marker', activeRegion ? 'is-active' : ''].filter(Boolean).join(' '));
+        group.setAttribute('class', ['household-marker', activeRegion ? 'is-active' : '', isSelectedHousehold ? 'is-selected-household' : ''].filter(Boolean).join(' '));
+        group.dataset.householdId = markerModel.householdId;
         group.setAttribute('tabindex', '0');
         group.setAttribute('role', 'button');
-        group.setAttribute('aria-label', `${household.label} 열기`);
+        group.setAttribute('aria-label', `${household.label} 지도 포인트`);
         const openMarker = () => {
           if (selectedRegion !== markerModel.regionId) setRegion(markerModel.regionId);
           setHousehold(markerModel.householdId);
         };
+        group.addEventListener('pointerenter', () => setHighlightedHousehold(markerModel.householdId));
+        group.addEventListener('pointerleave', () => setHighlightedHousehold(null));
+        group.addEventListener('focus', () => setHighlightedHousehold(markerModel.householdId));
+        group.addEventListener('blur', () => setHighlightedHousehold(null));
         group.addEventListener('click', openMarker);
         group.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -619,7 +642,12 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       const household = householdById(householdId);
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = 'household-card';
+      card.className = ['household-card', selectedHousehold === household.id ? 'is-selected-household' : ''].filter(Boolean).join(' ');
+      card.dataset.householdId = household.id;
+      card.addEventListener('pointerenter', () => setHighlightedHousehold(household.id));
+      card.addEventListener('pointerleave', () => setHighlightedHousehold(null));
+      card.addEventListener('focus', () => setHighlightedHousehold(household.id));
+      card.addEventListener('blur', () => setHighlightedHousehold(null));
       appendText(card, 'strong', household.label);
       appendText(card, 'span', household.locationLabel);
       card.addEventListener('click', () => setHousehold(household.id));
@@ -716,6 +744,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     back.textContent = '다른 가족 카드 보기';
     back.addEventListener('click', () => {
       selectedHousehold = null;
+      highlightedHouseholdId = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
       renderRoutePanel();
@@ -741,6 +770,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     openState = false;
     selectedRegion = 'kr-korea-overview';
     selectedHousehold = null;
+    highlightedHouseholdId = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
     render();
@@ -753,7 +783,9 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       openState = true;
       selectedRegion = 'kr-korea-overview';
       highlightedRegion = null;
+      highlightedHouseholdId = null;
       selectedHousehold = null;
+      highlightedHouseholdId = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
       render();
@@ -762,6 +794,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     close: () => {
       openState = false;
       highlightedRegion = null;
+      highlightedHouseholdId = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
       render();
