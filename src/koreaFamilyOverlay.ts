@@ -361,7 +361,19 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
         <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.20"/>
         <stop offset="62%" stop-color="#2563eb" stop-opacity="0.08"/>
         <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
-      </radialGradient>`;
+      </radialGradient>
+      <radialGradient id="korea-map-vignette" cx="50%" cy="48%" r="68%">
+        <stop offset="58%" stop-color="#0f172a" stop-opacity="0"/>
+        <stop offset="100%" stop-color="#020617" stop-opacity="0.74"/>
+      </radialGradient>
+      <pattern id="korea-static-grain" width="6" height="6" patternUnits="userSpaceOnUse">
+        <path d="M0 5.5H6M5.5 0V6" stroke="#bae6fd" stroke-opacity="0.08" stroke-width="0.16"/>
+        <circle cx="1.2" cy="1.4" r="0.22" fill="#fef3c7" fill-opacity="0.12"/>
+        <circle cx="4.6" cy="3.8" r="0.18" fill="#67e8f9" fill-opacity="0.10"/>
+      </pattern>
+      <filter id="korea-land-soft-shadow" x="-18%" y="-18%" width="136%" height="136%">
+        <feDropShadow dx="0" dy="0.35" stdDeviation="0.42" flood-color="#020617" flood-opacity="0.55"/>
+      </filter>`;
     svg.append(defs);
     const oceanGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     oceanGlow.setAttribute('x', '0');
@@ -370,6 +382,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     oceanGlow.setAttribute('height', '100');
     oceanGlow.setAttribute('fill', 'url(#korea-map-glow)');
     svg.append(oceanGlow);
+    const staticTexture = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    staticTexture.setAttribute('x', '0');
+    staticTexture.setAttribute('y', '0');
+    staticTexture.setAttribute('width', '100');
+    staticTexture.setAttribute('height', '100');
+    staticTexture.setAttribute('class', 'korea-static-texture');
+    staticTexture.setAttribute('fill', 'url(#korea-static-grain)');
+    staticTexture.setAttribute('aria-hidden', 'true');
+    svg.append(staticTexture);
     data.worldReferenceLines.forEach((line) => {
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', pathPoints(line.points));
@@ -507,6 +528,16 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       group.append(glow, dot, label);
       svg.append(group);
     });
+
+    const vignette = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    vignette.setAttribute('x', '0');
+    vignette.setAttribute('y', '0');
+    vignette.setAttribute('width', '100');
+    vignette.setAttribute('height', '100');
+    vignette.setAttribute('class', 'korea-map-vignette');
+    vignette.setAttribute('fill', 'url(#korea-map-vignette)');
+    vignette.setAttribute('aria-hidden', 'true');
+    svg.append(vignette);
 
     mapMount.append(svg);
   }
