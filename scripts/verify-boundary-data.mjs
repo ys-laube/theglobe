@@ -258,7 +258,12 @@ assert(assetsPolicySource.includes("REQUEST: 'GetMap'"), 'NASA GIBS imagery URL 
 assert(assetsPolicySource.includes("BBOX: (request.bbox ?? NASA_GIBS_BLUE_MARBLE.bbox).join(',')"), 'NASA GIBS image helper must preserve explicit global bbox parameters');
 assert(assetsPolicySource.includes('Earth imagery: NASA Global Imagery Browse Services (GIBS), BlueMarble_NextGeneration.'), 'NASA GIBS attribution text must stay with the imagery metadata');
 assert(assetsPolicySource.includes('loadImageViaGet'), 'NASA GIBS primary imagery must keep an explicit browser image GET load helper');
+assert(assetsPolicySource.includes('url: buildNasaGibsBlueMarbleWmsUrl()'), 'primary day asset must use the NASA GIBS URL builder');
+assert(assetsPolicySource.includes('required: true'), 'NASA GIBS day imagery must remain required primary Earth imagery');
+assert(assetsPolicySource.includes('shouldForcePrimaryTextureFailure'), 'fallback QA failure hook must remain available');
+assert(assetsPolicySource.includes('shouldForcePrimaryTextureTimeout'), 'fallback QA timeout hook must remain available');
 assert(globeRendererSource.includes('loadPrimaryEarthTexture'), 'globe renderer must use the primary Earth image helper for day imagery');
+assert(globeRendererSource.includes('loadPrimaryEarthTexture(EARTH_ASSETS.day.url, EARTH_ASSETS.day.label)'), 'globe renderer must load primary Earth imagery with configured day asset url and label');
 assert(globeRendererSource.includes('FALLBACK_ATTRIBUTION'), 'globe renderer must retain fallback attribution when primary Earth imagery fails');
 assert(!/"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
