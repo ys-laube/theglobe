@@ -6,13 +6,14 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "verify:data": "node scripts/verify-boundary-data.mjs && node scripts/verify-city-data.mjs",
+    "verify:data": "node scripts/verify-boundary-data.mjs && node scripts/verify-city-data.mjs && node scripts/smoke-ui-copy.mjs",
     "smoke:korea": "npm run build && node scripts/smoke-korea-family-map.mjs",
     "verify": "npm run typecheck && npm run verify:data && npm run build",
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "verify:city-data": "node scripts/verify-city-data.mjs",
-    "smoke:top100": "node scripts/smoke-top100-exploration.mjs"
+    "smoke:top100": "node scripts/smoke-top100-exploration.mjs",
+    "smoke:ui-copy": "node scripts/smoke-ui-copy.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-basic-ssl": "latest",

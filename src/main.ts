@@ -40,6 +40,7 @@ app.innerHTML = `
       <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
       <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
       <div class="region-list" data-region-list></div>
+      <p class="asset-note" data-attribution>Earth view preparing…</p>
     </aside>
   </main>
 `;
@@ -133,15 +134,16 @@ function handleGlobeTap(event: PointerEvent) {
 
 window.addEventListener('korea-family-map-request', enterKoreaFamilyMap);
 
-function giftStateLabel(state: string) {
-  if (state === 'asset-enhancement-ready' || state === 'earth-ready') return 'Earth ready';
-  if (state === 'fallback-earth') return 'Earth ready';
-  if (state === 'loading-earth') return 'Preparing Earth';
-  return state.replaceAll('-', ' ');
-}
+const friendlyStateLabels: Record<string, string> = {
+  boot: 'Preparing Earth',
+  'loading-earth': 'Preparing Earth',
+  'earth-ready': 'Earth ready',
+  'fallback-earth': 'Earth ready',
+  'asset-enhancement-ready': 'Earth ready',
+};
 
-globe.onStateChange((state, message) => {
-  stateLabel.textContent = giftStateLabel(state);
+globe.onStateChange((state, message, credit) => {
+  stateLabel.textContent = friendlyStateLabels[state] ?? 'Earth ready';
   stateCopy.textContent = message;
   overlay.updateState(state);
   updateQaState();

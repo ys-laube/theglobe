@@ -303,7 +303,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   }
 
   async function loadEarth() {
-    emit('loading-earth', 'Loading high-resolution Earth imagery…', EARTH_ASSETS.day.attribution);
+    emit('loading-earth', 'Bringing the globe into view…', EARTH_ASSETS.day.attribution);
     const loader = new THREE.TextureLoader();
     loader.setCrossOrigin('anonymous');
 
@@ -314,14 +314,14 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeMaterial.map = dayTexture;
       globeMaterial.emissiveIntensity = 0.04;
       globeMaterial.needsUpdate = true;
-      emit('earth-ready', 'Real Earth imagery loaded. Exploration is ready when you are.', EARTH_ASSETS.day.attribution);
+      emit('earth-ready', 'The globe is ready. Exploration can begin when you are.', EARTH_ASSETS.day.attribution);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown Earth texture load failure';
       globeMaterial.map = makeFallbackEarthTexture();
       globeMaterial.color.set('#ffffff');
       globeMaterial.emissiveIntensity = 0.10;
       globeMaterial.needsUpdate = true;
-      emit('fallback-earth', 'High-resolution imagery is unavailable, so a designed fallback Earth is active.', FALLBACK_ATTRIBUTION, { failureReason: reason });
+      emit('fallback-earth', 'A warm illustrated Earth is ready for exploration.', FALLBACK_ATTRIBUTION, { failureReason: reason });
     }
 
     Promise.allSettled([
@@ -336,7 +336,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         nightMaterial.needsUpdate = true;
       }),
     ]).then(() => {
-      if (state === 'earth-ready') emit('asset-enhancement-ready', 'The globe is ready for your journey.', attribution);
+      if (state === 'earth-ready') emit('asset-enhancement-ready', 'The globe is glowing with its final details.', attribution);
     });
   }
 
