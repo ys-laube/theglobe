@@ -365,7 +365,7 @@ try {
   if (result.capitalsCopy !== '전 세계 UN가입국의 수도를 보여줍니다') throw new Error(`Expected UN member-state capitals copy, found ${result.capitalsCopy}`);
   if (!result.capitalFocusOk || result.capitalCardTitle !== 'Seoul') throw new Error(`Expected rendered capital Seoul card, found ${result.capitalCardTitle}`);
   if (!result.capitalCardDetails?.includes('Gyeongbokgung Palace') || !result.capitalCardDetails?.includes('kimchi jjigae')) throw new Error(`Expected rendered capital card Landmark/Food, found ${result.capitalCardDetails?.join(', ')}`);
-  if (/landmarks?|highlights?|popular travel dining|local food culture|\$\{?city\}?/i.test(result.capitalCardText ?? '')) throw new Error(`Capital card contains placeholder content: ${result.capitalCardText}`);
+  if (result.capitalCardDetails?.some((value) => /landmarks?|highlights?|popular travel dining|local food culture|\$\{?city\}?/i.test(value ?? ''))) throw new Error(`Capital card details contain placeholder content: ${result.capitalCardDetails?.join(', ')}`);
   if (result.toggleLabelBefore !== 'TOP 100 인기 도시 보기') throw new Error(`Expected TOP100 toggle label, found ${result.toggleLabelBefore}`);
   if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);

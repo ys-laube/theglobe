@@ -10,31 +10,107 @@
   "fallbackPolicy": "Use explicit city overrides for priority/family/render-smoke cities. Remaining cards use non-placeholder regional fallback labels that avoid city-name templates and generic placeholder terms.",
   "fallbacks": {
     "capital": {
-      "Asia": { "landmark": "historic royal or civic quarter", "food": "signature noodle, rice, or market dish" },
-      "Europe": { "landmark": "old town square or national civic landmark", "food": "classic café plate or regional pastry" },
-      "Africa": { "landmark": "central heritage district or national monument", "food": "spiced stew, grilled dish, or shared grain plate" },
-      "North America": { "landmark": "national mall, plaza, or civic landmark", "food": "neighborhood classic or market favorite" },
-      "South America": { "landmark": "historic plaza or cathedral quarter", "food": "grilled specialty or local street snack" },
-      "Oceania": { "landmark": "harbor, parliament, or waterfront landmark", "food": "island produce or ocean-side dish" },
-      "Global": { "landmark": "historic center or signature viewpoint", "food": "beloved local dish" }
+      "Asia": {
+        "landmark": "historic royal quarter",
+        "food": "signature noodle, rice, or market dish"
+      },
+      "Europe": {
+        "landmark": "old town square or national monument",
+        "food": "classic café plate or regional pastry"
+      },
+      "Africa": {
+        "landmark": "central heritage district or national monument",
+        "food": "spiced stew, grilled dish, or shared grain plate"
+      },
+      "North America": {
+        "landmark": "national mall or civic plaza",
+        "food": "neighborhood classic or market favorite"
+      },
+      "South America": {
+        "landmark": "historic plaza or cathedral quarter",
+        "food": "grilled specialty or local street snack"
+      },
+      "Oceania": {
+        "landmark": "harbor, parliament, or waterfront site",
+        "food": "island produce or ocean-side dish"
+      },
+      "Global": {
+        "landmark": "historic center or skyline viewpoint",
+        "food": "beloved local dish"
+      }
     },
     "top100": {
-      "Global": { "landmark": "signature skyline, old town, or waterfront viewpoint", "food": "well-known local dish or market favorite" }
+      "Global": {
+        "landmark": "signature skyline, old town, or waterfront viewpoint",
+        "food": "well-known local dish or market favorite"
+      }
     }
   },
   "overrides": {
-    "capital:seoul": { "landmark": "Gyeongbokgung Palace", "food": "kimchi jjigae", "sourceUrl": "https://en.wikipedia.org/wiki/Gyeongbokgung" },
-    "capital:tokyo": { "landmark": "Tokyo Tower", "food": "sushi", "sourceUrl": "https://en.wikipedia.org/wiki/Tokyo_Tower" },
-    "capital:singapore": { "landmark": "Marina Bay Sands", "food": "Hainanese chicken rice", "sourceUrl": "https://en.wikipedia.org/wiki/Marina_Bay_Sands" },
-    "capital:bangkok": { "landmark": "Grand Palace", "food": "pad thai", "sourceUrl": "https://en.wikipedia.org/wiki/Grand_Palace" },
-    "capital:paris": { "landmark": "Eiffel Tower", "food": "croissant", "sourceUrl": "https://en.wikipedia.org/wiki/Eiffel_Tower" },
-    "capital:london": { "landmark": "Tower Bridge", "food": "fish and chips", "sourceUrl": "https://en.wikipedia.org/wiki/Tower_Bridge" },
-    "capital:washington-d-c": { "landmark": "National Mall", "food": "half-smoke", "sourceUrl": "https://en.wikipedia.org/wiki/National_Mall" },
-    "top100:hong-kong": { "landmark": "Victoria Peak", "food": "dim sum", "sourceUrl": "https://en.wikipedia.org/wiki/Victoria_Peak" },
-    "top100:bangkok": { "landmark": "Grand Palace", "food": "pad thai", "sourceUrl": "https://en.wikipedia.org/wiki/Grand_Palace" },
-    "top100:london": { "landmark": "Tower Bridge", "food": "fish and chips", "sourceUrl": "https://en.wikipedia.org/wiki/Tower_Bridge" },
-    "top100:singapore": { "landmark": "Marina Bay Sands", "food": "Hainanese chicken rice", "sourceUrl": "https://en.wikipedia.org/wiki/Marina_Bay_Sands" },
-    "top100:seoul": { "landmark": "Gyeongbokgung Palace", "food": "kimchi jjigae", "sourceUrl": "https://en.wikipedia.org/wiki/Gyeongbokgung" },
-    "top100:jeju": { "landmark": "Seongsan Ilchulbong", "food": "black pork barbecue", "sourceUrl": "https://en.wikipedia.org/wiki/Seongsan_Ilchulbong" }
+    "capital:seoul": {
+      "landmark": "Gyeongbokgung Palace",
+      "food": "kimchi jjigae",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Gyeongbokgung"
+    },
+    "capital:tokyo": {
+      "landmark": "Tokyo Tower",
+      "food": "sushi",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tokyo_Tower"
+    },
+    "capital:singapore": {
+      "landmark": "Marina Bay Sands",
+      "food": "Hainanese chicken rice",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Marina_Bay_Sands"
+    },
+    "capital:bangkok": {
+      "landmark": "Grand Palace",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Grand_Palace"
+    },
+    "capital:paris": {
+      "landmark": "Eiffel Tower",
+      "food": "croissant",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Eiffel_Tower"
+    },
+    "capital:london": {
+      "landmark": "Tower Bridge",
+      "food": "fish and chips",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tower_Bridge"
+    },
+    "capital:washington-d-c": {
+      "landmark": "National Mall",
+      "food": "half-smoke",
+      "sourceUrl": "https://en.wikipedia.org/wiki/National_Mall"
+    },
+    "top100:hong-kong": {
+      "landmark": "Victoria Peak",
+      "food": "dim sum",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Victoria_Peak"
+    },
+    "top100:bangkok": {
+      "landmark": "Grand Palace",
+      "food": "pad thai",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Grand_Palace"
+    },
+    "top100:london": {
+      "landmark": "Tower Bridge",
+      "food": "fish and chips",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Tower_Bridge"
+    },
+    "top100:singapore": {
+      "landmark": "Marina Bay Sands",
+      "food": "Hainanese chicken rice",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Marina_Bay_Sands"
+    },
+    "top100:seoul": {
+      "landmark": "Gyeongbokgung Palace",
+      "food": "kimchi jjigae",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Gyeongbokgung"
+    },
+    "top100:jeju": {
+      "landmark": "Seongsan Ilchulbong",
+      "food": "black pork barbecue",
+      "sourceUrl": "https://en.wikipedia.org/wiki/Seongsan_Ilchulbong"
+    }
   }
 }
