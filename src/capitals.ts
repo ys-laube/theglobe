@@ -1,4 +1,4 @@
-import { top100Cities, worldCapitals, type Top100CityEntry, type WorldCapitalEntry } from './data/cityData';
+import { cityContent, top100Cities, worldCapitals, type CityCardContent, type Top100CityEntry, type WorldCapitalEntry } from './data/cityData';
 
 export type CityExplorationMode = 'capitals' | 'top100';
 
@@ -19,21 +19,22 @@ export type Capital = {
 };
 
 const accents = ['#7dd3fc', '#f9a8d4', '#f87171', '#fbbf24', '#34d399', '#5eead4', '#fb923c', '#c4b5fd', '#93c5fd', '#bef264'];
-const foodsByRegion: Record<string, string> = {
-  Asia: 'local markets and signature street food',
-  Europe: 'classic cafés and regional plates',
-  Africa: 'heritage spices and shared tables',
-  'North America': 'city classics and neighborhood favorites',
-  'South America': 'grilled plates and bright coastal flavors',
-  Oceania: 'island produce and ocean-side dishes',
-  Global: 'beloved local food and travel favorites',
-};
+function contentFor(mode: CityExplorationMode, id: string, region: string): CityCardContent {
+  const override = cityContent.overrides[`${mode === 'capitals' ? 'capital' : 'top100'}:${id}`];
+  if (override) return override;
+  const modeFallbacks = cityContent.fallbacks[mode === 'capitals' ? 'capital' : 'top100'];
+  return modeFallbacks?.[region] ?? modeFallbacks?.Global ?? {
+    landmark: 'historic center or signature viewpoint',
+    food: 'beloved local dish',
+  };
+}
 
 function accentFor(index: number) {
   return accents[index % accents.length];
 }
 
 function capitalToMarker(entry: WorldCapitalEntry, index: number): Capital {
+  const content = contentFor('capitals', entry.id, entry.region);
   return {
     id: `capital-${entry.id}`,
     city: entry.city,
@@ -42,8 +43,8 @@ function capitalToMarker(entry: WorldCapitalEntry, index: number): Capital {
     lat: entry.lat,
     lng: entry.lng,
     mode: 'capitals',
-    landmark: `${entry.city} landmarks`,
-    food: foodsByRegion[entry.region] ?? 'local food culture',
+    landmark: content.landmark,
+    food: content.food,
     note: `${entry.capitalOf}의 수도. 위키 링크로 더 자세히 탐험할 수 있어요.`,
     link: entry.link,
     accent: accentFor(index),
@@ -51,6 +52,7 @@ function capitalToMarker(entry: WorldCapitalEntry, index: number): Capital {
 }
 
 function top100ToMarker(entry: Top100CityEntry, index: number): Capital {
+  const content = contentFor('top100', entry.id, entry.region);
   return {
     id: `top100-${entry.id}`,
     city: entry.city,
@@ -60,8 +62,8 @@ function top100ToMarker(entry: Top100CityEntry, index: number): Capital {
     lng: entry.lng,
     mode: 'top100',
     rank: entry.rank,
-    landmark: `${entry.city} highlights`,
-    food: 'popular travel dining and local favorites',
+    landmark: content.landmark,
+    food: content.food,
     note: `TOP100 인기 도시 #${entry.rank}. 정적 검증 데이터로 순위와 링크를 제공합니다.`,
     link: entry.link,
     accent: accentFor(index + 3),

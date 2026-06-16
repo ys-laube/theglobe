@@ -1,5 +1,6 @@
 import worldCapitalsData from './worldCapitals.json';
 import top100CitiesData from './top100Cities.json';
+import cityContentData from './cityContent.json';
 
 export type CitySourceMetadata = {
   id: string;
@@ -29,6 +30,21 @@ export type WorldCapitalEntry = StaticCityEntry & {
   capitalOf: string;
 };
 
+export type CityCardContent = {
+  landmark: string;
+  food: string;
+  sourceUrl?: string;
+};
+
+export type CityContentDataset = {
+  schemaVersion: 1;
+  datasetId: string;
+  source: CitySourceMetadata;
+  fallbackPolicy: string;
+  fallbacks: Record<string, Record<string, CityCardContent>>;
+  overrides: Record<string, CityCardContent>;
+};
+
 export type Top100CityEntry = StaticCityEntry & {
   rank: number;
 };
@@ -54,3 +70,4 @@ export type Top100CitiesDataset = {
 
 export const worldCapitals = worldCapitalsData as WorldCapitalsDataset;
 export const top100Cities = top100CitiesData as Top100CitiesDataset;
+export const cityContent = cityContentData as CityContentDataset;
