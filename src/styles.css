@@ -294,12 +294,12 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-overlay[data-map-style="satellite-relief-25d"] .korea-map-canvas {
   background:
     radial-gradient(circle at 32% 22%, rgba(254, 240, 138, 0.17), transparent 14rem),
-    radial-gradient(circle at 66% 72%, rgba(56, 189, 248, 0.36), transparent 19rem),
+    radial-gradient(circle at 66% 72%, rgba(96, 205, 255, 0.52), transparent 19rem),
     radial-gradient(circle at 50% 50%, rgba(134, 239, 172, 0.18), transparent 13rem),
     linear-gradient(180deg, rgba(226, 232, 240, 0.14), transparent 34%),
     repeating-linear-gradient(118deg, rgba(241, 245, 249, 0.055) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(34deg, rgba(15, 23, 42, 0.18) 0 1px, transparent 1px 9px),
-    linear-gradient(145deg, rgba(20, 184, 166, 0.42), rgba(14, 116, 144, 0.72) 44%, rgba(8, 47, 73, 0.82));
+    linear-gradient(145deg, rgba(34, 211, 238, 0.40), rgba(14, 165, 233, 0.66) 44%, rgba(12, 74, 110, 0.76));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.16),
     inset 0 -1.4rem 3.4rem rgba(2, 6, 23, 0.38),
@@ -311,14 +311,14 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   z-index: 0;
   background:
     radial-gradient(circle at 42% 34%, rgba(134, 239, 172, 0.34), transparent 16rem),
-    radial-gradient(circle at 62% 72%, rgba(56, 189, 248, 0.46), transparent 17rem),
-    linear-gradient(145deg, rgba(21, 128, 61, 0.48), rgba(14, 116, 144, 0.66) 48%, rgba(8, 47, 73, 0.84));
+    radial-gradient(circle at 62% 72%, rgba(96, 205, 255, 0.62), transparent 17rem),
+    linear-gradient(145deg, rgba(34, 197, 94, 0.42), rgba(14, 165, 233, 0.56) 48%, rgba(12, 74, 110, 0.72));
 }
 .korea-raster-layer::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 48%, transparent 52%, rgba(2, 6, 23, 0.24) 100%);
+  background: radial-gradient(circle at 50% 48%, transparent 60%, rgba(2, 6, 23, 0.14) 100%);
   pointer-events: none;
 }
 .korea-raster-image {
@@ -326,9 +326,10 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: saturate(1.24) contrast(1.06) brightness(1.14);
+  filter: saturate(1.32) contrast(1.04) brightness(1.22);
 }
 .korea-map-canvas svg { position: relative; z-index: 1; width: 100%; height: 100%; min-height: 320px; display: block; }
+.korea-vector-layer { transform-box: fill-box; transform-origin: center; }
 .korea-static-texture {
   pointer-events: none;
   mix-blend-mode: screen;
@@ -414,47 +415,52 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 
 .korea-map-overlay[data-family-traces="hidden"] .household-marker { display: none; }
 .household-marker { cursor: pointer; outline: none; pointer-events: auto; }
-.household-marker-glow {
-  fill: rgba(56, 189, 248, 0.18);
-  stroke: rgba(125, 211, 252, 0.75);
-  stroke-width: 0.34;
-  filter: drop-shadow(0 0 0.9rem rgba(56, 189, 248, 0.50));
-  animation: householdPulse 2.4s ease-in-out infinite;
-}
 .household-marker-dot {
-  fill: #bae6fd;
-  stroke: rgba(15, 23, 42, 0.72);
-  stroke-width: 0.24;
+  fill: rgba(186, 230, 253, 0.72);
+  stroke: rgba(15, 23, 42, 0.78);
+  stroke-width: 0.22;
+  opacity: 0.52;
+  transition: opacity 180ms ease, fill 180ms ease, filter 180ms ease;
 }
 .household-marker-label {
   fill: #e0f2fe;
-  font-size: 2.35px;
+  font-size: 1.85px;
   font-weight: 900;
   text-anchor: middle;
   paint-order: stroke;
-  stroke: rgba(2, 6, 23, 0.9);
-  stroke-width: 0.7;
+  stroke: rgba(2, 6, 23, 0.92);
+  stroke-width: 0.62;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
 }
-.household-marker.is-active .household-marker-glow { fill: rgba(14, 165, 233, 0.26); stroke: rgba(255, 255, 255, 0.92); }
-.household-marker:focus-visible .household-marker-glow,
-.household-marker:hover .household-marker-glow,
-.household-marker.is-highlighted .household-marker-glow,
-.household-marker.is-selected-household .household-marker-glow { fill: rgba(103, 232, 249, 0.34); stroke: rgba(255, 255, 255, 0.96); }
-@keyframes householdPulse {
-  0%, 100% { opacity: 0.82; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
+.household-marker:focus-visible .household-marker-dot,
+.household-marker:hover .household-marker-dot,
+.household-marker.is-highlighted .household-marker-dot,
+.household-marker.is-selected-household .household-marker-dot {
+  fill: rgba(254, 240, 138, 0.95);
+  opacity: 1;
+  filter: drop-shadow(0 0 0.42rem rgba(250, 204, 21, 0.45));
 }
+.household-marker:focus-visible .household-marker-label,
+.household-marker:hover .household-marker-label,
+.household-marker.is-highlighted .household-marker-label,
+.household-marker.is-selected-household .household-marker-label { opacity: 1; }
 .korea-map-label {
   fill: #f8fafc;
-  font-size: 3.2px;
-  font-weight: 800;
+  font-size: 2.45px;
+  font-weight: 850;
   text-anchor: middle;
   paint-order: stroke;
-  stroke: rgba(2, 6, 23, 0.85);
-  stroke-width: 0.9;
+  stroke: rgba(2, 6, 23, 0.9);
+  stroke-width: 0.72;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;
 }
+.korea-map-label.is-selected-label,
+.korea-map-label.is-highlighted { opacity: 1; }
+.korea-map-label.is-next-label { font-size: 2.05px; }
 .korea-route-panel {
   border-radius: 1.5rem;
   padding: 1rem;

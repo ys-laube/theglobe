@@ -498,26 +498,14 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
-    const activeRouteSegmentIds = new Set(activeRouteSegmentIdsByRegion[selectedRegion]);
     const familyTraceState = selectedNode.households?.length ? 'terminal' : 'hidden';
     host.dataset.familyTraces = familyTraceState;
     mapMount.dataset.familyTraces = familyTraceState;
 
-    if (familyTraceState === 'terminal') {
-      const routeLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      routeLayer.setAttribute('class', 'korea-family-route-layer');
-      routeLayer.setAttribute('aria-label', '선택한 가족 목적지까지의 경로');
-      familyRouteSegments
-        .filter((segment) => activeRouteSegmentIds.has(segment.id))
-        .forEach((segment) => {
-          const route = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          route.setAttribute('d', routePath(segment));
-          route.setAttribute('class', 'korea-family-route is-active');
-          route.setAttribute('aria-label', segment.label);
-          routeLayer.append(route);
-        });
-      svg.append(routeLayer);
-    }
+    const vectorLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    vectorLayer.setAttribute('class', 'korea-vector-layer');
+    vectorLayer.setAttribute('transform', 'translate(50 50) scale(1.12) translate(-50 -50)');
+    svg.append(vectorLayer);
 
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {
@@ -546,16 +534,17 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
           }
         });
       }
-      svg.append(polygon);
+      vectorLayer.append(polygon);
 
       if (isSelected || isNext) {
         const [x, y] = feature.centroid;
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', String(x));
         label.setAttribute('y', String(y));
-        label.setAttribute('class', 'korea-map-label');
+        label.setAttribute('class', ['korea-map-label', isSelected ? 'is-selected-label' : 'is-next-label'].filter(Boolean).join(' '));
+        label.dataset.regionId = id;
         label.textContent = feature.nameKo;
-        svg.append(label);
+        vectorLayer.append(label);
       }
     }
 
@@ -588,7 +577,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       group.append(halo, dot, label);
       islandLayer.append(group);
     });
-    svg.append(islandLayer);
+    vectorLayer.append(islandLayer);
 
     if (familyTraceState === 'terminal') {
       householdMarkers.forEach((markerModel) => {
@@ -621,23 +610,18 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
           }
         });
 
-        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        glow.setAttribute('cx', String(x));
-        glow.setAttribute('cy', String(y));
-        glow.setAttribute('r', activeRegion ? '3.9' : '3.2');
-        glow.setAttribute('class', 'household-marker-glow');
         const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
         dot.setAttribute('cx', String(x));
         dot.setAttribute('cy', String(y));
-        dot.setAttribute('r', activeRegion ? '1.35' : '1.05');
+        dot.setAttribute('r', activeRegion ? '0.72' : '0.58');
         dot.setAttribute('class', 'household-marker-dot');
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', String(x));
         label.setAttribute('y', String(y - 4.2));
         label.setAttribute('class', 'household-marker-label');
         label.textContent = household.label;
-        group.append(glow, dot, label);
-        svg.append(group);
+        group.append(dot, label);
+        vectorLayer.append(group);
       });
     }
 
