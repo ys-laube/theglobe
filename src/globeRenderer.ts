@@ -413,6 +413,8 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     },
     projectLocation: (lat, lng, target) => {
       const rect = target.getBoundingClientRect();
+      globeGroup.updateMatrixWorld(true);
+      camera.updateMatrixWorld(true);
       const world = latLngToVector(lat, lng, radius + 0.045).applyMatrix4(globeGroup.matrixWorld);
       const normal = latLngToVector(lat, lng, 1).applyEuler(globeGroup.rotation).normalize();
       const cameraDirection = camera.position.clone().sub(world).normalize();
