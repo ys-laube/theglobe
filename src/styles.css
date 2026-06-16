@@ -318,20 +318,15 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(circle at 54% 55%, transparent 48%, rgba(2, 6, 23, 0.30) 100%),
-    linear-gradient(90deg, rgba(2, 6, 23, 0.34), transparent 24%, transparent 78%, rgba(2, 6, 23, 0.18));
+  background: radial-gradient(circle at 50% 48%, transparent 42%, rgba(2, 6, 23, 0.44) 100%);
   pointer-events: none;
 }
 .korea-raster-image {
-  position: absolute;
-  left: 17%;
-  top: -1.5%;
-  width: 80%;
-  height: 112%;
-  object-fit: fill;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
-  filter: saturate(1.18) contrast(1.08) brightness(0.96);
+  filter: saturate(1.08) contrast(1.04) brightness(0.84);
 }
 .korea-map-canvas svg { position: relative; z-index: 1; width: 100%; height: 100%; min-height: 320px; display: block; }
 .korea-static-texture {
@@ -369,26 +364,26 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   filter: drop-shadow(0 0 0.72rem rgba(56, 189, 248, 0.58));
 }
 .korea-region {
-  fill: rgba(74, 222, 128, 0.045);
-  stroke: rgba(241, 245, 249, 0.76);
+  fill: rgba(74, 222, 128, 0.10);
+  stroke: rgba(226, 232, 240, 0.62);
   stroke-width: 0.42;
   vector-effect: non-scaling-stroke;
   transition: fill 180ms ease, stroke 180ms ease, filter 180ms ease;
   filter: url("#korea-land-soft-shadow");
 }
 .korea-region.is-selected {
-  fill: rgba(125, 211, 252, 0.16);
-  stroke: rgba(255, 255, 255, 0.90);
+  fill: rgba(125, 211, 252, 0.26);
+  stroke: rgba(255, 255, 255, 0.78);
   filter: drop-shadow(0 0 0.9rem rgba(125, 211, 252, 0.35));
 }
 .korea-region.is-next {
-  fill: rgba(192, 132, 252, 0.13);
+  fill: rgba(192, 132, 252, 0.22);
   stroke: rgba(233, 213, 255, 0.9);
   cursor: pointer;
 }
 .korea-region.is-next:hover,
-.korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.22); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
-.korea-region.has-households { fill: rgba(250, 204, 21, 0.18); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
+.korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.34); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
+.korea-region.has-households { fill: rgba(250, 204, 21, 0.30); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
 
 .korea-island-reference-layer { pointer-events: none; }
 .korea-island-reference { filter: drop-shadow(0 0 0.5rem rgba(125, 211, 252, 0.34)); }
