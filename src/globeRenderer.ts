@@ -234,8 +234,8 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     color: '#ffffff',
     roughness: 0.74,
     metalness: 0.03,
-    emissive: '#0b2f55',
-    emissiveIntensity: 0.22,
+    emissive: '#0f5f93',
+    emissiveIntensity: 0.26,
   });
   const globe = new THREE.Mesh(new THREE.SphereGeometry(radius, 128, 128), globeMaterial);
   globeGroup.add(globe);
@@ -269,7 +269,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const pickables: THREE.Object3D[] = [koreaHitArea];
 
   const lights = [
-    new THREE.AmbientLight('#b7d4ff', 0.92),
+    new THREE.AmbientLight('#c7e0ff', 0.98),
     new THREE.DirectionalLight('#fffaf0', 4.15),
     new THREE.PointLight('#7dd3fc', 18, 9),
   ];
@@ -335,14 +335,14 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       if (shouldForcePrimaryTextureTimeout()) await new Promise((_resolve, reject) => window.setTimeout(() => reject(new Error('Forced Earth texture timeout for QA')), EARTH_ASSET_TIMEOUT_MS + 80));
       const dayTexture = await loadPrimaryEarthTexture(EARTH_ASSETS.day.url, EARTH_ASSETS.day.label);
       globeMaterial.map = dayTexture;
-      globeMaterial.emissiveIntensity = 0.12;
+      globeMaterial.emissiveIntensity = 0.20;
       globeMaterial.needsUpdate = true;
       emit('earth-ready', 'where are you? where do you want to go?', EARTH_ASSETS.day.attribution);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown Earth texture load failure';
       globeMaterial.map = makeFallbackEarthTexture();
       globeMaterial.color.set('#ffffff');
-      globeMaterial.emissiveIntensity = 0.16;
+      globeMaterial.emissiveIntensity = 0.20;
       globeMaterial.needsUpdate = true;
       emit('fallback-earth', 'where are you? where do you want to go?', FALLBACK_ATTRIBUTION, { failureReason: reason });
     }
