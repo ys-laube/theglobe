@@ -318,7 +318,10 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 48%, transparent 60%, rgba(2, 6, 23, 0.14) 100%);
+  background:
+    linear-gradient(145deg, rgba(56, 189, 248, 0.18), rgba(14, 165, 233, 0.12) 44%, rgba(125, 211, 252, 0.10)),
+    radial-gradient(circle at 50% 48%, transparent 60%, rgba(2, 6, 23, 0.08) 100%);
+  mix-blend-mode: screen;
   pointer-events: none;
 }
 .korea-raster-image {
