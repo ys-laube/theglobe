@@ -247,8 +247,9 @@ try {
           document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
           await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'invalid', householdLabel + ' invalid passphrase');
           const invalidFeedback = document.querySelector('.name-gate-feedback')?.textContent?.trim();
-          input.value = acceptedName;
-          input.dispatchEvent(new Event('input', { bubbles: true }));
+          const acceptedInput = document.querySelector('.name-gate input');
+          acceptedInput.value = acceptedName;
+          acceptedInput.dispatchEvent(new Event('input', { bubbles: true }));
           document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
           await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', householdLabel + ' name gate unlock');
           const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
