@@ -210,13 +210,6 @@ function routePath(segment: FamilyRouteSegment) {
   return `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`;
 }
 
-function selectedRouteSummary(region: RegionId) {
-  const node = routeNodes[region];
-  if (region === 'kr-korea-overview') return '17-region static overview · choose a family route';
-  if (node.households?.length) return `${node.label} family target · cards and markers ready`;
-  return `${node.label} route highlighted · continue the drilldown`;
-}
-
 function householdById(id: HouseholdId) {
   const household = householdConfig.households.find((candidate) => candidate.id === id);
   if (!household) throw new Error(`Missing household config: ${id}`);
@@ -291,9 +284,9 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function renderHeader() {
     header.replaceChildren();
     const copy = document.createElement('div');
-    appendText(copy, 'p', 'Official static Korea family map', 'map-kicker');
+    appendText(copy, 'p', '17 광역자치단체', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 문서화한 정적 17개 광역 행정구역 안내에서 가족이 있는 자리까지 확대됩니다.');
+    appendText(copy, 'p', '가족이 있는 도시와 동네까지 차분히 이어지는 한국 지도입니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');
@@ -440,12 +433,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       svg.append(group);
     });
 
-    const legend = document.createElement('div');
-    legend.className = 'korea-map-legend';
-    appendText(legend, 'strong', '우리 가족이 이어지는 지도');
-    appendText(legend, 'span', selectedRouteSummary(selectedRegion));
-    appendText(legend, 'small', '빛나는 길을 따라 서로의 집으로 닿는 여정');
-    mapMount.append(svg, legend);
+    mapMount.append(svg);
   }
 
   function renderRoutePanel() {
@@ -472,13 +460,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     }
 
     if (!node.next.length) {
-      appendText(routePanel, 'p', 'Official static region', 'map-kicker');
-      appendText(routePanel, 'h3', `${node.label} 경계 가이드`);
-      appendText(routePanel, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 기준으로 문서화한 정적 SVG 안내 영역입니다. 가족 목적지가 있는 지역만 다음 단계로 확대됩니다.');
+      appendText(routePanel, 'p', '관할 기초자치단체', 'map-kicker');
+      appendText(routePanel, 'h3', node.label);
+      appendText(routePanel, 'p', '이 지역은 지금 단계에서 한눈에 둘러보는 카드로 남겨두고, 가족 목적지가 있는 곳만 더 깊게 열립니다.');
       return;
     }
 
-    appendText(routePanel, 'p', selectedRegion === 'kr-korea-overview' ? '17 first-level regions' : 'Next stop', 'map-kicker');
+    appendText(routePanel, 'p', selectedRegion === 'kr-korea-overview' ? '17 광역자치단체' : 'Next stop', 'map-kicker');
     appendText(routePanel, 'h3', selectedRegion === 'kr-korea-overview' ? '대한민국 17개 광역 행정구역' : '가족이 있는 지역으로 한 단계 더 들어가기');
     const choices = document.createElement('div');
     choices.className = 'route-choice-grid';
@@ -505,28 +493,24 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     routePanel.replaceChildren();
     appendText(routePanel, 'p', 'Selected family', 'map-kicker');
     appendText(routePanel, 'h3', household.label);
-    appendText(routePanel, 'p', `${household.locationLabel} · 가족 이름을 한 번 확인하면 준비해 둔 네이버 밴드 초대 링크가 열립니다.`);
+    appendText(routePanel, 'p', household.locationLabel);
 
     const gate = document.createElement('form');
     gate.className = 'name-gate';
-    gate.setAttribute('aria-label', `${household.label} 가족 이름 확인`);
+    gate.setAttribute('aria-label', `${household.label} 암구호 확인`);
 
     const label = document.createElement('label');
-    label.textContent = '가족 이름';
+    label.textContent = '암구호를 대시오!';
     label.setAttribute('for', `name-gate-${household.id}`);
     const input = document.createElement('input');
     input.id = `name-gate-${household.id}`;
-    input.name = 'family-name';
+    input.name = 'family-passphrase';
     input.type = 'text';
-    input.autocomplete = 'name';
-    input.placeholder = '예: 한유진';
-    input.setAttribute('aria-describedby', `name-gate-help-${household.id}`);
-    const help = appendText(gate, 'p', '로그인이나 개인정보 저장 없이, 이 화면에서만 가볍게 확인합니다.', 'name-gate-help');
-    help.id = `name-gate-help-${household.id}`;
+    input.autocomplete = 'off';
     const submit = document.createElement('button');
     submit.type = 'submit';
     submit.className = 'primary';
-    submit.textContent = '초대 링크 열기';
+    submit.textContent = '암구호 확인';
     label.append(input);
     gate.prepend(label);
     gate.append(submit);
@@ -534,13 +518,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const feedback = document.createElement('p');
     feedback.className = 'name-gate-feedback';
     feedback.setAttribute('aria-live', 'polite');
-    if (nameGateState === 'invalid') feedback.textContent = '이름을 다시 확인해 주세요. 공백은 자동으로 무시됩니다.';
+    if (nameGateState === 'invalid') feedback.textContent = '암구호 틀림';
     routePanel.append(gate, feedback);
 
     const links = document.createElement('div');
     links.className = 'band-link-grid';
     if (unlockedHousehold === household.id) {
-      feedback.textContent = '확인되었습니다. 가족 밴드 초대 링크를 선택하세요.';
+      feedback.textContent = '암구호 확인 완료';
       getHouseholdLinks(household.id).forEach((slot) => {
         const link = document.createElement('a');
         link.href = slot.placeholderHref;

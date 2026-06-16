@@ -314,7 +314,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeMaterial.map = dayTexture;
       globeMaterial.emissiveIntensity = 0.04;
       globeMaterial.needsUpdate = true;
-      emit('earth-ready', 'The globe is ready. Exploration can begin when you are.', EARTH_ASSETS.day.attribution);
+      emit('earth-ready', 'where are you? where do you want to go?', EARTH_ASSETS.day.attribution);
     } catch (error) {
       const reason = error instanceof Error ? error.message : 'Unknown Earth texture load failure';
       globeMaterial.map = makeFallbackEarthTexture();
@@ -336,7 +336,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         nightMaterial.needsUpdate = true;
       }),
     ]).then(() => {
-      if (state === 'earth-ready') emit('asset-enhancement-ready', 'The globe is glowing with its final details.', attribution);
+      if (state === 'earth-ready') emit('asset-enhancement-ready', 'where are you? where do you want to go?', attribution);
     });
   }
 

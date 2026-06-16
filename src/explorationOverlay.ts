@@ -233,7 +233,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.tierCopy.textContent = !earthReady
       ? '지구 표면 또는 의도된 폴백이 준비될 때까지 핀과 카드는 숨겨둡니다.'
       : explorationMode
-        ? (cityMode === 'top100' ? '여행 인기 도시 100곳을 순위와 함께 보여줍니다.' : '검증된 수도 전체를 처음부터 지구 위에 보여줍니다.')
+        ? (cityMode === 'top100' ? '여행 인기 도시 100곳을 순위와 함께 보여줍니다.' : '전 세계 UN가입국의 수도를 보여줍니다')
         : '탐험 모드를 켜면 세계의 수도부터 차분히 펼쳐집니다.';
     elements.explorationButton.textContent = explorationMode ? '탐험 모드 닫기' : '탐험 모드 열기';
     elements.explorationButton.disabled = !earthReady;
