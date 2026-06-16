@@ -301,7 +301,7 @@ for (const requiredImageryConstant of [
   'image/jpeg',
   'NASA GIBS · NASA Earth Observatory Blue Marble',
 ]) {
-  assert(koreaImagerySource.includes(requiredImageryConstant), `Korea imagery helper must preserve ${requiredImageryConstant}`);
+  assert(koreaImagerySource.includes(requiredImageryConstant) || assetsPolicySource.includes(requiredImageryConstant) || (requiredImageryConstant === '33,124,39,132' && assetsPolicySource.includes('bbox: [33, 124, 39, 132]')), `Korea imagery policy must preserve ${requiredImageryConstant}`);
 }
 assert(koreaOverlaySource.includes('dataset.imageryState') && koreaOverlaySource.includes('korea-raster-layer'), 'Korea overlay must expose raster imagery telemetry hooks');
 assert(koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__') || koreaImagerySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea imagery must retain deterministic fallback test hook');

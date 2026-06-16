@@ -1,16 +1,9 @@
+import { KOREA_GIBS_BLUE_MARBLE } from './assetsPolicy';
+
+export { KOREA_GIBS_BLUE_MARBLE };
+
 export type KoreaImageryState = 'loading' | 'ready' | 'fallback' | 'error';
 export type KoreaImagerySource = 'nasa-gibs-blue-marble-wms' | 'static-fallback';
-
-export const KOREA_GIBS_BLUE_MARBLE = {
-  endpoint: 'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi',
-  layer: 'BlueMarble_NextGeneration',
-  crs: 'EPSG:4326',
-  bbox: '33,124,39,132',
-  format: 'image/jpeg',
-  width: 900,
-  height: 900,
-  attribution: 'NASA GIBS · NASA Earth Observatory Blue Marble',
-} as const;
 
 export function buildKoreaGibsImageUrl(width = KOREA_GIBS_BLUE_MARBLE.width, height = KOREA_GIBS_BLUE_MARBLE.height) {
   const params = new URLSearchParams({
@@ -20,7 +13,7 @@ export function buildKoreaGibsImageUrl(width = KOREA_GIBS_BLUE_MARBLE.width, hei
     LAYERS: KOREA_GIBS_BLUE_MARBLE.layer,
     FORMAT: KOREA_GIBS_BLUE_MARBLE.format,
     CRS: KOREA_GIBS_BLUE_MARBLE.crs,
-    BBOX: KOREA_GIBS_BLUE_MARBLE.bbox,
+    BBOX: KOREA_GIBS_BLUE_MARBLE.bbox.join(','),
     WIDTH: String(width),
     HEIGHT: String(height),
   });

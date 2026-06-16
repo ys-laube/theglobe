@@ -290,7 +290,19 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       document.body.style.cursor = '';
       return;
     }
-    const hit = globe.pickVisibleObject(event, event.currentTarget as HTMLElement);
+    const target = event.currentTarget as HTMLElement;
+    if (commit && selected) {
+      const selectedPoint = globe.projectLocation(selected.lat, selected.lng, target);
+      if (selectedPoint?.visible) {
+        const distance = Math.hypot(event.clientX - selectedPoint.clientX, event.clientY - selectedPoint.clientY);
+        if (distance <= 18) {
+          focusCity(selected);
+          document.body.style.cursor = 'pointer';
+          return;
+        }
+      }
+    }
+    const hit = globe.pickVisibleObject(event, target);
     const capital = hit?.userData.capital as Capital | undefined;
     document.body.style.cursor = capital ? 'pointer' : '';
     if (capital && commit) focusCity(capital);

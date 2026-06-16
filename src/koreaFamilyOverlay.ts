@@ -406,33 +406,33 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     layer.dataset.imageryState = 'loading';
     layer.dataset.imagerySource = 'nasa-gibs-blue-marble-wms';
     const image = document.createElement('img');
+    let imageRequestActive = true;
+    const activateFallback = () => {
+      if (!layer.isConnected || layer.dataset.imageryState !== 'loading') return;
+      imageRequestActive = false;
+      image.onload = null;
+      image.onerror = null;
+      image.src = '';
+      layer.dataset.imageryState = 'fallback';
+      layer.dataset.imagerySource = 'static-fallback';
+      layer.replaceChildren();
+      setImageryTelemetry('fallback', 'static-fallback');
+    };
     image.className = 'korea-raster-image';
     image.alt = '';
     image.decoding = 'async';
     image.loading = 'eager';
     image.crossOrigin = 'anonymous';
-    image.addEventListener('load', () => {
-      if (!layer.isConnected) return;
+    image.onload = () => {
+      if (!imageRequestActive || !layer.isConnected || layer.dataset.imageryState !== 'loading') return;
+      imageRequestActive = false;
       layer.dataset.imageryState = 'ready';
       setImageryTelemetry('ready', 'nasa-gibs-blue-marble-wms');
-    }, { once: true });
-    image.addEventListener('error', () => {
-      if (!layer.isConnected) return;
-      layer.replaceChildren();
-      layer.dataset.imageryState = 'fallback';
-      layer.dataset.imagerySource = 'static-fallback';
-      setImageryTelemetry('fallback', 'static-fallback');
-    }, { once: true });
+    };
+    image.onerror = activateFallback;
     image.src = buildKoreaGibsImageUrl();
     layer.append(image);
-    window.setTimeout(() => {
-      if (layer.isConnected && layer.dataset.imageryState === 'loading') {
-        layer.dataset.imageryState = 'fallback';
-        layer.dataset.imagerySource = 'static-fallback';
-        layer.replaceChildren();
-        setImageryTelemetry('fallback', 'static-fallback');
-      }
-    }, 4000);
+    window.setTimeout(activateFallback, 4000);
     return layer;
   }
 
