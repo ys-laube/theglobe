@@ -10,8 +10,8 @@ export type NaverBandLinkSlot = {
   readonly id: string;
   readonly householdId: HouseholdId;
   readonly label: string;
-  readonly placeholderHref: `https://band.us/${string}`;
-  readonly status: 'placeholder';
+  readonly href: `https://band.us/${string}`;
+  readonly status: 'active';
 };
 
 type SevenNaverBandLinkSlots = readonly [
@@ -73,13 +73,13 @@ export const householdConfig = {
     },
   ],
   naverBandLinkSlots: [
-    { id: 'parents-band-1', householdId: 'parents', label: '한가네 본가 밴드 1', placeholderHref: 'https://band.us/band/parents-placeholder-1', status: 'placeholder' },
-    { id: 'parents-band-2', householdId: 'parents', label: '한가네 본가 밴드 2', placeholderHref: 'https://band.us/band/parents-placeholder-2', status: 'placeholder' },
-    { id: 'sister-band-1', householdId: 'sister', label: '건희민하찬희네 밴드 1', placeholderHref: 'https://band.us/band/sister-placeholder-1', status: 'placeholder' },
-    { id: 'sister-band-2', householdId: 'sister', label: '건희민하찬희네 밴드 2', placeholderHref: 'https://band.us/band/sister-placeholder-2', status: 'placeholder' },
-    { id: 'sister-band-3', householdId: 'sister', label: '건희민하찬희네 밴드 3', placeholderHref: 'https://band.us/band/sister-placeholder-3', status: 'placeholder' },
-    { id: 'brother-band-1', householdId: 'brother', label: '진주네 밴드', placeholderHref: 'https://band.us/band/brother-placeholder-1', status: 'placeholder' },
-    { id: 'home-band-1', householdId: 'home', label: '은하네 밴드', placeholderHref: 'https://band.us/band/home-placeholder-1', status: 'placeholder' },
+    { id: 'parents-band-1', householdId: 'parents', label: '한가네 본가 밴드 1', href: 'https://band.us/band/4640764', status: 'active' },
+    { id: 'parents-band-2', householdId: 'parents', label: '한가네 본가 밴드 2', href: 'https://band.us/band/3889566', status: 'active' },
+    { id: 'sister-band-1', householdId: 'sister', label: '건희민하찬희네 밴드 1', href: 'https://band.us/band/7751923', status: 'active' },
+    { id: 'sister-band-2', householdId: 'sister', label: '건희민하찬희네 밴드 2', href: 'https://band.us/band/60060244', status: 'active' },
+    { id: 'sister-band-3', householdId: 'sister', label: '건희민하찬희네 밴드 3', href: 'https://band.us/band/85496439', status: 'active' },
+    { id: 'brother-band-1', householdId: 'brother', label: '진주네 밴드', href: 'https://band.us/band/102062529', status: 'active' },
+    { id: 'home-band-1', householdId: 'home', label: '은하네 밴드', href: 'https://band.us/band/102317167', status: 'active' },
   ],
 } as const satisfies HouseholdConfig;
 
@@ -125,9 +125,9 @@ export function validateHouseholdConfig(config: HouseholdConfig) {
   config.naverBandLinkSlots.forEach((slot) => {
     if (slotIds.has(slot.id)) errors.push(`Duplicate Naver Band link slot id: ${slot.id}.`);
     slotIds.add(slot.id);
-    if (slot.status !== 'placeholder') errors.push(`Naver Band link slot ${slot.id} must remain placeholder until a real link is supplied.`);
-    if (!slot.placeholderHref.startsWith('https://band.us/')) {
-      errors.push(`Naver Band link slot ${slot.id} must use an https://band.us/ placeholder.`);
+    if (slot.status !== 'active') errors.push(`Naver Band link slot ${slot.id} must be active.`);
+    if (!slot.href.startsWith('https://band.us/band/')) {
+      errors.push(`Naver Band link slot ${slot.id} must use an https://band.us/band/ link.`);
     }
   });
 

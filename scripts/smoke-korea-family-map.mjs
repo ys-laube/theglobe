@@ -619,10 +619,10 @@ try {
     if (actualInfo?.householdCardCount !== 0) throw new Error(`Expected no household cards before ${expectedInfo.label} terminal drilldown, found ${actualInfo?.householdCardLabels?.join(', ')}`);
   }
   const expectedFamilyPaths = [
-    { key: 'seoulFamilyPath', terminalRegion: 'kr-seoul-mapo', householdId: 'brother', householdLabel: '진주네', linkCount: 1 },
-    { key: 'gyeongnamFamilyPath', terminalRegion: 'kr-gimhae-bonghwang', householdId: 'home', householdLabel: '은하네', linkCount: 1 },
-    { key: 'busanParentsPath', terminalRegion: 'kr-busan-haeundae', householdId: 'parents', householdLabel: '한가네 본가', linkCount: 2 },
-    { key: 'busanSisterPath', terminalRegion: 'kr-busan-haeundae', householdId: 'sister', householdLabel: '건희민하찬희네', linkCount: 3 },
+    { key: 'seoulFamilyPath', terminalRegion: 'kr-seoul-mapo', householdId: 'brother', householdLabel: '진주네', linkCount: 1, links: ['https://band.us/band/102062529'] },
+    { key: 'gyeongnamFamilyPath', terminalRegion: 'kr-gimhae-bonghwang', householdId: 'home', householdLabel: '은하네', linkCount: 1, links: ['https://band.us/band/102317167'] },
+    { key: 'busanParentsPath', terminalRegion: 'kr-busan-haeundae', householdId: 'parents', householdLabel: '한가네 본가', linkCount: 2, links: ['https://band.us/band/4640764', 'https://band.us/band/3889566'] },
+    { key: 'busanSisterPath', terminalRegion: 'kr-busan-haeundae', householdId: 'sister', householdLabel: '건희민하찬희네', linkCount: 3, links: ['https://band.us/band/7751923', 'https://band.us/band/60060244', 'https://band.us/band/85496439'] },
   ];
   for (const expectedPath of expectedFamilyPaths) {
     const actualPath = result[expectedPath.key];
@@ -639,13 +639,13 @@ try {
     for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
       if (!actualPath?.terminalHouseholdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected terminal household marker label ${requiredHouseholdLabel}, found ${actualPath?.terminalHouseholdMarkerLabels?.join(', ')}`);
     }
-    if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band placeholder links, found ${actualPath?.linkCount}`);
-    if (!actualPath?.links?.every((href) => href.startsWith('https://band.us/band/') && href.includes('-placeholder-'))) throw new Error(`Expected placeholder-only band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
+    if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band links, found ${actualPath?.linkCount}`);
+    if (JSON.stringify(actualPath?.links) !== JSON.stringify(expectedPath.links)) throw new Error(`Expected exact band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
   }
   if (result.selectedHousehold !== 'sister') throw new Error(`Expected sister household, found ${result.selectedHousehold}`);
   if (result.nameGateState !== 'unlocked') throw new Error(`Expected unlocked name gate, found ${result.nameGateState}`);
   if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links, found ${result.linkCount}`);
-  if (!result.links.every((href) => href.startsWith('https://band.us/'))) throw new Error('Expected band.us placeholder links');
+  if (JSON.stringify(result.links) !== JSON.stringify(['https://band.us/band/7751923', 'https://band.us/band/60060244', 'https://band.us/band/85496439'])) throw new Error(`Expected 건희민하찬희네 real band.us links, found ${result.links.join(', ')}`);
   console.log('PASS layout, exploration, Korea family paths, and Korea morph headless smoke', JSON.stringify(result));
 } finally {
   await terminate(chrome);

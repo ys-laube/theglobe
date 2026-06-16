@@ -21,11 +21,9 @@ public-data/VWorld static snapshots or documented metadata only, the capital dat
 the Euromonitor Top 100 City Destinations 2018 source with ranking-date/license notes. The app does not include a runtime forecast layer or forecast API.
 
 The household configuration is intended to stay in one static file. Accepted
-family display names and the seven Naver Band link slots live in
-`src/householdConfig.ts`: 한가네 본가 has two placeholder Band slots, 건희민하찬희네 has
-three, 진주네 has one, and 은하네 has one. Replace each placeholder with an
-`https://band.us/...` URL only after confirming the target Band post/page, and
-keep empty slots inert rather than inventing links. The name gate is a light,
+family display names and the seven active Naver Band links live in
+`src/householdConfig.ts`: 한가네 본가 has two Band links, 건희민하찬희네 has
+three, 진주네 has one, and 은하네 has one. The name gate is a light,
 client-only family cue; it is not authentication and does not store names.
 
 Korea must be handled as its own family-map destination, not by reusing the

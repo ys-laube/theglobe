@@ -760,12 +760,12 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       feedback.textContent = '암구호 확인 완료';
       getHouseholdLinks(household.id).forEach((slot) => {
         const link = document.createElement('a');
-        link.href = slot.placeholderHref;
+        link.href = slot.href;
         link.target = '_blank';
         link.rel = 'noreferrer';
         link.className = 'band-link';
         appendText(link, 'strong', slot.label);
-        appendText(link, 'span', 'placeholder · 실제 링크로 교체 예정');
+        appendText(link, 'span', '가족 밴드 열기 ↗');
         links.append(link);
       });
       routePanel.append(links);

@@ -322,8 +322,9 @@ assert(koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__') || koreaI
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
-assert((householdConfigSource.match(/placeholderHref: 'https:\/\/band\.us\/band\/[^']+'/g) ?? []).length === 7, 'household config must expose exactly 7 band.us placeholder links');
-assert((householdConfigSource.match(/, status: 'placeholder' }/g) ?? []).length === 7, 'all household link slots must remain placeholder status');
+assert((householdConfigSource.match(/href: 'https:\/\/band\.us\/band\/[^']+'/g) ?? []).length === 7, 'household config must expose exactly 7 active band.us links');
+assert((householdConfigSource.match(/, status: 'active' }/g) ?? []).length === 7, 'all household link slots must be active status');
+assert(!householdConfigSource.includes('placeholder'), 'household config must not retain placeholder link semantics after real Band links are supplied');
 assert(householdConfigSource.includes('validateHouseholdConfig(householdConfig)'), 'household config validation must remain exported');
 
 assert(packageManifest.scripts?.['verify:data']?.includes('node scripts/verify-boundary-data.mjs'), 'npm verify:data must run boundary verifier');
