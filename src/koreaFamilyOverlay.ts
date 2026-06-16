@@ -487,14 +487,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     staticTexture.setAttribute('fill', 'url(#korea-static-grain)');
     staticTexture.setAttribute('aria-hidden', 'true');
     svg.append(staticTexture);
-    data.worldReferenceLines.forEach((line) => {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', pathPoints(line.points));
-      path.setAttribute('class', 'korea-context-line');
-      path.setAttribute('aria-label', line.label);
-      svg.append(path);
-    });
-
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
