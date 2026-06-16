@@ -504,7 +504,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
     const vectorLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     vectorLayer.setAttribute('class', 'korea-vector-layer');
-    vectorLayer.setAttribute('transform', 'translate(19.5 18.5) translate(50 50) scale(1.34) translate(-50 -50)');
+    vectorLayer.setAttribute('transform', 'translate(19 18.5) translate(50 50) scale(1.34) translate(-50 -50)');
     svg.append(vectorLayer);
 
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
