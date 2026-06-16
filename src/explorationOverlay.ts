@@ -125,6 +125,7 @@ function makeMarker(capital: Capital, radius: number) {
   selectedGlow.userData.capital = capital;
   selectedGlow.userData.selectedCityGlow = true;
   selectedGlow.userData.selectedMarkerGlow = true;
+  selectedGlow.userData.renderOnly = true;
   return { marker, ring, hitArea, selectedGlow };
 }
 

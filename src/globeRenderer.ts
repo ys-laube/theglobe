@@ -353,7 +353,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     radius,
     addMarkerObjects: (...objects) => {
       markerGroup.add(...objects);
-      pickables.push(...objects);
+      pickables.push(...objects.filter((object) => object.userData.renderOnly !== true));
     },
     setMarkerLayerVisible: (visible) => {
       markerGroup.visible = visible;
@@ -438,7 +438,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         child.scale.setScalar(s);
       });
       markerGroup.children.forEach((child, index) => {
-        if (child instanceof THREE.Mesh && child.visible && child.userData.capital) {
+        if (child instanceof THREE.Mesh && child.visible && (child.userData.capital || child.userData.selectedMarkerGlow)) {
           const selectedPulse = child.userData.selectedMarkerGlow === true;
           const baseScale = selectedPulse ? (child.geometry.type === 'RingGeometry' ? 1.9 : 1.45) : 1;
           const pulse = selectedPulse ? 0.16 : 0.045;
