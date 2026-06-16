@@ -1,3 +1,4 @@
+import { buildKoreaGibsImageUrl, KOREA_GIBS_BLUE_MARBLE, shouldForceKoreaImageryFallback, type KoreaImagerySource, type KoreaImageryState } from './koreaImagery';
 import koreaFamilyBoundaries from './mapData/koreaFamilyBoundaries.json';
 import { getHouseholdLinks, householdConfig, isAcceptedHouseholdName, type Household, type HouseholdId } from './householdConfig';
 
@@ -360,8 +361,66 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     header.append(copy, closeButton);
   }
 
+  function setImageryTelemetry(state: KoreaImageryState, source: KoreaImagerySource) {
+    [host, mapMount].forEach((element) => {
+      element.dataset.imageryState = state;
+      element.dataset.imagerySource = source;
+      element.dataset.imageryLayer = source === 'nasa-gibs-blue-marble-wms' ? KOREA_GIBS_BLUE_MARBLE.layer : 'static-fallback';
+      element.dataset.imageryCrs = source === 'nasa-gibs-blue-marble-wms' ? KOREA_GIBS_BLUE_MARBLE.crs : 'none';
+      element.dataset.imageryAttribution = KOREA_GIBS_BLUE_MARBLE.attribution;
+    });
+  }
+
+  function createRasterLayer() {
+    const layer = document.createElement('div');
+    layer.className = 'korea-raster-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    layer.dataset.imageryAttribution = KOREA_GIBS_BLUE_MARBLE.attribution;
+
+    if (shouldForceKoreaImageryFallback()) {
+      setImageryTelemetry('fallback', 'static-fallback');
+      layer.dataset.imageryState = 'fallback';
+      layer.dataset.imagerySource = 'static-fallback';
+      return layer;
+    }
+
+    setImageryTelemetry('loading', 'nasa-gibs-blue-marble-wms');
+    layer.dataset.imageryState = 'loading';
+    layer.dataset.imagerySource = 'nasa-gibs-blue-marble-wms';
+    const image = document.createElement('img');
+    image.className = 'korea-raster-image';
+    image.alt = '';
+    image.decoding = 'async';
+    image.loading = 'eager';
+    image.crossOrigin = 'anonymous';
+    image.addEventListener('load', () => {
+      if (!layer.isConnected) return;
+      layer.dataset.imageryState = 'ready';
+      setImageryTelemetry('ready', 'nasa-gibs-blue-marble-wms');
+    }, { once: true });
+    image.addEventListener('error', () => {
+      if (!layer.isConnected) return;
+      layer.replaceChildren();
+      layer.dataset.imageryState = 'fallback';
+      layer.dataset.imagerySource = 'static-fallback';
+      setImageryTelemetry('fallback', 'static-fallback');
+    }, { once: true });
+    image.src = buildKoreaGibsImageUrl();
+    layer.append(image);
+    window.setTimeout(() => {
+      if (layer.isConnected && layer.dataset.imageryState === 'loading') {
+        layer.dataset.imageryState = 'fallback';
+        layer.dataset.imagerySource = 'static-fallback';
+        layer.replaceChildren();
+        setImageryTelemetry('fallback', 'static-fallback');
+      }
+    }, 4000);
+    return layer;
+  }
+
   function renderMap() {
     mapMount.replaceChildren();
+    mapMount.append(createRasterLayer());
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 100 100');
     svg.setAttribute('role', 'img');
