@@ -220,8 +220,73 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
+        const officialFirstLevelRegions = [
+          ['kr-seoul', '서울특별시'],
+          ['kr-busan', '부산광역시'],
+          ['kr-daegu', '대구광역시'],
+          ['kr-incheon', '인천광역시'],
+          ['kr-gwangju', '광주광역시'],
+          ['kr-daejeon', '대전광역시'],
+          ['kr-ulsan', '울산광역시'],
+          ['kr-sejong', '세종특별자치시'],
+          ['kr-gyeonggi', '경기도'],
+          ['kr-gangwon', '강원특별자치도'],
+          ['kr-chungbuk', '충청북도'],
+          ['kr-chungnam', '충청남도'],
+          ['kr-jeonbuk', '전북특별자치도'],
+          ['kr-jeonnam', '전라남도'],
+          ['kr-gyeongbuk', '경상북도'],
+          ['kr-gyeongnam', '경상남도'],
+          ['kr-jeju', '제주특별자치도'],
+        ];
         await waitFor(() => officialFirstLevelLabels.every((label) => [...document.querySelectorAll('.route-choice strong, .korea-region')].some((node) => (node.textContent ?? node.getAttribute('aria-label') ?? '').includes(label))), 'all 17 first-level Korea labels rendered');
         const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => [...document.querySelectorAll('.route-choice strong, .korea-region')].some((node) => (node.textContent ?? node.getAttribute('aria-label') ?? '').includes(label))).length;
+        const familyTraceState = () => ({
+          overlay: document.querySelector('.korea-map-overlay')?.getAttribute('data-family-traces'),
+          canvas: document.querySelector('.korea-map-canvas')?.getAttribute('data-family-traces'),
+          routeLayerPresent: Boolean(document.querySelector('.korea-family-route-layer')),
+          activeRouteCount: document.querySelectorAll('.korea-family-route.is-active').length,
+        });
+        const overviewTraceState = familyTraceState();
+        const openRoot = async () => {
+          await clickButtonByStrong('대한민국');
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
+        };
+        const findViewportHitForRegion = (regionId) => {
+          const region = document.querySelector('.korea-region[data-region-id="' + regionId + '"]');
+          if (!region) throw new Error('Missing SVG polygon for ' + regionId);
+          const rect = region.getBoundingClientRect();
+          const fractions = [0.5, 0.35, 0.65, 0.2, 0.8, 0.12, 0.88];
+          for (const fy of fractions) {
+            for (const fx of fractions) {
+              const clientX = rect.left + rect.width * fx;
+              const clientY = rect.top + rect.height * fy;
+              const hit = document.elementFromPoint(clientX, clientY);
+              const hitRegion = hit?.closest?.('.korea-region');
+              if (hitRegion?.getAttribute('data-region-id') === regionId) {
+                return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id') };
+              }
+            }
+          }
+          throw new Error('No document.elementFromPoint hit inside SVG polygon for ' + regionId);
+        };
+        const clickFirstLevelRegionByViewportHit = async ([regionId, label]) => {
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'overview before coordinate click ' + regionId);
+          const hitPoint = findViewportHitForRegion(regionId);
+          const hitElement = document.elementFromPoint(hitPoint.clientX, hitPoint.clientY);
+          if (!hitElement?.closest?.('.korea-region[data-region-id="' + regionId + '"]')) throw new Error('Coordinate hit drifted before click for ' + regionId);
+          hitElement.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY, pointerId: 301, pointerType: 'mouse' }));
+          hitElement.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY, pointerId: 301, pointerType: 'mouse' }));
+          hitElement.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: hitPoint.clientX, clientY: hitPoint.clientY }));
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === regionId, 'coordinate click selected ' + label);
+          const firstLevelTraceState = familyTraceState();
+          await openRoot();
+          return { regionId, label, ...hitPoint, selected: true, firstLevelTraceState };
+        };
+        const firstLevelCoordinateHits = [];
+        for (const regionEntry of officialFirstLevelRegions) {
+          firstLevelCoordinateHits.push(await clickFirstLevelRegionByViewportHit(regionEntry));
+        }
         await waitFor(() => document.querySelector('.route-choice[data-region-id="kr-busan"]') && document.querySelector('.korea-region[data-region-id="kr-busan"]'), 'Busan route choice and map region rendered');
         const busanChoice = document.querySelector('.route-choice[data-region-id="kr-busan"]');
         const busanRegion = document.querySelector('.korea-region[data-region-id="kr-busan"]');
@@ -253,10 +318,6 @@ try {
           && document.querySelector('#korea-static-grain')
         );
         const removedSatelliteCopyAbsent = !/static satellite-style Korea family map|공식 공공데이터 경계 데이터셋|위성풍/.test(document.body.textContent ?? '');
-        const openRoot = async () => {
-          await clickButtonByStrong('대한민국');
-          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
-        };
         const checkFamilyRegionInfo = async ({ label, region, nextLabel, landmark, food }) => {
           await openRoot();
           await clickButtonByStrong(label);
@@ -309,6 +370,7 @@ try {
             selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
             nameGateState: window.__GLOBE_QA__?.nameGateState,
             routeChoiceLabels,
+            familyTraceState: familyTraceState(),
             linkCount: links.length,
             links,
           };
@@ -376,6 +438,8 @@ try {
           selectedRegionToggleUpOk,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           renderedFirstLevelCount,
+          overviewTraceState,
+          firstLevelCoordinateHits,
           listHoverHighlightsMap,
           mapHoverHighlightsList,
           householdMarkerCount,
@@ -444,6 +508,12 @@ try {
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
   if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (result.renderedFirstLevelCount !== 17) throw new Error(`Expected 17 first-level Korea labels, found ${result.renderedFirstLevelCount}`);
+  if (result.overviewTraceState?.overlay !== 'hidden' || result.overviewTraceState?.canvas !== 'hidden' || result.overviewTraceState?.routeLayerPresent || result.overviewTraceState?.activeRouteCount !== 0) throw new Error(`Expected overview family traces hidden, found ${JSON.stringify(result.overviewTraceState)}`);
+  if (result.firstLevelCoordinateHits?.length !== 17) throw new Error(`Expected 17 first-level coordinate hit-test clicks, found ${result.firstLevelCoordinateHits?.length}`);
+  for (const coordinateHit of result.firstLevelCoordinateHits ?? []) {
+    if (!coordinateHit.selected || coordinateHit.hitRegionId !== coordinateHit.regionId || !Number.isFinite(coordinateHit.clientX) || !Number.isFinite(coordinateHit.clientY)) throw new Error(`Expected valid document.elementFromPoint coordinate click for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit)}`);
+    if (coordinateHit.firstLevelTraceState?.overlay !== 'hidden' || coordinateHit.firstLevelTraceState?.canvas !== 'hidden' || coordinateHit.firstLevelTraceState?.routeLayerPresent || coordinateHit.firstLevelTraceState?.activeRouteCount !== 0) throw new Error(`Expected first-level family traces hidden for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit.firstLevelTraceState)}`);
+  }
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
@@ -492,6 +562,7 @@ try {
     if (actualPath?.invalidFeedback !== '암구호 틀림') throw new Error(`Expected ${expectedPath.householdLabel} invalid gate copy, found ${actualPath?.invalidFeedback}`);
     if (actualPath?.linksBeforeUnlock !== 0) throw new Error(`Expected ${expectedPath.householdLabel} links hidden before unlock, found ${actualPath?.linksBeforeUnlock}`);
     if (!actualPath?.gateBeforeUnlockCopy?.includes('암구호를 대시오!') || !actualPath?.gateBeforeUnlockCopy?.includes('암구호 확인')) throw new Error(`Expected ${expectedPath.householdLabel} passphrase gate copy, found ${actualPath?.gateBeforeUnlockCopy}`);
+    if (actualPath?.familyTraceState?.overlay !== 'terminal' || actualPath?.familyTraceState?.canvas !== 'terminal' || !actualPath?.familyTraceState?.routeLayerPresent || actualPath?.familyTraceState?.activeRouteCount < 1) throw new Error(`Expected terminal family traces for ${expectedPath.householdLabel}, found ${JSON.stringify(actualPath?.familyTraceState)}`);
     if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band placeholder links, found ${actualPath?.linkCount}`);
     if (!actualPath?.links?.every((href) => href.startsWith('https://band.us/band/') && href.includes('-placeholder-'))) throw new Error(`Expected placeholder-only band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
   }
