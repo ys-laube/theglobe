@@ -169,6 +169,7 @@ try {
         const focusedCityCardLink = document.querySelector('.city-card a[href^="https://"]')?.href;
         const listFocusRotationDeltaY = Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? rotationBeforeCityFocus.y) - rotationBeforeCityFocus.y);
         const selectedCityFromQa = window.__GLOBE_QA__?.selectedCity;
+        const selectedMarkerGlowFromQa = window.__GLOBE_QA__?.selectedMarkerGlowCityId;
 
         const canvas = document.querySelector('#globe');
         const clickProjectedCity = async (cityId, lat, lng, label) => {
@@ -229,6 +230,7 @@ try {
           focusedCityCardLink,
           listFocusRotationDeltaY,
           selectedCityFromQa,
+          selectedMarkerGlowFromQa,
           seoulMarkerCardTitle,
           jejuMarkerCardTitle,
           panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
@@ -276,6 +278,7 @@ try {
   const expectedRankGroups = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
   if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected TOP100 rank groups ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
   if (result.selectedCityFromQa?.id !== 'top100-hong-kong' || result.selectedCityFromQa?.rank !== 1) throw new Error(`Expected QA selected TOP100 Hong Kong rank 1, found ${JSON.stringify(result.selectedCityFromQa)}`);
+  if (result.selectedMarkerGlowFromQa !== 'top100-hong-kong') throw new Error(`Expected selected marker glow for top100-hong-kong, found ${result.selectedMarkerGlowFromQa}`);
   if (result.listFocusRotationDeltaY <= 0.08) throw new Error(`Expected list click to rotate/focus globe, delta=${result.listFocusRotationDeltaY}`);
   if (!result.focusedCityCardOpen) throw new Error('Expected existing detail card to be open after TOP100 list click');
   if (result.focusedCityCardTitle !== '1. Hong Kong') throw new Error(`Expected existing detail card to open Hong Kong, found ${result.focusedCityCardTitle}`);

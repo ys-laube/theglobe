@@ -336,7 +336,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         nightMaterial.needsUpdate = true;
       }),
     ]).then(() => {
-      if (state === 'earth-ready') emit('asset-enhancement-ready', 'Earth imagery and optional atmosphere enhancements are active.', attribution);
+      if (state === 'earth-ready') emit('asset-enhancement-ready', 'The globe is ready for your journey.', attribution);
     });
   }
 
@@ -438,8 +438,11 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
         child.scale.setScalar(s);
       });
       markerGroup.children.forEach((child, index) => {
-        if (child.type === 'Mesh' && child.visible && child.userData.capital) {
-          const s = 1 + Math.sin(now * 0.002 + index) * 0.045;
+        if (child instanceof THREE.Mesh && child.visible && child.userData.capital) {
+          const selectedPulse = child.userData.selectedMarkerGlow === true;
+          const baseScale = selectedPulse ? (child.geometry.type === 'RingGeometry' ? 1.9 : 1.45) : 1;
+          const pulse = selectedPulse ? 0.16 : 0.045;
+          const s = baseScale + Math.sin(now * (selectedPulse ? 0.004 : 0.002) + index) * pulse;
           child.scale.setScalar(s);
         }
       });

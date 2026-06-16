@@ -18,6 +18,7 @@ export type ExplorationOverlay = {
     top100GroupCount: number;
     selectedCityId: string | null;
     focusedCityId: string | null;
+    selectedMarkerGlowCityId: string | null;
   };
 };
 
@@ -45,6 +46,9 @@ function safeExternalUrl(url: string) {
 }
 
 const top100BucketSize = 10;
+const markerBaseScale = 1;
+const selectedMarkerScale = 1.45;
+const selectedRingScale = 1.9;
 
 function top100BucketLabel(startRank: number) {
   return `${startRank}-${startRank + top100BucketSize - 1}`;
@@ -60,9 +64,14 @@ function appendText<K extends keyof HTMLElementTagNameMap>(parent: HTMLElement, 
 
 
 function makeMarker(capital: Capital, radius: number) {
+  const markerMaterial = new THREE.MeshBasicMaterial({
+    color: capital.accent,
+    transparent: true,
+    opacity: capital.mode === 'top100' ? 0.72 : 0.82,
+  });
   const marker = new THREE.Mesh(
     new THREE.SphereGeometry(capital.mode === 'top100' ? 0.024 : 0.03, 18, 18),
-    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.mode === 'top100' ? 0.72 : 0.82 })
+    markerMaterial
   );
   marker.position.copy(latLngToVector(capital.lat, capital.lng, radius + 0.045));
   marker.userData.capital = capital;
@@ -74,14 +83,20 @@ function makeMarker(capital: Capital, radius: number) {
   hitArea.position.copy(marker.position);
   hitArea.userData.capital = capital;
 
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color: capital.accent,
+    transparent: true,
+    opacity: capital.mode === 'top100' ? 0.22 : 0.28,
+    side: THREE.DoubleSide,
+  });
   const ring = new THREE.Mesh(
     new THREE.RingGeometry(capital.mode === 'top100' ? 0.038 : 0.045, capital.mode === 'top100' ? 0.046 : 0.052, 32),
-    new THREE.MeshBasicMaterial({ color: capital.accent, transparent: true, opacity: capital.mode === 'top100' ? 0.22 : 0.28, side: THREE.DoubleSide })
+    ringMaterial
   );
   ring.position.copy(marker.position.clone().multiplyScalar(1.002));
   ring.lookAt(new THREE.Vector3(0, 0, 0));
   ring.userData.capital = capital;
-  return { marker, ring, hitArea };
+  return { marker, markerMaterial, ring, ringMaterial, hitArea };
 }
 
 export function createExplorationOverlay(globe: GlobeRenderer, elements: OverlayElements): ExplorationOverlay {
@@ -167,11 +182,18 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   function syncUi() {
     const canShowMarkers = explorationMode && earthReady;
     globe.setMarkerLayerVisible(canShowMarkers);
-    markerObjects.forEach(({ capital, marker, ring, hitArea }) => {
+    markerObjects.forEach(({ capital, marker, markerMaterial, ring, ringMaterial, hitArea }) => {
       const visible = canShowMarkers && capital.mode === cityMode;
+      const selectedMarker = Boolean(selected && selected.id === capital.id && visible);
       marker.visible = visible;
       ring.visible = visible;
       hitArea.visible = visible;
+      marker.userData.selectedMarkerGlow = selectedMarker;
+      ring.userData.selectedMarkerGlow = selectedMarker;
+      markerMaterial.opacity = selectedMarker ? 1 : (capital.mode === 'top100' ? 0.72 : 0.82);
+      ringMaterial.opacity = selectedMarker ? 0.82 : (capital.mode === 'top100' ? 0.22 : 0.28);
+      marker.scale.setScalar(selectedMarker ? selectedMarkerScale : markerBaseScale);
+      ring.scale.setScalar(selectedMarker ? selectedRingScale : markerBaseScale);
     });
 
     const data = visibleData();
@@ -284,6 +306,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
       selectedCityId: selected?.id ?? null,
       focusedCityId: lastFocus?.cityId ?? null,
+      selectedMarkerGlowCityId: markerObjects.find(({ marker }) => marker.userData.selectedMarkerGlow)?.capital.id ?? null,
     }),
   };
 }
