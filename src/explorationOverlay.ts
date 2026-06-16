@@ -265,7 +265,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
             button.classList.add('is-selected');
             button.setAttribute('aria-current', 'true');
           }
-          appendText(button, 'span', `${capital.rank}. ${capital.city}`, 'rank-city');
+          appendText(button, 'span', `#${capital.rank} ${capital.city}`, 'rank-city');
           appendText(button, 'span', capital.country, 'rank-country');
           button.addEventListener('click', () => focusCity(capital));
           item.append(button);

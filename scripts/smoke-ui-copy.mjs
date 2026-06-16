@@ -9,6 +9,7 @@ const sourceFiles = [
   'src/assetsPolicy.ts',
   'src/explorationOverlay.ts',
   'src/koreaFamilyOverlay.ts',
+  'src/capitals.ts',
 ];
 const sources = Object.fromEntries(await Promise.all(
   sourceFiles.map(async (file) => [file, await readFile(join(root, file), 'utf8')])
@@ -66,6 +67,8 @@ const forbiddenKoreaCopy = [
   '이름을 다시 확인해 주세요',
   'The globe is glowing with its final details.',
   '이름 확인 후 가족 밴드로 연결됩니다',
+  '위키 링크로 더 자세히 탐험할 수 있어요.',
+  '정적 검증 데이터로 순위와 링크를 제공합니다.',
 ];
 for (const copy of forbiddenKoreaCopy) {
   assert(!combined.includes(copy), `old visible UI copy must be absent: ${copy}`);

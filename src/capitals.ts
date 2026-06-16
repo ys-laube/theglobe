@@ -42,7 +42,7 @@ function capitalToMarker(entry: WorldCapitalEntry, index: number): Capital {
     mode: 'capitals',
     landmark: content.landmark,
     food: content.food,
-    note: `${entry.capitalOf}의 수도. 위키 링크로 더 자세히 탐험할 수 있어요.`,
+    note: `${entry.capitalOf}의 수도입니다.`,
     link: entry.link,
     accent: accentFor(index),
   };
@@ -61,7 +61,7 @@ function top100ToMarker(entry: Top100CityEntry, index: number): Capital {
     rank: entry.rank,
     landmark: content.landmark,
     food: content.food,
-    note: `TOP100 인기 도시 #${entry.rank}. 정적 검증 데이터로 순위와 링크를 제공합니다.`,
+    note: `TOP100 인기 도시 #${entry.rank}.`,
     link: entry.link,
     accent: accentFor(index + 3),
   };
