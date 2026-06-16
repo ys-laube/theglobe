@@ -170,6 +170,8 @@ for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
 }
 assert(koreaOverlaySource.includes('household-marker'), 'Korea overlay must render glowing household markers');
 assert(koreaOverlaySource.includes('householdMarkers'), 'Korea overlay must keep explicit household marker model');
+assert(koreaOverlaySource.includes('setHighlightedRegion') && koreaOverlaySource.includes('data-region-id'), 'Korea overlay must cross-highlight route list and map regions');
+assert(koreaOverlaySource.includes('pointerenter') && koreaOverlaySource.includes('focus'), 'Korea overlay cross-highlight must support pointer and keyboard focus');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
@@ -185,6 +187,7 @@ assert(rootReadme.includes('src/mapData/boundaryProvenance.json'), 'root README 
 assert(mapDataReadme.includes('worldCountryBorders.json'), 'map data README must document bundled world border asset');
 assert(mapDataReadme.includes('npm run verify:data'), 'map data README must document verification command');
 assert(mapDataReadme.includes('No live map API calls'), 'map data README must preserve no-live-map runtime constraint');
+assert(rootReadme.includes('responsive scroll') || rootReadme.includes('same-stage morph'), 'root README must preserve responsive Korea overlay guidance');
 
 
 const runtimeSourceFiles = [

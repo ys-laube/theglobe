@@ -227,6 +227,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   let openState = false;
   let selectedRegion: RegionId = 'kr-korea-overview';
   let selectedHousehold: HouseholdId | null = null;
+  let highlightedRegion: RegionId | null = null;
   let nameGateState: OverlayState['nameGateState'] = 'closed';
   let unlockedHousehold: HouseholdId | null = null;
 
@@ -258,7 +259,19 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     };
   }
 
+  function syncHighlightState() {
+    host.querySelectorAll<HTMLElement | SVGElement>('[data-region-id]').forEach((element) => {
+      element.classList.toggle('is-highlighted', Boolean(highlightedRegion && element.dataset.regionId === highlightedRegion));
+    });
+  }
+
+  function setHighlightedRegion(region: RegionId | null) {
+    highlightedRegion = region;
+    syncHighlightState();
+  }
+
   function setRegion(region: RegionId) {
+    highlightedRegion = null;
     selectedRegion = region;
     selectedHousehold = null;
     nameGateState = 'closed';
@@ -353,10 +366,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       const isNext = nextIds.has(id);
       const isHouseholdTarget = householdTarget.has(id);
       polygon.setAttribute('class', ['korea-region', isSelected ? 'is-selected' : '', isNext ? 'is-next' : '', isHouseholdTarget ? 'has-households' : ''].filter(Boolean).join(' '));
+      polygon.dataset.regionId = id;
       polygon.setAttribute('aria-label', isNext ? `${feature.nameKo}로 확대` : isSelected ? `${feature.nameKo} 선택됨` : feature.nameKo);
       if (isNext) {
         polygon.setAttribute('tabindex', '0');
         polygon.setAttribute('role', 'button');
+        polygon.addEventListener('pointerenter', () => setHighlightedRegion(id));
+        polygon.addEventListener('pointerleave', () => setHighlightedRegion(null));
+        polygon.addEventListener('focus', () => setHighlightedRegion(id));
+        polygon.addEventListener('blur', () => setHighlightedRegion(null));
         polygon.addEventListener('click', () => setRegion(id));
         polygon.addEventListener('keydown', (event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -469,12 +487,18 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'route-choice';
+      button.dataset.regionId = nextId;
+      button.addEventListener('pointerenter', () => setHighlightedRegion(nextId));
+      button.addEventListener('pointerleave', () => setHighlightedRegion(null));
+      button.addEventListener('focus', () => setHighlightedRegion(nextId));
+      button.addEventListener('blur', () => setHighlightedRegion(null));
       appendText(button, 'strong', feature.nameKo);
       appendText(button, 'span', feature.nameEn);
       button.addEventListener('click', () => setRegion(nextId));
       choices.append(button);
     });
     routePanel.append(choices);
+    syncHighlightState();
   }
 
   function renderHouseholdDetail(household: Household) {
@@ -581,6 +605,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     open: () => {
       openState = true;
       selectedRegion = 'kr-korea-overview';
+      highlightedRegion = null;
       selectedHousehold = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
@@ -589,6 +614,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     },
     close: () => {
       openState = false;
+      highlightedRegion = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
       render();

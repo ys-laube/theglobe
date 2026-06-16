@@ -240,6 +240,8 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
     linear-gradient(145deg, rgba(2, 6, 23, 0.82), rgba(15, 23, 42, 0.64));
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255,255,255,0.12);
   backdrop-filter: blur(18px);
+  min-height: 0;
+  overflow: hidden;
   animation: koreaStageIn 520ms cubic-bezier(.2,.8,.2,1) both;
 }
 @keyframes koreaStageIn {
@@ -325,7 +327,8 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   stroke: rgba(233, 213, 255, 0.9);
   cursor: pointer;
 }
-.korea-region.is-next:hover { fill: rgba(216, 180, 254, 0.42); }
+.korea-region.is-next:hover,
+.korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.48); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
 .korea-region.has-households { fill: rgba(250, 204, 21, 0.30); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
 .household-marker { cursor: pointer; outline: none; }
 .household-marker-glow {
@@ -393,6 +396,9 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.38));
   border: 1px solid rgba(226, 232, 240, 0.14);
   align-self: stretch;
+  min-height: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .korea-route-panel h3 { margin: 0 0 0.7rem; font-size: 1.35rem; }
 .korea-route-panel p { color: #cbd5e1; line-height: 1.6; }
@@ -410,6 +416,11 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 .route-choice strong, .household-card strong { font-size: 1.1rem; }
 .route-choice span, .household-card span { color: #bfdbfe; }
+.route-choice.is-highlighted {
+  border-color: rgba(233, 213, 255, 0.62);
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.22), rgba(56, 189, 248, 0.12));
+  box-shadow: 0 0 1.15rem rgba(192, 132, 252, 0.22);
+}
 .household-card em { color: #fde68a; font-style: normal; font-size: 0.86rem; }
 .name-gate {
   display: grid;

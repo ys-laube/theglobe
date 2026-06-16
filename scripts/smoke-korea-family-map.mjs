@@ -202,6 +202,16 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const renderedFirstLevelCount = officialFirstLevelLabels.filter((label) => document.body.textContent?.includes(label)).length;
+        const busanChoice = document.querySelector('.route-choice[data-region-id="kr-busan"]');
+        const busanRegion = document.querySelector('.korea-region[data-region-id="kr-busan"]');
+        busanChoice?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+        await waitFor(() => busanRegion?.classList.contains('is-highlighted'), 'Busan list hover highlights map');
+        const listHoverHighlightsMap = busanRegion?.classList.contains('is-highlighted');
+        busanChoice?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+        busanRegion?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+        await waitFor(() => busanChoice?.classList.contains('is-highlighted'), 'Busan map hover highlights list');
+        const mapHoverHighlightsList = busanChoice?.classList.contains('is-highlighted');
+        busanRegion?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
         await clickButtonByStrong('부산광역시');
@@ -261,6 +271,8 @@ try {
           koreaRegionLabels,
           contextLineCount: document.querySelectorAll('.korea-context-line').length,
           renderedFirstLevelCount,
+          listHoverHighlightsMap,
+          mapHoverHighlightsList,
           householdMarkerCount,
           householdMarkerLabels,
           routeChoiceLabels,
@@ -313,6 +325,7 @@ try {
   if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (result.renderedFirstLevelCount !== 17) throw new Error(`Expected 17 first-level Korea labels, found ${result.renderedFirstLevelCount}`);
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
+  if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
   if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
   for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {
