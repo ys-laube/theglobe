@@ -40,7 +40,6 @@ app.innerHTML = `
       <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
       <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
       <div class="region-list" data-region-list></div>
-      <p class="asset-note" data-attribution>Earth imagery policy loading…</p>
     </aside>
   </main>
 `;
@@ -52,7 +51,6 @@ const explorationButton = document.querySelector<HTMLButtonElement>('[data-actio
 const tierButton = document.querySelector<HTMLButtonElement>('[data-action="toggle-tier"]')!;
 const stateLabel = document.querySelector<HTMLElement>('[data-state-label]')!;
 const stateCopy = document.querySelector<HTMLElement>('[data-state-copy]')!;
-const attribution = document.querySelector<HTMLElement>('[data-attribution]')!;
 const koreaMapHost = document.querySelector<HTMLElement>('.korea-map-host')!;
 
 let koreaFamilyEntryRequested = false;
@@ -61,6 +59,7 @@ let koreaFamilyOverlay: KoreaFamilyOverlay | null = null;
 function updateQaState() {
   const selectedCity = overlay.getSelectedCity();
   const lastFocus = overlay.getLastFocus();
+  const explorationQa = overlay.getQaState();
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
     viewMode: globe.getViewMode(),
@@ -75,6 +74,7 @@ function updateQaState() {
     selectedCityName: selectedCity?.city ?? null,
     selectedCityRank: selectedCity?.rank ?? null,
     selectedCityCardOpen: Boolean(selectedCity),
+    selectedMarkerGlowCityId: explorationQa.selectedMarkerGlowCityId,
     lastFocusedCityId: lastFocus?.cityId ?? null,
     lastFocusRotationDelta: lastFocus?.delta ?? 0,
     koreaFamilyEntryRequested,
@@ -132,10 +132,16 @@ function handleGlobeTap(event: PointerEvent) {
 
 window.addEventListener('korea-family-map-request', enterKoreaFamilyMap);
 
-globe.onStateChange((state, message, credit) => {
-  stateLabel.textContent = state.replaceAll('-', ' ');
+function giftStateLabel(state: string) {
+  if (state === 'asset-enhancement-ready' || state === 'earth-ready') return 'Earth ready';
+  if (state === 'fallback-earth') return 'Earth ready';
+  if (state === 'loading-earth') return 'Preparing Earth';
+  return state.replaceAll('-', ' ');
+}
+
+globe.onStateChange((state, message) => {
+  stateLabel.textContent = giftStateLabel(state);
   stateCopy.textContent = message;
-  attribution.textContent = credit;
   overlay.updateState(state);
   updateQaState();
 });

@@ -30,4 +30,7 @@ assert(rendererSource.includes('intersections.find((intersection) => intersectio
 assert(rendererSource.includes('projectLocation'), 'renderer must expose deterministic projected city coordinates for Seoul/Jeju smoke fixtures');
 assert(mainSource.includes('__GLOBE_QA_PROJECT_LOCATION__'), 'QA helper must expose projected marker coordinates for browser smoke fixtures');
 assert(mainSource.includes('selectedCityId') && mainSource.includes('lastFocusRotationDelta') && mainSource.includes('selectedCityCardOpen'), 'QA state must expose exploration list/focus/card contract');
+assert(overlaySource.includes('selectedMarkerGlow') && overlaySource.includes('selectedMarkerGlowCityId'), 'overlay must expose selected marker glow state for QA');
+assert(rendererSource.includes('selectedMarkerGlow') && rendererSource.includes('selectedPulse'), 'renderer must pulse the selected marker more strongly than nearby markers');
+assert(mainSource.includes('selectedMarkerGlowCityId'), 'QA state must expose selected marker glow city id');
 console.log('PASS TOP100 exploration smoke: 10 groups, 100 clickable cities, focus/card QA contract present');
