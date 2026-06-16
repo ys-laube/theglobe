@@ -12,6 +12,7 @@ const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
 const mainSource = await readFile(join(root, 'src/main.ts'), 'utf8');
 const globeRendererSource = await readFile(join(root, 'src/globeRenderer.ts'), 'utf8');
+const assetsPolicySource = await readFile(join(root, 'src/assetsPolicy.ts'), 'utf8');
 const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8');
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
@@ -249,6 +250,16 @@ for (const [sourcePath, source] of [['src/main.ts', mainSource], ['src/koreaFami
   assert(!/open-?meteo|weather|forecast/i.test(source), `${sourcePath} must not reintroduce weather/forecast runtime UI`);
   assert(!/kakao|naver\s*map|google\s*maps|mapbox|leaflet|vworld\s*(?:api|sdk|tile|tiles)|vworld\.(?:kr|com)/i.test(source), `${sourcePath} must not depend on runtime map API`);
 }
+
+assert(assetsPolicySource.includes('NASA_GIBS_BLUE_MARBLE'), 'Earth imagery policy must declare the NASA GIBS Blue Marble source metadata');
+assert(assetsPolicySource.includes('https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi'), 'NASA GIBS imagery must use the official EPSG:4326 best WMS endpoint');
+assert(assetsPolicySource.includes("layer: 'BlueMarble_NextGeneration'"), 'NASA GIBS imagery must lock the BlueMarble_NextGeneration layer');
+assert(assetsPolicySource.includes("REQUEST: 'GetMap'"), 'NASA GIBS imagery URL builder must use a GetMap image request');
+assert(assetsPolicySource.includes("BBOX: (request.bbox ?? NASA_GIBS_BLUE_MARBLE.bbox).join(',')"), 'NASA GIBS image helper must preserve explicit global bbox parameters');
+assert(assetsPolicySource.includes('Earth imagery: NASA Global Imagery Browse Services (GIBS), BlueMarble_NextGeneration.'), 'NASA GIBS attribution text must stay with the imagery metadata');
+assert(assetsPolicySource.includes('loadImageViaGet'), 'NASA GIBS primary imagery must keep an explicit browser image GET load helper');
+assert(globeRendererSource.includes('loadPrimaryEarthTexture'), 'globe renderer must use the primary Earth image helper for day imagery');
+assert(globeRendererSource.includes('FALLBACK_ATTRIBUTION'), 'globe renderer must retain fallback attribution when primary Earth imagery fails');
 assert(!/"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
