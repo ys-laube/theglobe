@@ -55,6 +55,7 @@ export type WorldCapitalsDataset = {
   source: CitySourceMetadata;
   inclusionRule: string;
   minimumRequiredCount: number;
+  expectedCount: number;
   legacyBaselineCount: number;
   capitals: WorldCapitalEntry[];
 };

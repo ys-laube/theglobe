@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "globe-static-data-provenance-v1",
-  "lockedAt": "2026-06-15",
+  "lockedAt": "2026-06-16",
   "staticFirstPolicy": {
     "runtimeDataFetchesRequired": false,
     "backendRequired": false,
@@ -70,11 +70,33 @@
     ]
   },
   "capitals": {
-    "sourceLock": "mledoze-countries-plus-capital-coordinates-snapshot",
-    "expectedBundledCount": 194,
-    "minimumBundledCount": 190,
+    "sourceLock": "un-member-states-plus-capital-coordinates-static-2026-06-16",
+    "expectedBundledCount": 193,
+    "minimumBundledCount": 193,
     "currentLegacyCount": 54,
-    "inclusionRule": "Sovereign-states-only: ISO 3166-1 officially-assigned entries where independent is true; territories/dependencies/disputed non-independent entries are excluded. One primary/listed capital marker per included state.",
+    "inclusionRule": "UN-member-states-only: exactly the 193 current United Nations Member States; territories, observer states, dependencies, and non-member states are excluded. One primary/listed capital marker per included member state.",
+    "officialMemberStateSource": {
+      "id": "un-member-states-official-list",
+      "name": "Member States | United Nations",
+      "url": "https://www.un.org/en/about-us/member-states",
+      "publisher": "United Nations",
+      "retrievalPolicy": "build-time static inclusion check; no client runtime query",
+      "licenseUsageNote": "Used as factual source for current UN Member State inclusion/count semantics."
+    },
+    "coordinateSource": {
+      "id": "capital-coordinate-csv",
+      "name": "country-capital-lat-long-population.csv",
+      "url": "https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9",
+      "retrievalPolicy": "build-time snapshot only; no client runtime query",
+      "licenseUsageNote": "Used only for capital display coordinates and capital labels; verify static metadata before refreshing."
+    },
+    "removedNonMemberEntries": [
+      {
+        "id": "vatican-city",
+        "country": "Vatican City",
+        "reason": "Holy See/Vatican City is not a UN Member State and is excluded from exact-193 UN member-state capital mode."
+      }
+    ],
     "snapshotRequiredFields": [
       "source",
       "queryUrl",
@@ -83,24 +105,6 @@
       "licenseUsageNote",
       "inclusionRule",
       "expectedCount"
-    ],
-    "approvedSources": [
-      {
-        "id": "mledoze-countries",
-        "name": "mledoze/countries independent ISO 3166-1 country list",
-        "url": "https://github.com/mledoze/countries",
-        "publisher": "mledoze/countries contributors",
-        "retrievalPolicy": "build-time snapshot only; no client runtime query",
-        "licenseUsageNote": "ODbL-1.0 source used to filter independent=true and officially-assigned country entries."
-      },
-      {
-        "id": "capital-coordinate-csv",
-        "name": "country-capital-lat-long-population.csv",
-        "url": "https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9",
-        "publisher": "public GitHub gist; source noted in dataset metadata",
-        "retrievalPolicy": "build-time snapshot only; no client runtime query",
-        "licenseUsageNote": "Used only for capital display coordinates and capital labels; verify static metadata before refreshing."
-      }
     ]
   },
   "top100Cities": {
@@ -137,6 +141,12 @@
   },
   "validationContract": {
     "cityDataVerifier": "scripts/verify-city-data.mjs must validate capital count > 33, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, and dataset source metadata.",
-    "boundaryVerifier": "scripts/verify-boundary-data.mjs must validate Korea boundary sourceClassification, official 17-region contract or documented source-metadata exception, Jeju/Ulleungdo/Dokdo island references, household target coverage, provenance exclusions, and no live map/API requirement."
+    "boundaryVerifier": "scripts/verify-boundary-data.mjs must validate Korea boundary sourceClassification, official 17-region contract or documented source-metadata exception, household target coverage, provenance exclusions, and no live map/API requirement."
+  },
+  "cityContent": {
+    "sourceLock": "city-card-content-curated-static-2026-06-16",
+    "artifact": "src/data/cityContent.json",
+    "fallbackPolicy": "Explicit high-priority city overrides plus validator-recognized non-placeholder regional fallbacks for remaining visible cards.",
+    "licenseUsageNote": "Short original labels only; no copied prose or imagery."
   }
 }

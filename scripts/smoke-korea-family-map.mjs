@@ -156,9 +156,14 @@ try {
 
         const exploreButton = await waitFor(() => document.querySelector('[data-action="explore"]:not(:disabled)'), 'exploration button');
         exploreButton.click();
-        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '194', 'all capitals visible');
+        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '193', 'all UN member-state capitals visible');
         const capitalsTitle = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const capitalsCopy = document.querySelector('[data-tier-copy]')?.textContent?.trim();
+        const capitalFocusOk = window.__GLOBE_QA_FOCUS_CITY__?.('capital-seoul', 'capitals');
+        await waitFor(() => window.__GLOBE_QA__?.selectedCityId === 'capital-seoul', 'capital Seoul rendered card');
+        const capitalCardText = document.querySelector('.city-card')?.textContent ?? '';
+        const capitalCardTitle = document.querySelector('.city-card h2')?.textContent?.trim();
+        const capitalCardDetails = [...document.querySelectorAll('.city-card dd')].map((node) => node.textContent?.trim()).filter(Boolean);
         const approvedFirstScreenCopyPresent = bodyText.includes('where are you? where do you want to go?');
         const top100Toggle = document.querySelector('[data-action="toggle-tier"]');
         const toggleLabelBefore = top100Toggle?.textContent?.trim();
@@ -287,6 +292,10 @@ try {
           koreaButtonPresent,
           capitalsTitle,
           capitalsCopy,
+          capitalFocusOk,
+          capitalCardTitle,
+          capitalCardDetails,
+          capitalCardText,
           toggleLabelBefore,
           top100Title,
           toggleLabelAfter,
@@ -354,6 +363,9 @@ try {
   if (!result.approvedFirstScreenCopyPresent) throw new Error('Expected approved first-screen copy to be rendered');
   if (result.capitalsTitle !== '세계의 수도') throw new Error(`Expected capitals title, found ${result.capitalsTitle}`);
   if (result.capitalsCopy !== '전 세계 UN가입국의 수도를 보여줍니다') throw new Error(`Expected UN member-state capitals copy, found ${result.capitalsCopy}`);
+  if (!result.capitalFocusOk || result.capitalCardTitle !== 'Seoul') throw new Error(`Expected rendered capital Seoul card, found ${result.capitalCardTitle}`);
+  if (!result.capitalCardDetails?.includes('Gyeongbokgung Palace') || !result.capitalCardDetails?.includes('kimchi jjigae')) throw new Error(`Expected rendered capital card Landmark/Food, found ${result.capitalCardDetails?.join(', ')}`);
+  if (/landmarks?|highlights?|popular travel dining|local food culture|\$\{?city\}?/i.test(result.capitalCardText ?? '')) throw new Error(`Capital card contains placeholder content: ${result.capitalCardText}`);
   if (result.toggleLabelBefore !== 'TOP 100 인기 도시 보기') throw new Error(`Expected TOP100 toggle label, found ${result.toggleLabelBefore}`);
   if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);

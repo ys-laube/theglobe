@@ -3,17 +3,26 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const [top100Raw, overlaySource, rendererSource, mainSource] = await Promise.all([
+const [top100Raw, cityContentRaw, overlaySource, rendererSource, mainSource] = await Promise.all([
   readFile(join(root, 'src/data/top100Cities.json'), 'utf8'),
+  readFile(join(root, 'src/data/cityContent.json'), 'utf8'),
   readFile(join(root, 'src/explorationOverlay.ts'), 'utf8'),
   readFile(join(root, 'src/globeRenderer.ts'), 'utf8'),
   readFile(join(root, 'src/main.ts'), 'utf8'),
 ]);
 const top100 = JSON.parse(top100Raw);
+const cityContent = JSON.parse(cityContentRaw);
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 assert(top100.cities.length === 100, 'TOP100 data must contain exactly 100 cities');
+const placeholderPattern = /landmarks?|highlights?|popular travel dining|local food culture|\$\{?city\}?/i;
+for (const city of top100.cities) {
+  const content = cityContent.overrides[`top100:${city.id}`] ?? cityContent.fallbacks.top100?.[city.region] ?? cityContent.fallbacks.top100?.Global;
+  assert(content, `TOP100 ${city.id} must have content`);
+  assert(!placeholderPattern.test(content.landmark), `TOP100 ${city.id} landmark must be non-placeholder`);
+  assert(!placeholderPattern.test(content.food), `TOP100 ${city.id} food must be non-placeholder`);
+}
 const buckets = Array.from({ length: 10 }, (_value, index) => {
   const min = index * 10 + 1;
   return top100.cities.filter((city) => city.rank >= min && city.rank <= min + 9);
@@ -32,6 +41,7 @@ assert(rendererSource.includes('new THREE.SphereGeometry(0.105, 20, 20)'), 'Kore
 assert(rendererSource.includes('intersections.find((intersection) => intersection.object.userData.capital)'), 'renderer picking must prioritize city markers over Korea hotspot');
 assert(rendererSource.includes('projectLocation'), 'renderer must expose deterministic projected city coordinates for Seoul/Jeju smoke fixtures');
 assert(mainSource.includes('__GLOBE_QA_PROJECT_LOCATION__'), 'QA helper must expose projected marker coordinates for browser smoke fixtures');
+assert(mainSource.includes('__GLOBE_QA_FOCUS_CITY__'), 'QA helper must expose rendered card city focus for capital-card smoke');
 assert(mainSource.includes('selectedCityId') && mainSource.includes('lastFocusRotationDelta') && mainSource.includes('selectedCityCardOpen'), 'QA state must expose exploration list/focus/card contract');
 assert(overlaySource.includes('selectedMarkerGlow') && overlaySource.includes('selectedMarkerGlowCityId'), 'overlay must expose selected marker glow state for QA');
 assert(rendererSource.includes('selectedMarkerGlow') && rendererSource.includes('selectedPulse'), 'renderer must pulse the selected marker more strongly than nearby markers');

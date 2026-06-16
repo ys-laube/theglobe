@@ -103,6 +103,11 @@ const overlay = createExplorationOverlay(globe, {
   visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
   regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
 });
+(window as Window & { __GLOBE_QA_FOCUS_CITY__?: (cityId: string, mode: 'capitals' | 'top100') => boolean }).__GLOBE_QA_FOCUS_CITY__ = (cityId, mode) => {
+  overlay.setCityMode(mode);
+  overlay.setExplorationMode(true);
+  return overlay.focusCityById(cityId);
+};
 
 koreaFamilyOverlay = createKoreaFamilyOverlay({
   host: koreaMapHost,

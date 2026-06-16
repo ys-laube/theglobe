@@ -1,17 +1,17 @@
 {
   "schemaVersion": 1,
-  "datasetId": "world-capitals-sovereign-states-static-2026-06-15",
+  "datasetId": "world-capitals-un-member-states-static-2026-06-16",
   "source": {
-    "id": "mledoze-countries-plus-capital-coordinates-snapshot",
-    "name": "mledoze/countries independent ISO 3166-1 country list joined to static capital-coordinate CSV",
-    "queryUrl": "https://github.com/mledoze/countries/blob/master/countries.json",
+    "id": "un-member-states-plus-capital-coordinates-static-2026-06-16",
+    "name": "United Nations Member States list joined to static capital-coordinate snapshot",
+    "queryUrl": "https://www.un.org/en/about-us/member-states",
     "coordinateSourceUrl": "https://gist.github.com/ofou/df09a6834a8421b4f376c875194915c9",
-    "extractedAt": "2026-06-15",
-    "licenseUsageNote": "Static bundled data generated from mledoze/countries (ODbL-1.0) independent=true officially-assigned countries and a public capital latitude/longitude CSV; no runtime fetch."
+    "extractedAt": "2026-06-16",
+    "licenseUsageNote": "Static bundled data uses the official United Nations Member States list for exact-193 inclusion semantics, joined to pre-existing static capital coordinates; no runtime fetch."
   },
-  "inclusionRule": "Sovereign-states-only: ISO 3166-1 officially-assigned entries where independent is true; territories/dependencies/disputed non-independent entries are excluded. One primary/listed capital marker per included state.",
-  "minimumRequiredCount": 190,
-  "expectedCount": 194,
+  "inclusionRule": "UN-member-states-only: exactly the 193 current United Nations Member States; territories, observer states, dependencies, and non-member states are excluded. One primary/listed capital marker per included member state.",
+  "minimumRequiredCount": 193,
+  "expectedCount": 193,
   "legacyBaselineCount": 54,
   "capitals": [
     {
@@ -23,7 +23,7 @@
       "lat": 36.7525,
       "lng": 3.042,
       "link": "https://en.wikipedia.org/wiki/Algiers",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "luanda",
@@ -34,7 +34,7 @@
       "lat": -8.8368,
       "lng": 13.2343,
       "link": "https://en.wikipedia.org/wiki/Luanda",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "cotonou",
@@ -45,7 +45,7 @@
       "lat": 6.3654,
       "lng": 2.4183,
       "link": "https://en.wikipedia.org/wiki/Cotonou",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "gaborone",
@@ -56,7 +56,7 @@
       "lat": -24.6545,
       "lng": 25.9086,
       "link": "https://en.wikipedia.org/wiki/Gaborone",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ouagadougou",
@@ -67,7 +67,7 @@
       "lat": 12.3642,
       "lng": -1.5383,
       "link": "https://en.wikipedia.org/wiki/Ouagadougou",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bujumbura",
@@ -78,7 +78,7 @@
       "lat": -3.3822,
       "lng": 29.3644,
       "link": "https://en.wikipedia.org/wiki/Bujumbura",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "yaounde",
@@ -89,7 +89,7 @@
       "lat": 3.8667,
       "lng": 11.5167,
       "link": "https://en.wikipedia.org/wiki/Yaound%C3%A9",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "praia",
@@ -100,7 +100,7 @@
       "lat": 14.9215,
       "lng": -23.5087,
       "link": "https://en.wikipedia.org/wiki/Praia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bangui",
@@ -111,7 +111,7 @@
       "lat": 4.3612,
       "lng": 18.555,
       "link": "https://en.wikipedia.org/wiki/Bangui",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "n-djamena",
@@ -122,7 +122,7 @@
       "lat": 12.1067,
       "lng": 15.0444,
       "link": "https://en.wikipedia.org/wiki/N%27Djam%C3%A9na",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "moroni",
@@ -133,7 +133,7 @@
       "lat": -11.7022,
       "lng": 43.2551,
       "link": "https://en.wikipedia.org/wiki/Moroni",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "brazzaville",
@@ -144,7 +144,7 @@
       "lat": -4.2658,
       "lng": 15.2832,
       "link": "https://en.wikipedia.org/wiki/Brazzaville",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kinshasa",
@@ -155,7 +155,7 @@
       "lat": -4.3276,
       "lng": 15.3136,
       "link": "https://en.wikipedia.org/wiki/Kinshasa",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "djibouti",
@@ -166,7 +166,7 @@
       "lat": 11.5877,
       "lng": 43.1447,
       "link": "https://en.wikipedia.org/wiki/Djibouti",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "cairo",
@@ -177,7 +177,7 @@
       "lat": 30.0392,
       "lng": 31.2394,
       "link": "https://en.wikipedia.org/wiki/Cairo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "malabo",
@@ -188,7 +188,7 @@
       "lat": 3.75,
       "lng": 8.7833,
       "link": "https://en.wikipedia.org/wiki/Malabo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "asmara",
@@ -199,7 +199,7 @@
       "lat": 15.3333,
       "lng": 38.9333,
       "link": "https://en.wikipedia.org/wiki/Asmara",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "mbabane",
@@ -210,7 +210,7 @@
       "lat": -26.3167,
       "lng": 31.1333,
       "link": "https://en.wikipedia.org/wiki/Mbabane",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "addis-ababa",
@@ -221,7 +221,7 @@
       "lat": 9.025,
       "lng": 38.7469,
       "link": "https://en.wikipedia.org/wiki/Addis_Ababa",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "libreville",
@@ -232,7 +232,7 @@
       "lat": 0.3925,
       "lng": 9.4537,
       "link": "https://en.wikipedia.org/wiki/Libreville",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "banjul",
@@ -243,7 +243,7 @@
       "lat": 13.4531,
       "lng": -16.6794,
       "link": "https://en.wikipedia.org/wiki/Banjul",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "accra",
@@ -254,7 +254,7 @@
       "lat": 5.556,
       "lng": -0.1969,
       "link": "https://en.wikipedia.org/wiki/Accra",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "conakry",
@@ -265,7 +265,7 @@
       "lat": 9.5716,
       "lng": -13.6476,
       "link": "https://en.wikipedia.org/wiki/Conakry",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bissau",
@@ -276,7 +276,7 @@
       "lat": 11.8636,
       "lng": -15.5977,
       "link": "https://en.wikipedia.org/wiki/Bissau",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "abidjan",
@@ -287,7 +287,7 @@
       "lat": 5.3453,
       "lng": -4.0268,
       "link": "https://en.wikipedia.org/wiki/Abidjan",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nairobi",
@@ -298,7 +298,7 @@
       "lat": -1.2833,
       "lng": 36.8167,
       "link": "https://en.wikipedia.org/wiki/Nairobi",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "maseru",
@@ -309,7 +309,7 @@
       "lat": -29.3167,
       "lng": 27.4833,
       "link": "https://en.wikipedia.org/wiki/Maseru",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "monrovia",
@@ -320,7 +320,7 @@
       "lat": 6.3005,
       "lng": -10.7969,
       "link": "https://en.wikipedia.org/wiki/Monrovia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tripoli",
@@ -331,7 +331,7 @@
       "lat": 32.8752,
       "lng": 13.1875,
       "link": "https://en.wikipedia.org/wiki/Tripoli",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "antananarivo",
@@ -342,7 +342,7 @@
       "lat": -18.9137,
       "lng": 47.5361,
       "link": "https://en.wikipedia.org/wiki/Antananarivo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "lilongwe",
@@ -353,7 +353,7 @@
       "lat": -13.9669,
       "lng": 33.7873,
       "link": "https://en.wikipedia.org/wiki/Lilongwe",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bamako",
@@ -364,7 +364,7 @@
       "lat": 12.65,
       "lng": -8.0,
       "link": "https://en.wikipedia.org/wiki/Bamako",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nouakchott",
@@ -375,7 +375,7 @@
       "lat": 18.0858,
       "lng": -15.9785,
       "link": "https://en.wikipedia.org/wiki/Nouakchott",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "port-louis",
@@ -386,7 +386,7 @@
       "lat": -20.1619,
       "lng": 57.4989,
       "link": "https://en.wikipedia.org/wiki/Port_Louis",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "rabat",
@@ -397,7 +397,7 @@
       "lat": 34.0133,
       "lng": -6.8326,
       "link": "https://en.wikipedia.org/wiki/Rabat",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "maputo",
@@ -408,7 +408,7 @@
       "lat": -25.9653,
       "lng": 32.5892,
       "link": "https://en.wikipedia.org/wiki/Maputo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "windhoek",
@@ -419,7 +419,7 @@
       "lat": -22.5594,
       "lng": 17.0832,
       "link": "https://en.wikipedia.org/wiki/Windhoek",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "niamey",
@@ -430,7 +430,7 @@
       "lat": 13.5137,
       "lng": 2.1098,
       "link": "https://en.wikipedia.org/wiki/Niamey",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "abuja",
@@ -441,7 +441,7 @@
       "lat": 9.0574,
       "lng": 7.4898,
       "link": "https://en.wikipedia.org/wiki/Abuja",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kigali",
@@ -452,7 +452,7 @@
       "lat": -1.9474,
       "lng": 30.0579,
       "link": "https://en.wikipedia.org/wiki/Kigali",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dakar",
@@ -463,7 +463,7 @@
       "lat": 14.6937,
       "lng": -17.4441,
       "link": "https://en.wikipedia.org/wiki/Dakar",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "victoria",
@@ -474,7 +474,7 @@
       "lat": -4.6167,
       "lng": 55.45,
       "link": "https://en.wikipedia.org/wiki/Victoria",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "freetown",
@@ -485,7 +485,7 @@
       "lat": 8.484,
       "lng": -13.2299,
       "link": "https://en.wikipedia.org/wiki/Freetown",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "mogadishu",
@@ -496,7 +496,7 @@
       "lat": 2.0416,
       "lng": 45.3435,
       "link": "https://en.wikipedia.org/wiki/Mogadishu",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "cape-town",
@@ -507,7 +507,7 @@
       "lat": -33.9258,
       "lng": 18.4232,
       "link": "https://en.wikipedia.org/wiki/Cape_Town",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "juba",
@@ -518,7 +518,7 @@
       "lat": 4.8517,
       "lng": 31.5825,
       "link": "https://en.wikipedia.org/wiki/Juba",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "khartoum",
@@ -529,7 +529,7 @@
       "lat": 15.5518,
       "lng": 32.5324,
       "link": "https://en.wikipedia.org/wiki/Khartoum",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "sao-tome",
@@ -540,7 +540,7 @@
       "lat": 0.3365,
       "lng": 6.7273,
       "link": "https://en.wikipedia.org/wiki/S%C3%A3o_Tom%C3%A9",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dodoma",
@@ -551,7 +551,7 @@
       "lat": -6.1722,
       "lng": 35.7395,
       "link": "https://en.wikipedia.org/wiki/Dodoma",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "lome",
@@ -562,7 +562,7 @@
       "lat": 6.1375,
       "lng": 1.2123,
       "link": "https://en.wikipedia.org/wiki/Lom%C3%A9",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tunis",
@@ -573,7 +573,7 @@
       "lat": 36.819,
       "lng": 10.1658,
       "link": "https://en.wikipedia.org/wiki/Tunis",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kampala",
@@ -584,7 +584,7 @@
       "lat": 0.3163,
       "lng": 32.5822,
       "link": "https://en.wikipedia.org/wiki/Kampala",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "lusaka",
@@ -595,7 +595,7 @@
       "lat": -15.4134,
       "lng": 28.2771,
       "link": "https://en.wikipedia.org/wiki/Lusaka",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "harare",
@@ -606,7 +606,7 @@
       "lat": -17.8294,
       "lng": 31.0539,
       "link": "https://en.wikipedia.org/wiki/Harare",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "st-john-s",
@@ -617,7 +617,7 @@
       "lat": 17.1172,
       "lng": -61.8457,
       "link": "https://en.wikipedia.org/wiki/St._John%27s",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "buenos-aires",
@@ -628,7 +628,7 @@
       "lat": -34.6051,
       "lng": -58.4004,
       "link": "https://en.wikipedia.org/wiki/Buenos_Aires",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nassau",
@@ -639,7 +639,7 @@
       "lat": 25.0582,
       "lng": -77.3431,
       "link": "https://en.wikipedia.org/wiki/Nassau",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bridgetown",
@@ -650,7 +650,7 @@
       "lat": 13.1,
       "lng": -59.6167,
       "link": "https://en.wikipedia.org/wiki/Bridgetown",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "belmopan",
@@ -661,7 +661,7 @@
       "lat": 17.25,
       "lng": -88.7667,
       "link": "https://en.wikipedia.org/wiki/Belmopan",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "la-paz",
@@ -672,7 +672,7 @@
       "lat": -16.5,
       "lng": -68.15,
       "link": "https://en.wikipedia.org/wiki/La_Paz",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "brasilia",
@@ -683,7 +683,7 @@
       "lat": -15.7797,
       "lng": -47.9297,
       "link": "https://en.wikipedia.org/wiki/Bras%C3%ADlia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ottawa-gatineau",
@@ -694,7 +694,7 @@
       "lat": 45.4166,
       "lng": -75.698,
       "link": "https://en.wikipedia.org/wiki/Ottawa-Gatineau",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "santiago",
@@ -705,7 +705,7 @@
       "lat": -33.4569,
       "lng": -70.6483,
       "link": "https://en.wikipedia.org/wiki/Santiago",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bogota",
@@ -716,7 +716,7 @@
       "lat": 4.6097,
       "lng": -74.0818,
       "link": "https://en.wikipedia.org/wiki/Bogot%C3%A1",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "san-jose",
@@ -727,7 +727,7 @@
       "lat": 9.9278,
       "lng": -84.0807,
       "link": "https://en.wikipedia.org/wiki/San_Jos%C3%A9",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "havana",
@@ -738,7 +738,7 @@
       "lat": 23.1195,
       "lng": -82.3785,
       "link": "https://en.wikipedia.org/wiki/Havana",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "roseau",
@@ -749,7 +749,7 @@
       "lat": 15.3017,
       "lng": -61.3881,
       "link": "https://en.wikipedia.org/wiki/Roseau",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "santo-domingo",
@@ -760,7 +760,7 @@
       "lat": 18.4896,
       "lng": -69.9018,
       "link": "https://en.wikipedia.org/wiki/Santo_Domingo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "quito",
@@ -771,7 +771,7 @@
       "lat": -0.2299,
       "lng": -78.525,
       "link": "https://en.wikipedia.org/wiki/Quito",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "san-salvador",
@@ -782,7 +782,7 @@
       "lat": 13.6894,
       "lng": -89.1872,
       "link": "https://en.wikipedia.org/wiki/San_Salvador",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "st-george-s",
@@ -793,7 +793,7 @@
       "lat": 12.0564,
       "lng": -61.7485,
       "link": "https://en.wikipedia.org/wiki/St.George%27s",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "guatemala-city",
@@ -804,7 +804,7 @@
       "lat": 14.6127,
       "lng": -90.5307,
       "link": "https://en.wikipedia.org/wiki/Guatemala_City",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "georgetown",
@@ -815,7 +815,7 @@
       "lat": 6.8045,
       "lng": -58.1553,
       "link": "https://en.wikipedia.org/wiki/Georgetown",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "port-au-prince",
@@ -826,7 +826,7 @@
       "lat": 18.5392,
       "lng": -72.335,
       "link": "https://en.wikipedia.org/wiki/Port-au-Prince",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tegucigalpa",
@@ -837,7 +837,7 @@
       "lat": 14.0818,
       "lng": -87.2068,
       "link": "https://en.wikipedia.org/wiki/Tegucigalpa",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kingston",
@@ -848,7 +848,7 @@
       "lat": 17.997,
       "lng": -76.7936,
       "link": "https://en.wikipedia.org/wiki/Kingston",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "mexico-city",
@@ -859,7 +859,7 @@
       "lat": 19.4273,
       "lng": -99.1419,
       "link": "https://en.wikipedia.org/wiki/Mexico_City",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "managua",
@@ -870,7 +870,7 @@
       "lat": 12.1328,
       "lng": -86.2504,
       "link": "https://en.wikipedia.org/wiki/Managua",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "panama-city",
@@ -881,7 +881,7 @@
       "lat": 8.9958,
       "lng": -79.5196,
       "link": "https://en.wikipedia.org/wiki/Panama_City",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "asuncion",
@@ -892,7 +892,7 @@
       "lat": -25.3007,
       "lng": -57.6359,
       "link": "https://en.wikipedia.org/wiki/Asunci%C3%B3n",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "lima",
@@ -903,7 +903,7 @@
       "lat": -12.0432,
       "lng": -77.0282,
       "link": "https://en.wikipedia.org/wiki/Lima",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "basseterre",
@@ -914,7 +914,7 @@
       "lat": 17.2948,
       "lng": -62.7261,
       "link": "https://en.wikipedia.org/wiki/Basseterre",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "castries",
@@ -925,7 +925,7 @@
       "lat": 14.006,
       "lng": -60.991,
       "link": "https://en.wikipedia.org/wiki/Castries",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kingstown",
@@ -936,7 +936,7 @@
       "lat": 13.1587,
       "lng": -61.2248,
       "link": "https://en.wikipedia.org/wiki/Kingstown",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "paramaribo",
@@ -947,7 +947,7 @@
       "lat": 5.8664,
       "lng": -55.1668,
       "link": "https://en.wikipedia.org/wiki/Paramaribo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "port-of-spain",
@@ -958,7 +958,7 @@
       "lat": 10.6662,
       "lng": -61.5166,
       "link": "https://en.wikipedia.org/wiki/Port_of_Spain",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "washington-d-c",
@@ -969,7 +969,7 @@
       "lat": 38.8951,
       "lng": -77.0364,
       "link": "https://en.wikipedia.org/wiki/Washington,_D.C.",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "montevideo",
@@ -980,7 +980,7 @@
       "lat": -34.8335,
       "lng": -56.1674,
       "link": "https://en.wikipedia.org/wiki/Montevideo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "caracas",
@@ -991,7 +991,7 @@
       "lat": 10.488,
       "lng": -66.8792,
       "link": "https://en.wikipedia.org/wiki/Caracas",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kabul",
@@ -1002,7 +1002,7 @@
       "lat": 34.5289,
       "lng": 69.1725,
       "link": "https://en.wikipedia.org/wiki/Kabul",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "yerevan",
@@ -1013,7 +1013,7 @@
       "lat": 40.182,
       "lng": 44.5146,
       "link": "https://en.wikipedia.org/wiki/Yerevan",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "baku",
@@ -1024,7 +1024,7 @@
       "lat": 40.3777,
       "lng": 49.892,
       "link": "https://en.wikipedia.org/wiki/Baku",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "manama",
@@ -1035,7 +1035,7 @@
       "lat": 26.2154,
       "lng": 50.5832,
       "link": "https://en.wikipedia.org/wiki/Manama",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dhaka",
@@ -1046,7 +1046,7 @@
       "lat": 23.7104,
       "lng": 90.4074,
       "link": "https://en.wikipedia.org/wiki/Dhaka",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "thimphu",
@@ -1057,7 +1057,7 @@
       "lat": 27.4661,
       "lng": 89.6419,
       "link": "https://en.wikipedia.org/wiki/Thimphu",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bandar-seri-begawan",
@@ -1068,7 +1068,7 @@
       "lat": 4.9403,
       "lng": 114.9481,
       "link": "https://en.wikipedia.org/wiki/Bandar_Seri_Begawan",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "phnom-penh",
@@ -1079,7 +1079,7 @@
       "lat": 11.5625,
       "lng": 104.916,
       "link": "https://en.wikipedia.org/wiki/Phnom_Penh",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "beijing",
@@ -1090,7 +1090,7 @@
       "lat": 39.9075,
       "lng": 116.3972,
       "link": "https://en.wikipedia.org/wiki/Beijing",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tbilisi",
@@ -1101,7 +1101,7 @@
       "lat": 41.6941,
       "lng": 44.8337,
       "link": "https://en.wikipedia.org/wiki/Tbilisi",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "delhi",
@@ -1112,7 +1112,7 @@
       "lat": 28.6667,
       "lng": 77.2167,
       "link": "https://en.wikipedia.org/wiki/Delhi",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "jakarta",
@@ -1123,7 +1123,7 @@
       "lat": -6.2118,
       "lng": 106.8416,
       "link": "https://en.wikipedia.org/wiki/Jakarta",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tehran",
@@ -1134,7 +1134,7 @@
       "lat": 35.6944,
       "lng": 51.4215,
       "link": "https://en.wikipedia.org/wiki/Tehran",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "baghdad",
@@ -1145,7 +1145,7 @@
       "lat": 33.3406,
       "lng": 44.4009,
       "link": "https://en.wikipedia.org/wiki/Baghdad",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "jerusalem",
@@ -1156,7 +1156,7 @@
       "lat": 31.769,
       "lng": 35.2163,
       "link": "https://en.wikipedia.org/wiki/Jerusalem",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tokyo",
@@ -1167,7 +1167,7 @@
       "lat": 35.6895,
       "lng": 139.6917,
       "link": "https://en.wikipedia.org/wiki/Tokyo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "amman",
@@ -1178,7 +1178,7 @@
       "lat": 31.9552,
       "lng": 35.945,
       "link": "https://en.wikipedia.org/wiki/Amman",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "astana",
@@ -1189,7 +1189,7 @@
       "lat": 51.1801,
       "lng": 71.446,
       "link": "https://en.wikipedia.org/wiki/Astana",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kuwait-city",
@@ -1200,7 +1200,7 @@
       "lat": 29.3697,
       "lng": 47.9783,
       "link": "https://en.wikipedia.org/wiki/Kuwait_City",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bishkek",
@@ -1211,7 +1211,7 @@
       "lat": 42.87,
       "lng": 74.59,
       "link": "https://en.wikipedia.org/wiki/Bishkek",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "vientiane",
@@ -1222,7 +1222,7 @@
       "lat": 17.9667,
       "lng": 102.6,
       "link": "https://en.wikipedia.org/wiki/Vientiane",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "beirut",
@@ -1233,7 +1233,7 @@
       "lat": 33.9,
       "lng": 35.4833,
       "link": "https://en.wikipedia.org/wiki/Beirut",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kuala-lumpur",
@@ -1244,7 +1244,7 @@
       "lat": 3.1412,
       "lng": 101.6865,
       "link": "https://en.wikipedia.org/wiki/Kuala_Lumpur",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "male",
@@ -1255,7 +1255,7 @@
       "lat": 4.1748,
       "lng": 73.5089,
       "link": "https://en.wikipedia.org/wiki/Male",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ulaanbaatar",
@@ -1266,7 +1266,7 @@
       "lat": 47.9077,
       "lng": 106.8832,
       "link": "https://en.wikipedia.org/wiki/Ulaanbaatar",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nay-pyi-taw",
@@ -1277,7 +1277,7 @@
       "lat": 19.745,
       "lng": 96.1297,
       "link": "https://en.wikipedia.org/wiki/Nay_Pyi_Taw",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kathmandu",
@@ -1288,7 +1288,7 @@
       "lat": 27.7017,
       "lng": 85.3206,
       "link": "https://en.wikipedia.org/wiki/Kathmandu",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "p-yongyang",
@@ -1299,7 +1299,7 @@
       "lat": 39.0339,
       "lng": 125.7543,
       "link": "https://en.wikipedia.org/wiki/P%27yongyang",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "muscat",
@@ -1310,7 +1310,7 @@
       "lat": 23.6139,
       "lng": 58.5922,
       "link": "https://en.wikipedia.org/wiki/Muscat",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "islamabad",
@@ -1321,7 +1321,7 @@
       "lat": 33.7035,
       "lng": 73.0594,
       "link": "https://en.wikipedia.org/wiki/Islamabad",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "manila",
@@ -1332,7 +1332,7 @@
       "lat": 14.6042,
       "lng": 120.9822,
       "link": "https://en.wikipedia.org/wiki/Manila",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "doha",
@@ -1343,7 +1343,7 @@
       "lat": 25.2747,
       "lng": 51.5245,
       "link": "https://en.wikipedia.org/wiki/Doha",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "riyadh",
@@ -1354,7 +1354,7 @@
       "lat": 24.6905,
       "lng": 46.7096,
       "link": "https://en.wikipedia.org/wiki/Riyadh",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "singapore",
@@ -1365,7 +1365,7 @@
       "lat": 1.2897,
       "lng": 103.8501,
       "link": "https://en.wikipedia.org/wiki/Singapore",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "seoul",
@@ -1376,7 +1376,7 @@
       "lat": 37.5683,
       "lng": 126.9778,
       "link": "https://en.wikipedia.org/wiki/Seoul",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "colombo",
@@ -1387,7 +1387,7 @@
       "lat": 6.9319,
       "lng": 79.8478,
       "link": "https://en.wikipedia.org/wiki/Colombo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "damascus",
@@ -1398,7 +1398,7 @@
       "lat": 33.5086,
       "lng": 36.3084,
       "link": "https://en.wikipedia.org/wiki/Damascus",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dushanbe",
@@ -1409,7 +1409,7 @@
       "lat": 38.5358,
       "lng": 68.7791,
       "link": "https://en.wikipedia.org/wiki/Dushanbe",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bangkok",
@@ -1420,7 +1420,7 @@
       "lat": 13.722,
       "lng": 100.5252,
       "link": "https://en.wikipedia.org/wiki/Bangkok",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dili",
@@ -1431,7 +1431,7 @@
       "lat": -8.5601,
       "lng": 125.5668,
       "link": "https://en.wikipedia.org/wiki/Dili",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ashgabat",
@@ -1442,7 +1442,7 @@
       "lat": 37.95,
       "lng": 58.3833,
       "link": "https://en.wikipedia.org/wiki/Ashgabat",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ankara",
@@ -1453,7 +1453,7 @@
       "lat": 39.9199,
       "lng": 32.8543,
       "link": "https://en.wikipedia.org/wiki/Ankara",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "abu-dhabi",
@@ -1464,7 +1464,7 @@
       "lat": 24.4648,
       "lng": 54.3618,
       "link": "https://en.wikipedia.org/wiki/Abu_Dhabi",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tashkent",
@@ -1475,7 +1475,7 @@
       "lat": 41.2647,
       "lng": 69.2163,
       "link": "https://en.wikipedia.org/wiki/Tashkent",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ha-noi",
@@ -1486,7 +1486,7 @@
       "lat": 21.0245,
       "lng": 105.8412,
       "link": "https://en.wikipedia.org/wiki/H%C3%A0_Noi",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "sana-a",
@@ -1497,7 +1497,7 @@
       "lat": 15.3531,
       "lng": 44.2078,
       "link": "https://en.wikipedia.org/wiki/Sana%27a%27",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tirana",
@@ -1508,7 +1508,7 @@
       "lat": 41.3275,
       "lng": 19.8189,
       "link": "https://en.wikipedia.org/wiki/Tirana",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "andorra-la-vella",
@@ -1519,7 +1519,7 @@
       "lat": 42.5078,
       "lng": 1.5211,
       "link": "https://en.wikipedia.org/wiki/Andorra_la_Vella",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "vienna",
@@ -1530,7 +1530,7 @@
       "lat": 48.2064,
       "lng": 16.3707,
       "link": "https://en.wikipedia.org/wiki/Vienna",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "minsk",
@@ -1541,7 +1541,7 @@
       "lat": 53.9,
       "lng": 27.5667,
       "link": "https://en.wikipedia.org/wiki/Minsk",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bruxelles-brussel",
@@ -1552,7 +1552,7 @@
       "lat": 50.8467,
       "lng": 4.3499,
       "link": "https://en.wikipedia.org/wiki/Bruxelles-Brussel",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "sarajevo",
@@ -1563,7 +1563,7 @@
       "lat": 43.8486,
       "lng": 18.3564,
       "link": "https://en.wikipedia.org/wiki/Sarajevo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "sofia",
@@ -1574,7 +1574,7 @@
       "lat": 42.6975,
       "lng": 23.3242,
       "link": "https://en.wikipedia.org/wiki/Sofia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "zagreb",
@@ -1585,7 +1585,7 @@
       "lat": 45.8144,
       "lng": 15.978,
       "link": "https://en.wikipedia.org/wiki/Zagreb",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nicosia",
@@ -1596,7 +1596,7 @@
       "lat": 35.1595,
       "lng": 33.3669,
       "link": "https://en.wikipedia.org/wiki/Nicosia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "prague",
@@ -1607,7 +1607,7 @@
       "lat": 50.088,
       "lng": 14.4208,
       "link": "https://en.wikipedia.org/wiki/Prague",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "copenhagen",
@@ -1618,7 +1618,7 @@
       "lat": 55.6759,
       "lng": 12.5655,
       "link": "https://en.wikipedia.org/wiki/Copenhagen",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tallinn",
@@ -1629,7 +1629,7 @@
       "lat": 59.437,
       "lng": 24.7535,
       "link": "https://en.wikipedia.org/wiki/Tallinn",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "helsinki",
@@ -1640,7 +1640,7 @@
       "lat": 60.1692,
       "lng": 24.9402,
       "link": "https://en.wikipedia.org/wiki/Helsinki",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "paris",
@@ -1651,7 +1651,7 @@
       "lat": 48.8534,
       "lng": 2.3488,
       "link": "https://en.wikipedia.org/wiki/Paris",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "berlin",
@@ -1662,7 +1662,7 @@
       "lat": 52.5244,
       "lng": 13.4105,
       "link": "https://en.wikipedia.org/wiki/Berlin",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "athens",
@@ -1673,7 +1673,7 @@
       "lat": 37.9534,
       "lng": 23.749,
       "link": "https://en.wikipedia.org/wiki/Athens",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "budapest",
@@ -1684,7 +1684,7 @@
       "lat": 47.498,
       "lng": 19.0399,
       "link": "https://en.wikipedia.org/wiki/Budapest",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "reykjavik",
@@ -1695,7 +1695,7 @@
       "lat": 64.1355,
       "lng": -21.8954,
       "link": "https://en.wikipedia.org/wiki/Reykjav%C3%ADk",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "dublin",
@@ -1706,7 +1706,7 @@
       "lat": 53.3331,
       "lng": -6.2489,
       "link": "https://en.wikipedia.org/wiki/Dublin",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "rome",
@@ -1717,7 +1717,7 @@
       "lat": 41.8947,
       "lng": 12.4811,
       "link": "https://en.wikipedia.org/wiki/Rome",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "riga",
@@ -1728,7 +1728,7 @@
       "lat": 56.946,
       "lng": 24.1059,
       "link": "https://en.wikipedia.org/wiki/Riga",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "vaduz",
@@ -1739,7 +1739,7 @@
       "lat": 47.1415,
       "lng": 9.5215,
       "link": "https://en.wikipedia.org/wiki/Vaduz",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "vilnius",
@@ -1750,7 +1750,7 @@
       "lat": 54.6892,
       "lng": 25.2798,
       "link": "https://en.wikipedia.org/wiki/Vilnius",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "luxembourg",
@@ -1761,7 +1761,7 @@
       "lat": 49.6117,
       "lng": 6.13,
       "link": "https://en.wikipedia.org/wiki/Luxembourg",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "valletta",
@@ -1772,7 +1772,7 @@
       "lat": 35.8997,
       "lng": 14.5147,
       "link": "https://en.wikipedia.org/wiki/Valletta",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "chisinau",
@@ -1783,7 +1783,7 @@
       "lat": 47.0056,
       "lng": 28.8575,
       "link": "https://en.wikipedia.org/wiki/Chi%C5%9Fin%C4%83u",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "monaco",
@@ -1794,7 +1794,7 @@
       "lat": 43.7333,
       "lng": 7.4167,
       "link": "https://en.wikipedia.org/wiki/Monaco",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "podgorica",
@@ -1805,7 +1805,7 @@
       "lat": 42.4411,
       "lng": 19.2636,
       "link": "https://en.wikipedia.org/wiki/Podgorica",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "amsterdam",
@@ -1816,7 +1816,7 @@
       "lat": 52.374,
       "lng": 4.8897,
       "link": "https://en.wikipedia.org/wiki/Amsterdam",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "skopje",
@@ -1827,7 +1827,7 @@
       "lat": 42.0,
       "lng": 21.4333,
       "link": "https://en.wikipedia.org/wiki/Skopje",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "oslo",
@@ -1838,7 +1838,7 @@
       "lat": 59.9127,
       "lng": 10.7461,
       "link": "https://en.wikipedia.org/wiki/Oslo",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "warsaw",
@@ -1849,7 +1849,7 @@
       "lat": 52.2298,
       "lng": 21.0118,
       "link": "https://en.wikipedia.org/wiki/Warsaw",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "lisbon",
@@ -1860,7 +1860,7 @@
       "lat": 38.7169,
       "lng": -9.1399,
       "link": "https://en.wikipedia.org/wiki/Lisbon",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bucharest",
@@ -1871,7 +1871,7 @@
       "lat": 44.4328,
       "lng": 26.1043,
       "link": "https://en.wikipedia.org/wiki/Bucharest",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "moscow",
@@ -1882,7 +1882,7 @@
       "lat": 55.755,
       "lng": 37.6218,
       "link": "https://en.wikipedia.org/wiki/Moscow",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "san-marino",
@@ -1893,7 +1893,7 @@
       "lat": 43.9333,
       "lng": 12.45,
       "link": "https://en.wikipedia.org/wiki/San_Marino",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "belgrade",
@@ -1904,7 +1904,7 @@
       "lat": 44.8176,
       "lng": 20.4633,
       "link": "https://en.wikipedia.org/wiki/Belgrade",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bratislava",
@@ -1915,7 +1915,7 @@
       "lat": 48.1482,
       "lng": 17.1067,
       "link": "https://en.wikipedia.org/wiki/Bratislava",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "ljubljana",
@@ -1926,7 +1926,7 @@
       "lat": 46.0511,
       "lng": 14.5051,
       "link": "https://en.wikipedia.org/wiki/Ljubljana",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "madrid",
@@ -1937,7 +1937,7 @@
       "lat": 40.4165,
       "lng": -3.7026,
       "link": "https://en.wikipedia.org/wiki/Madrid",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "stockholm",
@@ -1948,7 +1948,7 @@
       "lat": 59.3326,
       "lng": 18.0649,
       "link": "https://en.wikipedia.org/wiki/Stockholm",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "bern",
@@ -1959,7 +1959,7 @@
       "lat": 46.9481,
       "lng": 7.4474,
       "link": "https://en.wikipedia.org/wiki/Bern",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "kiev",
@@ -1970,7 +1970,7 @@
       "lat": 50.4454,
       "lng": 30.5186,
       "link": "https://en.wikipedia.org/wiki/Kiev",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "london",
@@ -1981,18 +1981,7 @@
       "lat": 51.5085,
       "lng": -0.1257,
       "link": "https://en.wikipedia.org/wiki/London",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
-    },
-    {
-      "id": "vatican-city",
-      "city": "Vatican City",
-      "country": "Vatican City",
-      "capitalOf": "Vatican City",
-      "region": "Europe",
-      "lat": 41.9024,
-      "lng": 12.4533,
-      "link": "https://en.wikipedia.org/wiki/Vatican_City",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "canberra",
@@ -2003,7 +1992,7 @@
       "lat": -35.2835,
       "lng": 149.1281,
       "link": "https://en.wikipedia.org/wiki/Canberra",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "suva",
@@ -2014,7 +2003,7 @@
       "lat": -18.1416,
       "lng": 178.4415,
       "link": "https://en.wikipedia.org/wiki/Suva",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "tarawa",
@@ -2025,7 +2014,7 @@
       "lat": 1.3272,
       "lng": 172.9813,
       "link": "https://en.wikipedia.org/wiki/Tarawa",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "majuro",
@@ -2036,7 +2025,7 @@
       "lat": 7.0897,
       "lng": 171.3803,
       "link": "https://en.wikipedia.org/wiki/Majuro",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "palikir",
@@ -2047,7 +2036,7 @@
       "lat": 6.9174,
       "lng": 158.1588,
       "link": "https://en.wikipedia.org/wiki/Palikir",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nauru",
@@ -2058,7 +2047,7 @@
       "lat": -0.5308,
       "lng": 166.9112,
       "link": "https://en.wikipedia.org/wiki/Nauru",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "wellington",
@@ -2069,7 +2058,7 @@
       "lat": -41.2866,
       "lng": 174.7756,
       "link": "https://en.wikipedia.org/wiki/Wellington",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "koror",
@@ -2080,7 +2069,7 @@
       "lat": 7.3426,
       "lng": 134.4789,
       "link": "https://en.wikipedia.org/wiki/Koror",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "port-moresby",
@@ -2091,7 +2080,7 @@
       "lat": -9.4431,
       "lng": 147.1797,
       "link": "https://en.wikipedia.org/wiki/Port_Moresby",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "apia",
@@ -2102,7 +2091,7 @@
       "lat": -13.8333,
       "lng": -171.7667,
       "link": "https://en.wikipedia.org/wiki/Apia",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "honiara",
@@ -2113,7 +2102,7 @@
       "lat": -9.4333,
       "lng": 159.95,
       "link": "https://en.wikipedia.org/wiki/Honiara",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "nuku-alofa",
@@ -2124,7 +2113,7 @@
       "lat": -21.1394,
       "lng": -175.2032,
       "link": "https://en.wikipedia.org/wiki/Nuku%27alofa",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "funafuti",
@@ -2135,7 +2124,7 @@
       "lat": -8.5189,
       "lng": 179.1991,
       "link": "https://en.wikipedia.org/wiki/Funafuti",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     },
     {
       "id": "port-vila",
@@ -2146,7 +2135,7 @@
       "lat": -17.7338,
       "lng": 168.3219,
       "link": "https://en.wikipedia.org/wiki/Port_Vila",
-      "sourceId": "mledoze-countries-plus-capital-coordinates-snapshot"
+      "sourceId": "un-member-states-plus-capital-coordinates-static-2026-06-16"
     }
   ]
 }

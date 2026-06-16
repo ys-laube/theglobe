@@ -6,6 +6,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const capitals = JSON.parse(await readFile(join(root, 'src/data/worldCapitals.json'), 'utf8'));
 const top100 = JSON.parse(await readFile(join(root, 'src/data/top100Cities.json'), 'utf8'));
 const dataProvenance = JSON.parse(await readFile(join(root, 'src/mapData/dataProvenance.json'), 'utf8'));
+const cityContent = JSON.parse(await readFile(join(root, 'src/data/cityContent.json'), 'utf8'));
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 
 function assert(condition, message) {
@@ -23,8 +24,41 @@ function assertUnique(entries, key, label) {
   assert(new Set(values).size === values.length, `${label} ${key} values must be unique`);
 }
 
+const placeholderPatterns = [
+  /\$\{?city\}?/i,
+  /\blandmarks?\b/i,
+  /\bhighlights?\b/i,
+  /popular travel dining/i,
+  /local food culture/i,
+];
+function assertContentValue(value, label) {
+  assert(typeof value === 'string' && value.trim().length >= 4, `${label} must be non-empty content`);
+  assert(!placeholderPatterns.some((pattern) => pattern.test(value)), `${label} must not use placeholder content: ${value}`);
+}
+function contentFor(mode, entry) {
+  const prefix = mode === 'capitals' ? 'capital' : 'top100';
+  return cityContent.overrides[`${prefix}:${entry.id}`]
+    ?? cityContent.fallbacks[prefix]?.[entry.region]
+    ?? cityContent.fallbacks[prefix]?.Global;
+}
+assert(cityContent.schemaVersion === 1, 'city content schemaVersion must be 1');
+assert(cityContent.source.id === dataProvenance.cityContent.sourceLock, 'city content source id must match provenance lock');
+assert(cityContent.source.licenseUsageNote?.length > 0, 'city content license/usage note is required');
+assert(cityContent.fallbackPolicy?.includes('non-placeholder'), 'city content fallback policy must document non-placeholder fallback use');
+for (const [mode, regionMap] of Object.entries(cityContent.fallbacks)) {
+  for (const [region, content] of Object.entries(regionMap)) {
+    assertContentValue(content.landmark, `${mode} ${region} fallback landmark`);
+    assertContentValue(content.food, `${mode} ${region} fallback food`);
+  }
+}
+for (const [key, content] of Object.entries(cityContent.overrides)) {
+  assertContentValue(content.landmark, `${key} override landmark`);
+  assertContentValue(content.food, `${key} override food`);
+  assertHttps(content.sourceUrl, `${key} sourceUrl`);
+}
+
 assert(capitals.schemaVersion === 1, 'world capitals schemaVersion must be 1');
-assert(capitals.datasetId === 'world-capitals-sovereign-states-static-2026-06-15', 'world capitals dataset id must be stable');
+assert(capitals.datasetId === 'world-capitals-un-member-states-static-2026-06-16', 'world capitals dataset id must lock UN member-state scope');
 assert(capitals.source.id === dataProvenance.capitals.sourceLock, 'world capitals source id must match provenance lock');
 assertHttps(capitals.source.queryUrl, 'world capitals source queryUrl');
 assertHttps(capitals.source.coordinateSourceUrl, 'world capitals coordinateSourceUrl');
@@ -32,10 +66,12 @@ assert(typeof capitals.source.extractedAt === 'string' && capitals.source.extrac
 assert(capitals.minimumRequiredCount > capitals.legacyBaselineCount, 'capital minimum must exceed legacy baseline');
 assert(capitals.legacyBaselineCount === dataProvenance.capitals.currentLegacyCount, 'capital legacy baseline must match data provenance');
 assert(capitals.expectedCount === dataProvenance.capitals.expectedBundledCount, 'capital expected count must match data provenance');
-assert(capitals.capitals.length === capitals.expectedCount, 'bundled capitals must match sovereign-states-only expected count');
+assert(capitals.expectedCount === 193, 'world capitals expectedCount must be exactly 193 UN member states');
+assert(capitals.capitals.length === capitals.expectedCount, 'bundled capitals must match exact UN member-state expected count');
 assert(capitals.capitals.length > capitals.legacyBaselineCount, 'bundled capitals must exceed legacy 54 entries');
 assert(capitals.capitals.length >= capitals.minimumRequiredCount && capitals.minimumRequiredCount === dataProvenance.capitals.minimumBundledCount, 'bundled capitals must satisfy minimum required count');
-assert(/sovereign-states-only/i.test(capitals.inclusionRule), 'capital inclusion rule must lock sovereign-states-only scope');
+assert(/UN-member-states-only/i.test(capitals.inclusionRule) && /193/.test(capitals.inclusionRule), 'capital inclusion rule must lock exact UN 193 member-state scope');
+assert(!capitals.capitals.some((entry) => entry.id === 'vatican-city' || /vatican/i.test(entry.country)), 'non-UN Vatican City entry must be excluded');
 assertUnique(capitals.capitals, 'id', 'capital');
 for (const entry of capitals.capitals) {
   assert(entry.sourceId === capitals.source.id, `capital ${entry.id} sourceId must match dataset source`);
@@ -44,6 +80,10 @@ for (const entry of capitals.capitals) {
   }
   assertCoordinate(entry, `capital ${entry.id}`);
   assertHttps(entry.link, `capital ${entry.id} link`);
+  const content = contentFor('capitals', entry);
+  assert(content, `capital ${entry.id} must have city content override or fallback`);
+  assertContentValue(content.landmark, `capital ${entry.id} landmark`);
+  assertContentValue(content.food, `capital ${entry.id} food`);
 }
 
 assert(top100.schemaVersion === 1, 'TOP100 schemaVersion must be 1');
@@ -71,6 +111,10 @@ for (const entry of top100.cities) {
   }
   assertCoordinate(entry, `TOP100 ${entry.id}`);
   assertHttps(entry.link, `TOP100 ${entry.id} link`);
+  const content = contentFor('top100', entry);
+  assert(content, `TOP100 ${entry.id} must have city content override or fallback`);
+  assertContentValue(content.landmark, `TOP100 ${entry.id} landmark`);
+  assertContentValue(content.food, `TOP100 ${entry.id} food`);
 }
 
 assert(packageManifest.scripts?.['verify:city-data'] === 'node scripts/verify-city-data.mjs', 'npm verify:city-data must run city data verifier');
