@@ -63,6 +63,7 @@ type OverlayState = {
   tier: string | null;
   selectedRegion: RegionId | null;
   selectedHousehold: HouseholdId | null;
+  highlightedHouseholdId: HouseholdId | null;
   nameGateState: 'closed' | 'locked' | 'invalid' | 'unlocked';
   unlockedLinkCount: number;
 };
@@ -299,6 +300,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       tier: openState ? routeNodes[selectedRegion].label : null,
       selectedRegion: openState ? selectedRegion : null,
       selectedHousehold,
+      highlightedHouseholdId: openState ? highlightedHouseholdId : null,
       nameGateState: openState ? nameGateState : 'closed',
       unlockedLinkCount: openState && selectedHousehold && unlockedHousehold === selectedHousehold ? getHouseholdLinks(selectedHousehold).length : 0,
     };
@@ -332,7 +334,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     highlightedHouseholdId = null;
     selectedRegion = region;
     selectedHousehold = null;
-    highlightedHouseholdId = null;
     nameGateState = 'closed';
     unlockedHousehold = null;
     render();
@@ -785,7 +786,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       highlightedRegion = null;
       highlightedHouseholdId = null;
       selectedHousehold = null;
-      highlightedHouseholdId = null;
       nameGateState = 'closed';
       unlockedHousehold = null;
       render();

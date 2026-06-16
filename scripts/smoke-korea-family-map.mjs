@@ -370,8 +370,21 @@ try {
           const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
           const terminalHouseholdMarkerCount = document.querySelectorAll('.household-marker').length;
           const terminalHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+          const householdCard = document.querySelector('.household-card[data-household-id="' + householdId + '"]');
+          const householdMarker = document.querySelector('.household-marker[data-household-id="' + householdId + '"]');
+          if (!householdCard || !householdMarker) throw new Error('Missing household card/marker data-household-id pair for ' + householdId);
+          householdCard.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+          await waitFor(() => householdMarker.classList.contains('is-highlighted') && window.__GLOBE_QA__?.highlightedHouseholdId === householdId, householdLabel + ' card highlights map marker');
+          const cardHoverHighlightsMarker = householdMarker.classList.contains('is-highlighted');
+          householdCard.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+          await waitFor(() => !householdMarker.classList.contains('is-highlighted'), householdLabel + ' card hover clears marker');
+          householdMarker.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+          await waitFor(() => householdCard.classList.contains('is-highlighted') && window.__GLOBE_QA__?.highlightedHouseholdId === householdId, householdLabel + ' map marker highlights card');
+          const markerHoverHighlightsCard = householdCard.classList.contains('is-highlighted');
+          householdMarker.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
           await clickButtonByStrong(householdLabel);
           await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === householdId, householdLabel + ' household');
+          const selectedMarkerHighlighted = document.querySelector('.household-marker[data-household-id="' + householdId + '"]')?.classList.contains('is-selected-household') ?? false;
           const input = document.querySelector('.name-gate input');
           const gateBeforeUnlockCopy = document.querySelector('.name-gate')?.textContent ?? '';
           const linksBeforeUnlock = document.querySelectorAll('.band-link').length;
@@ -395,6 +408,10 @@ try {
             terminalRegion: window.__GLOBE_QA__?.selectedRegion,
             selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
             nameGateState: window.__GLOBE_QA__?.nameGateState,
+            highlightedHouseholdId: window.__GLOBE_QA__?.highlightedHouseholdId,
+            cardHoverHighlightsMarker,
+            markerHoverHighlightsCard,
+            selectedMarkerHighlighted,
             routeChoiceLabels,
             terminalHouseholdMarkerCount,
             terminalHouseholdMarkerLabels,
@@ -584,6 +601,8 @@ try {
     if (actualPath?.terminalRegion !== expectedPath.terminalRegion) throw new Error(`Expected ${expectedPath.householdLabel} terminal ${expectedPath.terminalRegion}, found ${actualPath?.terminalRegion}`);
     if (actualPath?.selectedHousehold !== expectedPath.householdId) throw new Error(`Expected ${expectedPath.householdLabel} household ${expectedPath.householdId}, found ${actualPath?.selectedHousehold}`);
     if (actualPath?.nameGateState !== 'unlocked') throw new Error(`Expected ${expectedPath.householdLabel} name gate unlocked, found ${actualPath?.nameGateState}`);
+    if (actualPath?.highlightedHouseholdId !== expectedPath.householdId) throw new Error(`Expected ${expectedPath.householdLabel} highlightedHouseholdId ${expectedPath.householdId}, found ${actualPath?.highlightedHouseholdId}`);
+    if (!actualPath?.cardHoverHighlightsMarker || !actualPath?.markerHoverHighlightsCard || !actualPath?.selectedMarkerHighlighted) throw new Error(`Expected ${expectedPath.householdLabel} bidirectional household card/marker highlight, found ${JSON.stringify({ cardHoverHighlightsMarker: actualPath?.cardHoverHighlightsMarker, markerHoverHighlightsCard: actualPath?.markerHoverHighlightsCard, selectedMarkerHighlighted: actualPath?.selectedMarkerHighlighted })}`);
     if (actualPath?.invalidFeedback !== '암구호 틀림') throw new Error(`Expected ${expectedPath.householdLabel} invalid gate copy, found ${actualPath?.invalidFeedback}`);
     if (actualPath?.linksBeforeUnlock !== 0) throw new Error(`Expected ${expectedPath.householdLabel} links hidden before unlock, found ${actualPath?.linksBeforeUnlock}`);
     if (!actualPath?.gateBeforeUnlockCopy?.includes('암구호를 대시오!') || !actualPath?.gateBeforeUnlockCopy?.includes('암구호 확인')) throw new Error(`Expected ${expectedPath.householdLabel} passphrase gate copy, found ${actualPath?.gateBeforeUnlockCopy}`);

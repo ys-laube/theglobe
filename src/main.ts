@@ -91,6 +91,7 @@ function updateQaState() {
     koreaTier: koreaFamilyOverlay?.getState().tier ?? null,
     selectedRegion: koreaFamilyOverlay?.getState().selectedRegion ?? null,
     selectedHousehold: koreaFamilyOverlay?.getState().selectedHousehold ?? null,
+    highlightedHouseholdId: koreaFamilyOverlay?.getState().highlightedHouseholdId ?? null,
     nameGateState: koreaFamilyOverlay?.getState().nameGateState ?? 'closed',
     unlockedLinkCount: koreaFamilyOverlay?.getState().unlockedLinkCount ?? 0,
     forcedTextureMode: new URLSearchParams(window.location.search).get('earthTexture'),

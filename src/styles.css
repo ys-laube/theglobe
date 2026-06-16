@@ -327,18 +327,18 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-overlay[data-family-traces="terminal"] .korea-family-route-layer { opacity: 1; }
 .korea-family-route {
   fill: none;
-  stroke: rgba(250, 204, 21, 0.26);
+  stroke: rgba(125, 211, 252, 0.34);
   stroke-width: 0.72;
   stroke-linecap: round;
   stroke-dasharray: 1.4 1.6;
   vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 0.42rem rgba(250, 204, 21, 0.2));
+  filter: drop-shadow(0 0 0.42rem rgba(56, 189, 248, 0.22));
 }
 .korea-family-route.is-active {
-  stroke: rgba(254, 240, 138, 0.95);
+  stroke: rgba(125, 211, 252, 0.95);
   stroke-width: 1.1;
   stroke-dasharray: none;
-  filter: drop-shadow(0 0 0.72rem rgba(250, 204, 21, 0.62));
+  filter: drop-shadow(0 0 0.72rem rgba(56, 189, 248, 0.58));
 }
 .korea-region {
   fill: rgba(74, 222, 128, 0.17);
@@ -360,7 +360,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 .korea-region.is-next:hover,
 .korea-region.is-highlighted { fill: rgba(216, 180, 254, 0.48); stroke: rgba(255, 255, 255, 0.96); filter: drop-shadow(0 0 0.95rem rgba(216, 180, 254, 0.38)); }
-.korea-region.has-households { fill: rgba(250, 204, 21, 0.30); stroke: rgba(254, 240, 138, 0.94); filter: drop-shadow(0 0 1rem rgba(250, 204, 21, 0.34)); }
+.korea-region.has-households { fill: rgba(34, 211, 238, 0.24); stroke: rgba(125, 211, 252, 0.94); filter: drop-shadow(0 0 1rem rgba(56, 189, 248, 0.34)); }
 
 .korea-island-reference-layer { pointer-events: none; }
 .korea-island-reference { filter: drop-shadow(0 0 0.5rem rgba(125, 211, 252, 0.34)); }
@@ -388,21 +388,21 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 
 .korea-map-overlay[data-family-traces="hidden"] .household-marker { display: none; }
-.household-marker { cursor: default; outline: none; pointer-events: none; }
+.household-marker { cursor: pointer; outline: none; pointer-events: auto; }
 .household-marker-glow {
-  fill: rgba(250, 204, 21, 0.18);
-  stroke: rgba(254, 240, 138, 0.75);
+  fill: rgba(56, 189, 248, 0.18);
+  stroke: rgba(125, 211, 252, 0.75);
   stroke-width: 0.34;
-  filter: drop-shadow(0 0 0.9rem rgba(250, 204, 21, 0.55));
+  filter: drop-shadow(0 0 0.9rem rgba(56, 189, 248, 0.50));
   animation: householdPulse 2.4s ease-in-out infinite;
 }
 .household-marker-dot {
-  fill: #fef3c7;
-  stroke: rgba(120, 53, 15, 0.65);
+  fill: #bae6fd;
+  stroke: rgba(15, 23, 42, 0.72);
   stroke-width: 0.24;
 }
 .household-marker-label {
-  fill: #fef9c3;
+  fill: #e0f2fe;
   font-size: 2.35px;
   font-weight: 900;
   text-anchor: middle;
@@ -411,9 +411,11 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   stroke-width: 0.7;
   pointer-events: none;
 }
-.household-marker.is-active .household-marker-glow { fill: rgba(251, 191, 36, 0.26); stroke: rgba(255, 255, 255, 0.92); }
+.household-marker.is-active .household-marker-glow { fill: rgba(14, 165, 233, 0.26); stroke: rgba(255, 255, 255, 0.92); }
 .household-marker:focus-visible .household-marker-glow,
-.household-marker:hover .household-marker-glow { fill: rgba(254, 240, 138, 0.32); stroke: rgba(255, 255, 255, 0.96); }
+.household-marker:hover .household-marker-glow,
+.household-marker.is-highlighted .household-marker-glow,
+.household-marker.is-selected-household .household-marker-glow { fill: rgba(103, 232, 249, 0.34); stroke: rgba(255, 255, 255, 0.96); }
 @keyframes householdPulse {
   0%, 100% { opacity: 0.82; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.08); }
@@ -481,10 +483,10 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 .route-choice strong, .household-card strong { font-size: 1.1rem; }
 .route-choice span, .household-card span { color: #bfdbfe; }
-.route-choice.is-highlighted {
-  border-color: rgba(233, 213, 255, 0.62);
-  background: linear-gradient(135deg, rgba(192, 132, 252, 0.22), rgba(56, 189, 248, 0.12));
-  box-shadow: 0 0 1.15rem rgba(192, 132, 252, 0.22);
+.route-choice.is-highlighted, .household-card.is-highlighted, .household-card.is-selected-household {
+  border-color: rgba(125, 211, 252, 0.62);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(192, 132, 252, 0.12));
+  box-shadow: 0 0 1.15rem rgba(56, 189, 248, 0.22);
 }
 .household-card em { color: #fde68a; font-style: normal; font-size: 0.86rem; }
 .name-gate {

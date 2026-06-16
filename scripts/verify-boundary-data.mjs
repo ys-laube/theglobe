@@ -274,6 +274,7 @@ for (const [householdId, expectation] of Object.entries(expectedHouseholds)) {
 assert(koreaOverlaySource.includes('renderHouseholdCards'), 'Korea overlay must retain terminal household-card rendering');
 assert(koreaOverlaySource.includes('nameGateState') && koreaOverlaySource.includes('암구호를 대시오!') && koreaOverlaySource.includes('암구호 틀림'), 'Korea overlay must retain terminal family passphrase gate flow');
 assert(koreaOverlaySource.includes('setHighlightedRegion') && koreaOverlaySource.includes('data-region-id'), 'Korea overlay must cross-highlight route list and map regions');
+assert(koreaOverlaySource.includes('highlightedHouseholdId') && koreaOverlaySource.includes('data-household-id') && koreaOverlaySource.includes('setHighlightedHousehold'), 'Korea overlay must cross-highlight household cards and map markers by household id');
 assert(koreaOverlaySource.includes('pointerenter') && koreaOverlaySource.includes('focus'), 'Korea overlay cross-highlight must support pointer and keyboard focus');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
