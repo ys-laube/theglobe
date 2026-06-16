@@ -139,6 +139,18 @@ try {
           '6 region',
           'Korea family map',
           '더 많은 수도 보기',
+          'The globe is glowing with its final details.',
+          'Official static region',
+          'official static region',
+          '17 first-level regions',
+          '17-first-level region',
+          '우리 가족이 이어지는 지도',
+          '빛나는 길을 따라',
+          '가족 이름',
+          '예: 한유진',
+          '로그인이나 개인정보 저장 없이',
+          '초대 링크 열기',
+          '이름을 다시 확인해 주세요',
         ].filter((text) => bodyText.includes(text));
         const koreaButtonPresent = Boolean(document.querySelector('[data-action="korea-family"]'));
 
@@ -147,6 +159,7 @@ try {
         await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '194', 'all capitals visible');
         const capitalsTitle = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const capitalsCopy = document.querySelector('[data-tier-copy]')?.textContent?.trim();
+        const approvedFirstScreenCopyPresent = bodyText.includes('where are you? where do you want to go?');
         const top100Toggle = document.querySelector('[data-action="toggle-tier"]');
         const toggleLabelBefore = top100Toggle?.textContent?.trim();
         top100Toggle.click();
@@ -227,12 +240,22 @@ try {
           await clickButtonByStrong(householdLabel);
           await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === householdId, householdLabel + ' household');
           const input = document.querySelector('.name-gate input');
+          const gateBeforeUnlockCopy = document.querySelector('.name-gate')?.textContent ?? '';
+          const linksBeforeUnlock = document.querySelectorAll('.band-link').length;
+          input.value = '틀린 암구호';
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'invalid', householdLabel + ' invalid passphrase');
+          const invalidFeedback = document.querySelector('.name-gate-feedback')?.textContent?.trim();
           input.value = acceptedName;
           input.dispatchEvent(new Event('input', { bubbles: true }));
           document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
           await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', householdLabel + ' name gate unlock');
           const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
           return {
+            gateBeforeUnlockCopy,
+            linksBeforeUnlock,
+            invalidFeedback,
             householdId,
             householdLabel,
             terminalRegion: window.__GLOBE_QA__?.selectedRegion,
@@ -256,6 +279,7 @@ try {
         return {
           qa: window.__GLOBE_QA__,
           rejectedCopy,
+          approvedFirstScreenCopyPresent,
           koreaButtonPresent,
           capitalsTitle,
           capitalsCopy,
@@ -320,8 +344,9 @@ try {
   if (!result) throw new Error(`Browser smoke returned no serializable result: ${JSON.stringify(smoke)}`);
   if (result.rejectedCopy.length) throw new Error(`Rejected copy still present: ${result.rejectedCopy.join(', ')}`);
   if (result.koreaButtonPresent) throw new Error('Expected primary Korea family button to be removed');
+  if (!result.approvedFirstScreenCopyPresent) throw new Error('Expected approved first-screen copy to be rendered');
   if (result.capitalsTitle !== '세계의 수도') throw new Error(`Expected capitals title, found ${result.capitalsTitle}`);
-  if (!result.capitalsCopy.includes('검증된 수도 전체')) throw new Error(`Expected all-capitals copy, found ${result.capitalsCopy}`);
+  if (result.capitalsCopy !== '전 세계 UN가입국의 수도를 보여줍니다') throw new Error(`Expected UN member-state capitals copy, found ${result.capitalsCopy}`);
   if (result.toggleLabelBefore !== 'TOP 100 인기 도시 보기') throw new Error(`Expected TOP100 toggle label, found ${result.toggleLabelBefore}`);
   if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);
@@ -374,6 +399,9 @@ try {
     if (actualPath?.terminalRegion !== expectedPath.terminalRegion) throw new Error(`Expected ${expectedPath.householdLabel} terminal ${expectedPath.terminalRegion}, found ${actualPath?.terminalRegion}`);
     if (actualPath?.selectedHousehold !== expectedPath.householdId) throw new Error(`Expected ${expectedPath.householdLabel} household ${expectedPath.householdId}, found ${actualPath?.selectedHousehold}`);
     if (actualPath?.nameGateState !== 'unlocked') throw new Error(`Expected ${expectedPath.householdLabel} name gate unlocked, found ${actualPath?.nameGateState}`);
+    if (actualPath?.invalidFeedback !== '암구호 틀림') throw new Error(`Expected ${expectedPath.householdLabel} invalid gate copy, found ${actualPath?.invalidFeedback}`);
+    if (actualPath?.linksBeforeUnlock !== 0) throw new Error(`Expected ${expectedPath.householdLabel} links hidden before unlock, found ${actualPath?.linksBeforeUnlock}`);
+    if (!actualPath?.gateBeforeUnlockCopy?.includes('암구호를 대시오!') || !actualPath?.gateBeforeUnlockCopy?.includes('암구호 확인')) throw new Error(`Expected ${expectedPath.householdLabel} passphrase gate copy, found ${actualPath?.gateBeforeUnlockCopy}`);
     if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band placeholder links, found ${actualPath?.linkCount}`);
     if (!actualPath?.links?.every((href) => href.startsWith('https://band.us/band/') && href.includes('-placeholder-'))) throw new Error(`Expected placeholder-only band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
   }

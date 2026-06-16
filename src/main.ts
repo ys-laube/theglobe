@@ -24,7 +24,7 @@ app.innerHTML = `
       <div class="halo"></div>
       <div class="earth-status" aria-live="polite">
         <strong data-state-label>Preparing Earth</strong>
-        <span data-state-copy>Loading the globe renderer.</span>
+        <span data-state-copy>where are you? where do you want to go?</span>
       </div>
       <div class="hint">드래그해서 지구를 돌리고, 탐험 모드에서 세계의 수도와 인기 도시를 만나보세요</div>
       <article class="city-card" data-empty="true" aria-live="polite"></article>
