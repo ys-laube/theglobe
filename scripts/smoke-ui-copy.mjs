@@ -26,6 +26,11 @@ const forbiddenVisibleCopy = [
   'Cloud texture from the Three.js examples planets set; optional non-blocking enhancement.',
   'Night-lights texture from the Three.js examples planets set; optional non-blocking enhancement.',
   'Earth imagery policy loading…',
+  'Earth Ready',
+  'Earth ready',
+  'Earth view preparing',
+  'asset enhancement ready',
+  'A warm illustrated Earth is ready for exploration.',
 ];
 
 for (const copy of forbiddenVisibleCopy) {
@@ -34,6 +39,7 @@ for (const copy of forbiddenVisibleCopy) {
 
 
 const requiredGiftCopy = [
+  'Our Earth',
   'where are you? where do you want to go?',
   '전 세계 UN가입국의 수도를 보여줍니다',
   '17 광역자치단체',

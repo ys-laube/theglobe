@@ -334,7 +334,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
       globeMaterial.color.set('#ffffff');
       globeMaterial.emissiveIntensity = 0.10;
       globeMaterial.needsUpdate = true;
-      emit('fallback-earth', 'A warm illustrated Earth is ready for exploration.', FALLBACK_ATTRIBUTION, { failureReason: reason });
+      emit('fallback-earth', 'where are you? where do you want to go?', FALLBACK_ATTRIBUTION, { failureReason: reason });
     }
 
     void loadCountryBorders();

@@ -23,7 +23,7 @@ app.innerHTML = `
       <canvas id="globe" aria-label="마우스나 터치로 회전 가능한 실제 지구 느낌의 3D 지구본"></canvas>
       <div class="halo"></div>
       <div class="earth-status" aria-live="polite">
-        <strong data-state-label>Preparing Earth</strong>
+        <strong data-state-label>Our Earth</strong>
         <span data-state-copy>where are you? where do you want to go?</span>
       </div>
       <div class="hint">드래그해서 지구를 돌리고, 탐험 모드에서 세계의 수도와 인기 도시를 만나보세요</div>
@@ -40,7 +40,6 @@ app.innerHTML = `
       <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
       <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
       <div class="region-list" data-region-list></div>
-      <p class="asset-note" data-attribution>Earth view preparing…</p>
     </aside>
   </main>
 `;
@@ -174,9 +173,9 @@ window.addEventListener('korea-family-map-request', () => { void enterKoreaFamil
 const friendlyStateLabels: Record<string, string> = {
   boot: 'Preparing Earth',
   'loading-earth': 'Preparing Earth',
-  'earth-ready': 'Earth ready',
-  'fallback-earth': 'Earth ready',
-  'asset-enhancement-ready': 'Earth ready',
+  'earth-ready': 'Our Earth',
+  'fallback-earth': 'Our Earth',
+  'asset-enhancement-ready': 'Our Earth',
 };
 
 globe.onStateChange((state, message, credit) => {
