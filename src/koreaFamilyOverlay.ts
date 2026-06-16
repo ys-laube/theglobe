@@ -442,9 +442,9 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
     const legend = document.createElement('div');
     legend.className = 'korea-map-legend';
-    appendText(legend, 'strong', 'Static family overlay');
+    appendText(legend, 'strong', '우리 가족이 이어지는 지도');
     appendText(legend, 'span', selectedRouteSummary(selectedRegion));
-    appendText(legend, 'small', 'Bundled geometry · no live map API · decorative navigation');
+    appendText(legend, 'small', '빛나는 길을 따라 서로의 집으로 닿는 여정');
     mapMount.append(svg, legend);
   }
 
