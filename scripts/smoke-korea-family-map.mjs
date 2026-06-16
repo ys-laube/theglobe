@@ -214,21 +214,44 @@ try {
         busanRegion?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
-        await clickButtonByStrong('부산광역시');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan', 'Busan tier');
-        await clickButtonByStrong('해운대구');
-        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-busan-haeundae', 'Haeundae tier');
         const householdMarkerCount = document.querySelectorAll('.household-marker').length;
         const householdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
-        const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
-        await clickButtonByStrong('건희민하찬희네');
-        await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === 'sister', 'sister household');
-        const input = document.querySelector('.name-gate input');
-        input.value = '박건희';
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', 'name gate unlock');
-        const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
+        const openRoot = async () => {
+          await clickButtonByStrong('대한민국');
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
+        };
+        const unlockFamilyPath = async ({ labels, terminalRegion, householdLabel, householdId, acceptedName }) => {
+          for (const label of labels) await clickButtonByStrong(label);
+          await waitFor(() => window.__GLOBE_QA__?.selectedRegion === terminalRegion, terminalRegion + ' tier');
+          const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong, .household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          await clickButtonByStrong(householdLabel);
+          await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === householdId, householdLabel + ' household');
+          const input = document.querySelector('.name-gate input');
+          input.value = acceptedName;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          document.querySelector('.name-gate').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          await waitFor(() => window.__GLOBE_QA__?.nameGateState === 'unlocked', householdLabel + ' name gate unlock');
+          const links = [...document.querySelectorAll('.band-link')].map((link) => link.href);
+          return {
+            householdId,
+            householdLabel,
+            terminalRegion: window.__GLOBE_QA__?.selectedRegion,
+            selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
+            nameGateState: window.__GLOBE_QA__?.nameGateState,
+            routeChoiceLabels,
+            linkCount: links.length,
+            links,
+          };
+        };
+        const seoulFamilyPath = await unlockFamilyPath({ labels: ['서울특별시', '마포구'], terminalRegion: 'kr-seoul-mapo', householdLabel: '진주네', householdId: 'brother', acceptedName: '한진주' });
+        await openRoot();
+        const gyeongnamFamilyPath = await unlockFamilyPath({ labels: ['경상남도', '김해시', '봉황동'], terminalRegion: 'kr-gimhae-bonghwang', householdLabel: '은하네', householdId: 'home', acceptedName: '한은하' });
+        await openRoot();
+        const busanParentsPath = await unlockFamilyPath({ labels: ['부산광역시', '해운대구'], terminalRegion: 'kr-busan-haeundae', householdLabel: '한가네 본가', householdId: 'parents', acceptedName: '한봉수' });
+        await openRoot();
+        const busanSisterPath = await unlockFamilyPath({ labels: ['부산광역시', '해운대구'], terminalRegion: 'kr-busan-haeundae', householdLabel: '건희민하찬희네', householdId: 'sister', acceptedName: '박건희' });
+        const routeChoiceLabels = busanSisterPath.routeChoiceLabels;
+        const links = busanSisterPath.links;
 
         return {
           qa: window.__GLOBE_QA__,
@@ -276,6 +299,10 @@ try {
           householdMarkerCount,
           householdMarkerLabels,
           routeChoiceLabels,
+          seoulFamilyPath,
+          gyeongnamFamilyPath,
+          busanParentsPath,
+          busanSisterPath,
           selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
           nameGateState: window.__GLOBE_QA__?.nameGateState,
           linkCount: links.length,
@@ -336,11 +363,25 @@ try {
   for (const requiredHouseholdLabel of ['한가네 본가', '건희민하찬희네', '진주네', '은하네']) {
     if (!result.householdMarkerLabels?.includes(requiredHouseholdLabel)) throw new Error(`Expected household marker label ${requiredHouseholdLabel}, found ${result.householdMarkerLabels?.join(', ')}`);
   }
+  const expectedFamilyPaths = [
+    { key: 'seoulFamilyPath', terminalRegion: 'kr-seoul-mapo', householdId: 'brother', householdLabel: '진주네', linkCount: 1 },
+    { key: 'gyeongnamFamilyPath', terminalRegion: 'kr-gimhae-bonghwang', householdId: 'home', householdLabel: '은하네', linkCount: 1 },
+    { key: 'busanParentsPath', terminalRegion: 'kr-busan-haeundae', householdId: 'parents', householdLabel: '한가네 본가', linkCount: 2 },
+    { key: 'busanSisterPath', terminalRegion: 'kr-busan-haeundae', householdId: 'sister', householdLabel: '건희민하찬희네', linkCount: 3 },
+  ];
+  for (const expectedPath of expectedFamilyPaths) {
+    const actualPath = result[expectedPath.key];
+    if (actualPath?.terminalRegion !== expectedPath.terminalRegion) throw new Error(`Expected ${expectedPath.householdLabel} terminal ${expectedPath.terminalRegion}, found ${actualPath?.terminalRegion}`);
+    if (actualPath?.selectedHousehold !== expectedPath.householdId) throw new Error(`Expected ${expectedPath.householdLabel} household ${expectedPath.householdId}, found ${actualPath?.selectedHousehold}`);
+    if (actualPath?.nameGateState !== 'unlocked') throw new Error(`Expected ${expectedPath.householdLabel} name gate unlocked, found ${actualPath?.nameGateState}`);
+    if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band placeholder links, found ${actualPath?.linkCount}`);
+    if (!actualPath?.links?.every((href) => href.startsWith('https://band.us/band/') && href.includes('-placeholder-'))) throw new Error(`Expected placeholder-only band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
+  }
   if (result.selectedHousehold !== 'sister') throw new Error(`Expected sister household, found ${result.selectedHousehold}`);
   if (result.nameGateState !== 'unlocked') throw new Error(`Expected unlocked name gate, found ${result.nameGateState}`);
   if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links, found ${result.linkCount}`);
   if (!result.links.every((href) => href.startsWith('https://band.us/'))) throw new Error('Expected band.us placeholder links');
-  console.log('PASS layout, exploration, and Korea morph headless smoke', JSON.stringify(result));
+  console.log('PASS layout, exploration, Korea family paths, and Korea morph headless smoke', JSON.stringify(result));
 } finally {
   await terminate(chrome);
   await terminate(preview);
