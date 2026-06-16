@@ -984,7 +984,7 @@
       "경상남도",
       "제주특별자치도"
     ],
-    "sourceMetadataException": "This committed asset is a documented-guide family route overlay, not an official-derived first-level Korea region layer; it intentionally includes only family route regions until an official build-time snapshot is committed."
+    "sourceMetadataException": "This committed asset is a documented-guide static overlay that documents the official 17-region set, bundles simplified guide geometry, adds decorative Jeju/Ulleungdo/Dokdo island references, and includes family route drilldowns; it is not raw official-derived legal-boundary geometry."
   },
   "familyTargetCoverage": [
     {
@@ -1029,7 +1029,7 @@
         5.5,
         -2.8
       ],
-      "sourceNote": "Included through the official first-level 제주특별자치도 feature and repeated as a static island reference label for the satellite-style guide."
+      "sourceNote": "Included through the official first-level 제주특별자치도 feature and repeated as a static island reference label for the satellite-style guide; not a legal coordinate."
     },
     {
       "id": "island-ulleungdo-reference",
