@@ -222,6 +222,18 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         document.querySelector('.korea-map-canvas')?.scrollIntoView({ block: 'center', inline: 'center' });
         await new Promise((resolve) => setTimeout(resolve, 120));
+        await waitFor(() => document.querySelector('.korea-raster-layer'), 'Korea raster imagery layer');
+        const readImageryTelemetry = () => ({
+          state: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state'),
+          source: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-source'),
+          layer: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-layer'),
+          crs: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-crs'),
+          attribution: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-attribution'),
+          hostState: document.querySelector('.korea-map-overlay')?.getAttribute('data-imagery-state'),
+          rasterLayerPresent: Boolean(document.querySelector('.korea-raster-layer')),
+          rasterImageSrc: document.querySelector('.korea-raster-image')?.getAttribute('src') ?? '',
+        });
+        const imageryTelemetry = readImageryTelemetry();
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const officialFirstLevelRegions = [
           ['kr-seoul', '서울특별시'],
@@ -255,6 +267,12 @@ try {
           await clickButtonByStrong('대한민국');
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
         };
+        window.__KOREA_IMAGERY_FORCE_FALLBACK__ = true;
+        await clickButtonByStrong('부산광역시');
+        await openRoot();
+        await waitFor(() => document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state') === 'fallback', 'forced Korea imagery fallback');
+        const fallbackImageryTelemetry = readImageryTelemetry();
+        window.__KOREA_IMAGERY_FORCE_FALLBACK__ = false;
         const closestRegion = (node) => {
           let current = node;
           while (current && current !== document) {
@@ -475,6 +493,8 @@ try {
           rotationDeltaY: Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? initialRotationY) - initialRotationY),
           weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
           weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
+          imageryTelemetry,
+          fallbackImageryTelemetry,
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           koreaRegionCount,
           koreaRegionLabels,
@@ -561,6 +581,14 @@ try {
   }
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
+  if (!result.imageryTelemetry?.rasterLayerPresent) throw new Error('Expected Korea raster/fallback layer under SVG boundaries');
+  if (!['loading', 'ready', 'fallback', 'error'].includes(result.imageryTelemetry?.state)) throw new Error(`Expected Korea imagery state telemetry, found ${JSON.stringify(result.imageryTelemetry)}`);
+  if (result.imageryTelemetry?.source !== 'nasa-gibs-blue-marble-wms') throw new Error(`Expected normal Korea imagery source nasa-gibs-blue-marble-wms, found ${result.imageryTelemetry?.source}`);
+  if (result.imageryTelemetry?.layer !== 'BlueMarble_NextGeneration') throw new Error(`Expected BlueMarble_NextGeneration layer, found ${result.imageryTelemetry?.layer}`);
+  if (result.imageryTelemetry?.crs !== 'EPSG:4326') throw new Error(`Expected EPSG:4326 imagery CRS, found ${result.imageryTelemetry?.crs}`);
+  if (!result.imageryTelemetry?.rasterImageSrc?.includes('BlueMarble_NextGeneration') || !result.imageryTelemetry?.rasterImageSrc?.includes('BBOX=33%2C124%2C39%2C132')) throw new Error(`Expected GIBS Korea GetMap URL with locked layer/bbox, found ${result.imageryTelemetry?.rasterImageSrc}`);
+  if (!/NASA GIBS/.test(result.imageryTelemetry?.attribution ?? '') || !/Blue Marble/.test(result.imageryTelemetry?.attribution ?? '')) throw new Error(`Expected NASA GIBS/Blue Marble attribution metadata, found ${result.imageryTelemetry?.attribution}`);
+  if (result.fallbackImageryTelemetry?.state !== 'fallback' || result.fallbackImageryTelemetry?.source !== 'static-fallback' || !result.fallbackImageryTelemetry?.rasterLayerPresent) throw new Error(`Expected deterministic static fallback telemetry, found ${JSON.stringify(result.fallbackImageryTelemetry)}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
   if (!result.daeguInfoText?.includes('Landmark') || !result.daeguInfoText?.includes('Food') || !result.daeguInfoText?.includes('서문시장') || !result.daeguInfoText?.includes('막창구이')) throw new Error(`Expected non-family region Landmark/Food panel, found ${result.daeguInfoText}`);
   if (!result.daeguInfoHref?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected non-family region Namuwiki link, found ${result.daeguInfoHref}`);
