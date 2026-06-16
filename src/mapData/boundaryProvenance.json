@@ -4,7 +4,7 @@
   "committedAssetStrategy": {
     "assetId": "korea-official-static-family-boundaries-v2",
     "status": "official-source-documented-static",
-    "summary": "G003 commits a static Korea family overlay with 17 first-level administrative regions plus family drilldown targets, documented from official public-data/VWorld legal-boundary dataset metadata and bundled without runtime map APIs. The normalized guide polygons are hand-authored from official-source metadata review and are not legal-boundary coordinates.",
+    "summary": "G003 commits a static satellite-style Korea family overlay with 17 first-level administrative regions, Jeju/Ulleungdo/Dokdo decorative island references, and family drilldown targets, documented from official public-data/VWorld legal-boundary dataset metadata and bundled without runtime map APIs. The normalized guide polygons and island markers are hand-authored from official-source metadata review and are not legal-boundary coordinates.",
     "licenseTreatment": "공공데이터포털 metadata for 국토교통부_일별법정구역정보 lists 무료 and 이용허락범위 제한 없음; VWorld is documented as the official download surface. This app bundles simplified normalized SVG guide geometry, not raw SHP files.",
     "accuracyNotice": "Decorative navigation art only. Static decorative guide only. Do not use for legal, survey, routing, cadastral, emergency, or address decisions.",
     "sourceClassification": "documented-guide",
@@ -30,6 +30,15 @@
         "제주특별자치도"
       ],
       "currentException": "documented-guide static overlay documents the official 17-region set and bundles simplified guide geometry plus family targets; it is not raw official-derived legal-boundary geometry."
+    },
+    "islandReferencePolicy": {
+      "requiredIslandReferencesKo": [
+        "제주도",
+        "울릉도",
+        "독도"
+      ],
+      "renderingDecision": "Render Jeju/Ulleungdo/Dokdo as non-region static decorative markers/labels in the satellite-style overlay so the interactive 17+4 region polygon contract remains stable.",
+      "accuracyNotice": "Island points are normalized visual anchors only and must not be described as legal, cadastral, survey, routing, emergency, or address coordinates."
     }
   },
   "verifiedSourceCandidates": [
@@ -75,5 +84,5 @@
       "reason": "Violates the static/no-live-API requirement and adds runtime dependency risk."
     }
   ],
-  "attributionText": "Korea family overlay: static normalized boundary-guide visualization documented from 국토교통부_일별법정구역정보 / VWorld legal-boundary metadata; decorative family navigation only, no legal-boundary accuracy claim."
+  "attributionText": "Korea family overlay: static normalized satellite-style boundary-guide visualization documented from 국토교통부_일별법정구역정보 / VWorld legal-boundary metadata; includes decorative Jeju/Ulleungdo/Dokdo island references for family navigation only, no legal-boundary accuracy claim."
 }

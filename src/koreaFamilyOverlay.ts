@@ -18,9 +18,20 @@ type ReferenceLine = {
   readonly points: readonly (readonly [number, number])[];
 };
 
+type IslandReference = {
+  readonly id: string;
+  readonly nameKo: string;
+  readonly nameEn: string;
+  readonly kind: string;
+  readonly point: readonly [number, number];
+  readonly radius: number;
+  readonly labelOffset: readonly [number, number];
+};
+
 type OverlayData = {
   readonly features: readonly BoundaryFeature[];
   readonly worldReferenceLines: readonly ReferenceLine[];
+  readonly islandReferences: readonly IslandReference[];
 };
 
 type RegionId =
@@ -284,9 +295,9 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function renderHeader() {
     header.replaceChildren();
     const copy = document.createElement('div');
-    appendText(copy, 'p', '17 광역자치단체', 'map-kicker');
+    appendText(copy, 'p', 'Static satellite-style Korea family map', 'map-kicker');
     appendText(copy, 'h2', routeNodes[selectedRegion].label);
-    appendText(copy, 'p', '가족이 있는 도시와 동네까지 차분히 이어지는 한국 지도입니다.');
+    appendText(copy, 'p', '공식 공공데이터 경계 데이터셋 메타데이터를 문서화한 정적 위성풍 17개 광역 행정구역 안내에서 제주·울릉도·독도 기준점과 가족이 있는 자리까지 확대됩니다.');
     const breadcrumbs = document.createElement('div');
     breadcrumbs.className = 'korea-breadcrumbs';
     const rootButton = document.createElement('button');
@@ -390,6 +401,36 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     }
 
 
+    const islandLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    islandLayer.setAttribute('class', 'korea-island-reference-layer');
+    islandLayer.setAttribute('aria-label', '제주 울릉도 독도 정적 섬 기준점');
+    data.islandReferences.forEach((island) => {
+      const [x, y] = island.point;
+      const [dx, dy] = island.labelOffset;
+      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      group.setAttribute('class', 'korea-island-reference');
+      group.dataset.islandId = island.id;
+      group.setAttribute('aria-label', `${island.nameKo} 정적 섬 기준점`);
+      const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      halo.setAttribute('cx', String(x));
+      halo.setAttribute('cy', String(y));
+      halo.setAttribute('r', String(island.radius + 1.25));
+      halo.setAttribute('class', 'korea-island-halo');
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', String(x));
+      dot.setAttribute('cy', String(y));
+      dot.setAttribute('r', String(island.radius));
+      dot.setAttribute('class', 'korea-island-dot');
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', String(x + dx));
+      label.setAttribute('y', String(y + dy));
+      label.setAttribute('class', 'korea-island-label');
+      label.textContent = island.nameKo;
+      group.append(halo, dot, label);
+      islandLayer.append(group);
+    });
+    svg.append(islandLayer);
+
     householdMarkers.forEach((markerModel) => {
       const feature = featureById(markerModel.regionId);
       const household = householdById(markerModel.householdId);
@@ -433,7 +474,12 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       svg.append(group);
     });
 
-    mapMount.append(svg);
+    const legend = document.createElement('div');
+    legend.className = 'korea-map-legend';
+    appendText(legend, 'strong', '우리 가족이 이어지는 지도');
+    appendText(legend, 'span', selectedRouteSummary(selectedRegion));
+    appendText(legend, 'small', '제주·울릉도·독도 기준점과 빛나는 길을 따라 서로의 집으로 닿는 여정');
+    mapMount.append(svg, legend);
   }
 
   function renderRoutePanel() {

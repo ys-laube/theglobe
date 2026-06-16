@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "assetId": "korea-official-static-family-boundaries-v2",
-  "title": "Korea official-source documented static family map overlay",
+  "title": "Korea official-source documented static satellite-style family map overlay",
   "coordinateSystem": "normalized-svg-0-100",
   "intendedUse": "Premium family-map overlay navigation only; static simplified visualization, not GIS, legal, survey, routing, or address lookup data.",
-  "geometryKind": "static-simplified-boundary-guide-polygons",
+  "geometryKind": "static-simplified-satellite-style-boundary-guide-polygons",
   "provenanceId": "korea-official-static-boundary-provenance-v2",
   "officialSourceSnapshot": {
     "primaryMetadataSourceId": "data-go-kr-molit-daily-legal-district-shp",
@@ -12,7 +12,7 @@
     "metadataReviewedAt": "2026-06-15",
     "sourceFeatureClass": "법정구역 경계 SHP (시도/시군구/읍면동)",
     "firstLevelRegionCount": 17,
-    "note": "Coordinates are normalized and simplified for a static decorative SVG overlay from official-source metadata/dataset-guide review. They are not legal-boundary coordinates and intentionally avoid runtime map/API dependencies."
+    "note": "Coordinates are normalized and simplified for a static decorative satellite-style SVG overlay from official-source metadata/dataset-guide review. They are not legal-boundary coordinates and intentionally avoid runtime map/API dependencies."
   },
   "bounds": {
     "minX": 0,
@@ -959,7 +959,8 @@
     "Static official-source-documented boundary guide for family overlay only",
     "No legal-boundary accuracy claims",
     "No routing, cadastral, survey, emergency, or address decisions",
-    "No live map tiles, live map APIs, backend services, auth, or runtime API keys"
+    "No live map tiles, live map APIs, backend services, auth, or runtime API keys",
+    "Jeju/Ulleungdo/Dokdo appear only as static decorative island references, not legal coordinates"
   ],
   "sourceClassification": "documented-guide",
   "firstLevelRegionPolicy": {
@@ -1010,6 +1011,57 @@
         "봉황동"
       ],
       "terminalFeatureId": "kr-gimhae-bonghwang"
+    }
+  ],
+  "islandReferences": [
+    {
+      "id": "island-jeju-reference",
+      "nameKo": "제주도",
+      "nameEn": "Jeju Island",
+      "kind": "decorative-island-reference",
+      "relatedFeatureId": "kr-jeju",
+      "point": [
+        46,
+        97
+      ],
+      "radius": 1.65,
+      "labelOffset": [
+        5.5,
+        -2.8
+      ],
+      "sourceNote": "Included through the official first-level 제주특별자치도 feature and repeated as a static island reference label for the satellite-style guide."
+    },
+    {
+      "id": "island-ulleungdo-reference",
+      "nameKo": "울릉도",
+      "nameEn": "Ulleungdo",
+      "kind": "decorative-island-reference",
+      "point": [
+        77.4,
+        24.6
+      ],
+      "radius": 1.05,
+      "labelOffset": [
+        3.2,
+        -1.8
+      ],
+      "sourceNote": "Static decorative island marker documented from official legal-boundary metadata review; not a legal coordinate."
+    },
+    {
+      "id": "island-dokdo-reference",
+      "nameKo": "독도",
+      "nameEn": "Dokdo",
+      "kind": "decorative-island-reference",
+      "point": [
+        85.2,
+        24.0
+      ],
+      "radius": 0.68,
+      "labelOffset": [
+        2.6,
+        1.9
+      ],
+      "sourceNote": "Static decorative island marker documented from official legal-boundary metadata review; not a legal coordinate."
     }
   ]
 }

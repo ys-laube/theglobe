@@ -62,7 +62,12 @@
         "경상남도",
         "제주특별자치도"
       ]
-    }
+    },
+    "requiredIslandReferencesKo": [
+      "제주도",
+      "울릉도",
+      "독도"
+    ]
   },
   "capitals": {
     "sourceLock": "mledoze-countries-plus-capital-coordinates-snapshot",
@@ -132,6 +137,6 @@
   },
   "validationContract": {
     "cityDataVerifier": "scripts/verify-city-data.mjs must validate capital count > 33, TOP100 exact count 100, ranks 1-100, coordinates, unique ids, HTTPS links, and dataset source metadata.",
-    "boundaryVerifier": "scripts/verify-boundary-data.mjs must validate Korea boundary sourceClassification, official 17-region contract or documented source-metadata exception, household target coverage, provenance exclusions, and no live map/API requirement."
+    "boundaryVerifier": "scripts/verify-boundary-data.mjs must validate Korea boundary sourceClassification, official 17-region contract or documented source-metadata exception, Jeju/Ulleungdo/Dokdo island references, household target coverage, provenance exclusions, and no live map/API requirement."
   }
 }
