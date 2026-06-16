@@ -536,12 +536,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       }
       vectorLayer.append(polygon);
 
-      if (isSelected || isNext) {
+      const shouldPinSelectedLabel = isSelected && !selectedNode.next.length && !selectedNode.households?.length;
+      if (shouldPinSelectedLabel || isNext) {
         const [x, y] = feature.centroid;
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', String(x));
         label.setAttribute('y', String(y));
-        label.setAttribute('class', ['korea-map-label', isSelected ? 'is-selected-label' : 'is-next-label'].filter(Boolean).join(' '));
+        label.setAttribute('class', ['korea-map-label', shouldPinSelectedLabel ? 'is-selected-label' : 'is-next-label'].filter(Boolean).join(' '));
         label.dataset.regionId = id;
         label.textContent = feature.nameKo;
         vectorLayer.append(label);
