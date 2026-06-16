@@ -100,6 +100,7 @@ try {
   const page = await newPageResponse.json();
   const client = await cdp(page.webSocketDebuggerUrl);
   await client.send('Runtime.enable');
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1000, deviceScaleFactor: 1, mobile: false });
   await delay(1000);
 
   const smoke = await client.send('Runtime.evaluate', {
@@ -219,6 +220,8 @@ try {
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
+        document.querySelector('.korea-map-canvas')?.scrollIntoView({ block: 'center', inline: 'center' });
+        await new Promise((resolve) => setTimeout(resolve, 120));
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const officialFirstLevelRegions = [
           ['kr-seoul', '서울특별시'],
@@ -256,19 +259,32 @@ try {
           const region = document.querySelector('.korea-region[data-region-id="' + regionId + '"]');
           if (!region) throw new Error('Missing SVG polygon for ' + regionId);
           const rect = region.getBoundingClientRect();
-          const fractions = [0.5, 0.35, 0.65, 0.2, 0.8, 0.12, 0.88];
-          for (const fy of fractions) {
-            for (const fx of fractions) {
-              const clientX = rect.left + rect.width * fx;
-              const clientY = rect.top + rect.height * fy;
-              const hit = document.elementFromPoint(clientX, clientY);
-              const hitRegion = hit?.closest?.('.korea-region');
-              if (hitRegion?.getAttribute('data-region-id') === regionId) {
-                return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id') };
-              }
+          const samples = [];
+          for (let yi = 1; yi <= 11; yi += 1) {
+            for (let xi = 1; xi <= 11; xi += 1) {
+              samples.push([xi / 12, yi / 12]);
             }
           }
-          throw new Error('No document.elementFromPoint hit inside SVG polygon for ' + regionId);
+          samples.unshift([0.5, 0.5], [0.35, 0.35], [0.65, 0.65], [0.35, 0.65], [0.65, 0.35]);
+          const misses = [];
+          for (const [fx, fy] of samples) {
+            const clientX = rect.left + rect.width * fx;
+            const clientY = rect.top + rect.height * fy;
+            const hit = document.elementFromPoint(clientX, clientY);
+            const stackRegion = [...document.elementsFromPoint(clientX, clientY)]
+              .map((node) => node.closest?.('.korea-region'))
+              .find((candidate) => candidate?.getAttribute('data-region-id') === regionId);
+            const hitRegion = hit?.closest?.('.korea-region');
+            if (hitRegion?.getAttribute('data-region-id') === regionId) {
+              return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id'), elementFromPointVerified: true };
+            }
+            if (stackRegion) {
+              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', coveredRegionId: regionId });
+            } else if (misses.length < 6) {
+              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', topRegion: hitRegion?.getAttribute('data-region-id') ?? null });
+            }
+          }
+          throw new Error('No document.elementFromPoint hit inside SVG polygon for ' + regionId + ': ' + JSON.stringify(misses.slice(0, 8)));
         };
         const clickFirstLevelRegionByViewportHit = async ([regionId, label]) => {
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'overview before coordinate click ' + regionId);
