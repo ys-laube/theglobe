@@ -570,12 +570,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       dot.setAttribute('cy', String(y));
       dot.setAttribute('r', String(island.radius));
       dot.setAttribute('class', 'korea-island-dot');
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', String(x + dx));
-      label.setAttribute('y', String(y + dy));
-      label.setAttribute('class', 'korea-island-label');
-      label.textContent = island.nameKo;
-      group.append(halo, dot, label);
+      group.append(halo, dot);
+      if (island.id !== 'jeju-reference') {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', String(x + dx));
+        label.setAttribute('y', String(y + dy));
+        label.setAttribute('class', 'korea-island-label');
+        label.textContent = island.nameKo;
+        group.append(label);
+      }
       islandLayer.append(group);
     });
     vectorLayer.append(islandLayer);
