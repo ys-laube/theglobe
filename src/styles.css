@@ -297,8 +297,6 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
     radial-gradient(circle at 66% 72%, rgba(96, 205, 255, 0.52), transparent 19rem),
     radial-gradient(circle at 50% 50%, rgba(134, 239, 172, 0.18), transparent 13rem),
     linear-gradient(180deg, rgba(226, 232, 240, 0.14), transparent 34%),
-    repeating-linear-gradient(118deg, rgba(241, 245, 249, 0.055) 0 1px, transparent 1px 5px),
-    repeating-linear-gradient(34deg, rgba(15, 23, 42, 0.18) 0 1px, transparent 1px 9px),
     linear-gradient(145deg, rgba(34, 211, 238, 0.40), rgba(14, 165, 233, 0.66) 44%, rgba(12, 74, 110, 0.76));
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.16),
@@ -336,7 +334,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-static-texture {
   pointer-events: none;
   mix-blend-mode: screen;
-  opacity: 0.82;
+  opacity: 0;
 }
 .korea-map-vignette {
   pointer-events: none;
