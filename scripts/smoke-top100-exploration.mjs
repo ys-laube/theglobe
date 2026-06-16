@@ -3,10 +3,11 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const [top100Raw, cityContentRaw, overlaySource, rendererSource, mainSource] = await Promise.all([
+const [top100Raw, cityContentRaw, overlaySource, stylesSource, rendererSource, mainSource] = await Promise.all([
   readFile(join(root, 'src/data/top100Cities.json'), 'utf8'),
   readFile(join(root, 'src/data/cityContent.json'), 'utf8'),
   readFile(join(root, 'src/explorationOverlay.ts'), 'utf8'),
+  readFile(join(root, 'src/styles.css'), 'utf8'),
   readFile(join(root, 'src/globeRenderer.ts'), 'utf8'),
   readFile(join(root, 'src/main.ts'), 'utf8'),
 ]);
@@ -30,6 +31,10 @@ const buckets = Array.from({ length: 10 }, (_value, index) => {
 assert(buckets.every((bucket) => bucket.length === 10), 'TOP100 data must split into ten rank buckets of ten cities');
 assert(overlaySource.includes('data-rank-group'), 'overlay must render rank group elements for TOP100');
 assert(overlaySource.includes('button.dataset.cityId = capital.id'), 'overlay must render clickable city list buttons');
+assert(!overlaySource.includes('`${capital.rank}. ${capital.city}`'), 'TOP100 rows must not combine native ol numbering with inline dotted rank');
+assert(overlaySource.includes('`#${capital.rank} ${capital.city}`'), 'TOP100 rows must expose one explicit #rank city label');
+assert(stylesSource.includes('.rank-group ol') && stylesSource.includes('list-style: none'), 'TOP100 ordered-list native markers must be disabled');
+assert(stylesSource.includes('padding-left: 0'), 'TOP100 rows must not reserve native marker indentation');
 assert(overlaySource.includes('focusCity(capital)'), 'overlay list/marker selection must focus and open the card');
 assert(overlaySource.includes('selectedCityGlow'), 'overlay must add a selected city marker glow mesh');
 assert(overlaySource.includes("button.setAttribute('aria-current', 'true')"), 'overlay must mark the selected TOP100 list city');
