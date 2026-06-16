@@ -50,6 +50,7 @@ const firstLevelIds = new Set([
   'kr-gyeonggi', 'kr-gangwon', 'kr-chungbuk', 'kr-chungnam', 'kr-jeonbuk', 'kr-jeonnam', 'kr-gyeongbuk', 'kr-gyeongnam', 'kr-jeju',
 ]);
 const familyTargetIds = new Set(['kr-seoul-mapo', 'kr-busan-haeundae', 'kr-gyeongnam-gimhae', 'kr-gimhae-bonghwang']);
+const expectedIslandReferencesKo = ['제주도', '울릉도', '독도'];
 const requiredIds = new Set([...firstLevelIds, ...familyTargetIds]);
 const expectedTiers = new Map([
   ['kr-seoul', 'special-city'], ['kr-busan', 'metropolitan-city'], ['kr-daegu', 'metropolitan-city'], ['kr-incheon', 'metropolitan-city'],
@@ -62,7 +63,7 @@ const expectedTiers = new Map([
 assert(boundaries.schemaVersion === 2, 'G003 boundary schemaVersion must be 2');
 assert(boundaries.assetId === 'korea-official-static-family-boundaries-v2', 'G003 must use v2 Korea boundary asset id');
 assert(boundaries.coordinateSystem === 'normalized-svg-0-100', 'boundary coordinate system must stay normalized and static');
-assert(boundaries.geometryKind === 'static-simplified-boundary-guide-polygons', 'G003 must reject legacy stylized geometryKind');
+assert(boundaries.geometryKind === 'static-simplified-satellite-style-boundary-guide-polygons', 'G003 must use the approved static satellite-style geometryKind');
 assert(['official-derived', 'documented-guide'].includes(boundaries.sourceClassification), 'boundary sourceClassification must be official-derived or documented-guide');
 assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
 assert(provenance.committedAssetStrategy.assetId === boundaries.assetId, 'provenance asset id must match boundary asset');
@@ -70,6 +71,7 @@ assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, '
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'data provenance must lock boundary provenance id');
 
 assert(boundaries.officialSourceSnapshot?.firstLevelRegionCount === 17, 'official source snapshot must document 17 first-level Korea regions');
+assert(/satellite-style/i.test(boundaries.officialSourceSnapshot?.note ?? ''), 'official source snapshot must document the static satellite-style guide treatment');
 assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document expected 17 first-level regions');
 sameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedRegionNames, 'boundary official first-level region names');
 assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock expected 17 first-level regions');
@@ -101,6 +103,25 @@ for (const feature of boundaries.features) {
 }
 assert(ids.size === requiredIds.size, 'missing required Korea boundary-guide feature ids');
 sameMembers(boundaries.features.filter((feature) => feature.adminLevel === 1).map((feature) => feature.nameKo), expectedRegionNames, 'rendered first-level region names');
+
+assert(Array.isArray(boundaries.islandReferences), 'boundary data must declare Jeju/Ulleungdo/Dokdo island references');
+assert(boundaries.islandReferences.length === expectedIslandReferencesKo.length, 'boundary data must declare exactly 3 static island references');
+sameMembers(boundaries.islandReferences.map((island) => island.nameKo), expectedIslandReferencesKo, 'static island reference names');
+sameMembers(dataProvenance.koreaBoundaries.requiredIslandReferencesKo, expectedIslandReferencesKo, 'data provenance static island reference names');
+sameMembers(provenance.committedAssetStrategy.islandReferencePolicy?.requiredIslandReferencesKo, expectedIslandReferencesKo, 'boundary provenance island reference names');
+for (const island of boundaries.islandReferences) {
+  assert(island.kind === 'decorative-island-reference', `${island.nameKo} must be decorative island reference data`);
+  assert(Array.isArray(island.point) && island.point.length === 2, `${island.nameKo} needs a static normalized point`);
+  assert(Array.isArray(island.labelOffset) && island.labelOffset.length === 2, `${island.nameKo} needs a static label offset`);
+  assert(Number.isFinite(island.radius) && island.radius > 0 && island.radius <= 2, `${island.nameKo} radius must stay decorative and bounded`);
+  for (const [x, y] of [island.point, island.labelOffset]) {
+    assert(Number.isFinite(x) && Number.isFinite(y), `${island.nameKo} island coordinate must be finite`);
+  }
+  assert(/static|정적/i.test(island.sourceNote ?? ''), `${island.nameKo} must document static source treatment`);
+  assert(/not a legal coordinate/i.test(island.sourceNote ?? '') || island.nameKo === '제주도', `${island.nameKo} must reject legal-coordinate use`);
+}
+assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
+assert(koreaOverlaySource.includes('제주·울릉도·독도'), 'Korea overlay copy must name Jeju/Ulleungdo/Dokdo references');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
