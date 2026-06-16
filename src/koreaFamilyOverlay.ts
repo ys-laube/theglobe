@@ -474,12 +474,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       svg.append(group);
     });
 
-    const legend = document.createElement('div');
-    legend.className = 'korea-map-legend';
-    appendText(legend, 'strong', '우리 가족이 이어지는 지도');
-    appendText(legend, 'span', selectedRouteSummary(selectedRegion));
-    appendText(legend, 'small', '제주·울릉도·독도 기준점과 빛나는 길을 따라 서로의 집으로 닿는 여정');
-    mapMount.append(svg, legend);
+    mapMount.append(svg);
   }
 
   function renderRoutePanel() {
