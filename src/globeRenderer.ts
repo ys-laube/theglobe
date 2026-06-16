@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, shouldForcePrimaryTextureFailure, shouldForcePrimaryTextureTimeout } from './assetsPolicy';
+import { EARTH_ASSETS, EARTH_ASSET_TIMEOUT_MS, FALLBACK_ATTRIBUTION, loadImageViaGet, shouldForcePrimaryTextureFailure, shouldForcePrimaryTextureTimeout } from './assetsPolicy';
 
 export type GlobeRuntimeState = 'boot' | 'loading-earth' | 'earth-ready' | 'fallback-earth' | 'asset-enhancement-ready';
 export type GlobeViewMode = 'earth' | 'korea-focus';
@@ -113,11 +113,21 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string) {
   });
 }
 
+function configureLoadedTexture(texture: THREE.Texture) {
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 8;
+  return texture;
+}
+
 function loadTexture(loader: THREE.TextureLoader, url: string, label: string) {
-  return withTimeout(loader.loadAsync(url), EARTH_ASSET_TIMEOUT_MS, label).then((texture) => {
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.anisotropy = 8;
-    return texture;
+  return withTimeout(loader.loadAsync(url), EARTH_ASSET_TIMEOUT_MS, label).then(configureLoadedTexture);
+}
+
+function loadPrimaryEarthTexture(url: string, label: string) {
+  return loadImageViaGet(url, label).then((image) => {
+    const texture = new THREE.Texture(image);
+    texture.needsUpdate = true;
+    return configureLoadedTexture(texture);
   });
 }
 
@@ -277,7 +287,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
   const koreaRotation = new THREE.Euler(0.48, 2.5, 0.02);
   let focusRotation: THREE.Euler | null = null;
   let stateMessage = 'Preparing the globe.';
-  let attribution = EARTH_ASSETS.day.attribution;
+  let attribution: string = EARTH_ASSETS.day.attribution;
   let failureReason: string | undefined;
 
   let countryBordersLoad: Promise<void> | null = null;
@@ -323,7 +333,7 @@ export function createGlobeRenderer(canvas: HTMLCanvasElement, host: HTMLElement
     try {
       if (shouldForcePrimaryTextureFailure()) throw new Error('Forced Earth texture failure for QA');
       if (shouldForcePrimaryTextureTimeout()) await new Promise((_resolve, reject) => window.setTimeout(() => reject(new Error('Forced Earth texture timeout for QA')), EARTH_ASSET_TIMEOUT_MS + 80));
-      const dayTexture = await loadTexture(loader, EARTH_ASSETS.day.url, EARTH_ASSETS.day.label);
+      const dayTexture = await loadPrimaryEarthTexture(EARTH_ASSETS.day.url, EARTH_ASSETS.day.label);
       globeMaterial.map = dayTexture;
       globeMaterial.emissiveIntensity = 0.04;
       globeMaterial.needsUpdate = true;

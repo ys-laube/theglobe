@@ -77,5 +77,11 @@ for (const copy of forbiddenKoreaCopy) {
 assert(!sources['src/main.ts'].includes("state.replaceAll('-', ' ');"), 'UI must not render raw technical state ids such as asset enhancement ready');
 assert(sources['src/main.ts'].includes('friendlyStateLabels'), 'main UI must map runtime state ids to family-friendly labels');
 assert(sources['src/globeRenderer.ts'].includes('where are you? where do you want to go?'), 'final ready message should use the approved first-screen copy');
+assert(sources['src/assetsPolicy.ts'].includes('NASA_GIBS_BLUE_MARBLE'), 'NASA GIBS Blue Marble constants must be defined');
+assert(sources['src/assetsPolicy.ts'].includes('BlueMarble_NextGeneration'), 'NASA GIBS BlueMarble_NextGeneration layer must be configured');
+assert(sources['src/assetsPolicy.ts'].includes("REQUEST: 'GetMap'"), 'NASA GIBS helper must use WMS GetMap image GET parameters');
+assert(sources['src/assetsPolicy.ts'].includes('loadImageViaGet'), 'primary imagery must have an explicit GET image load helper');
+assert(sources['src/assetsPolicy.ts'].includes('shouldForcePrimaryTextureFailure'), 'fallback QA hook must remain available');
+assert(sources['src/globeRenderer.ts'].includes('loadPrimaryEarthTexture'), 'globe renderer must load primary Earth imagery through the image helper');
 
 console.log('PASS UI copy smoke: approved G001 copy/gate polish is present and old copy is absent');
