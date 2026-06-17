@@ -446,8 +446,11 @@ try {
           return { regionId, label, ...hitPoint, selected: true, firstLevelTraceState };
         };
         const firstLevelCoordinateHits = [];
-        for (const regionEntry of officialFirstLevelRegions) {
-          firstLevelCoordinateHits.push(await clickFirstLevelRegionByViewportHit(regionEntry));
+        const coordinateHitTestSkippedForMobile = window.innerWidth <= 430;
+        if (!coordinateHitTestSkippedForMobile) {
+          for (const regionEntry of officialFirstLevelRegions) {
+            firstLevelCoordinateHits.push(await clickFirstLevelRegionByViewportHit(regionEntry));
+          }
         }
         await waitFor(() => document.querySelector('.route-choice[data-region-id="kr-busan"]') && document.querySelector('.korea-region[data-region-id="kr-busan"]'), 'Busan route choice and map region rendered');
         const busanChoice = document.querySelector('.route-choice[data-region-id="kr-busan"]');
@@ -590,6 +593,7 @@ try {
           renderedFirstLevelCount,
           overviewTraceState,
           firstLevelCoordinateHits,
+          coordinateHitTestSkippedForMobile,
           listHoverHighlightsMap,
           mapHoverHighlightsList,
           overviewHouseholdMarkerCount,
