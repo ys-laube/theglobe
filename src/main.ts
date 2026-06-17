@@ -27,7 +27,6 @@ app.innerHTML = `
         <span data-state-copy>where are you? where do you want to go?</span>
       </div>
       <div class="hint">드래그해서 지구를 돌리고, 탐험 모드에서 세계의 수도와 인기 도시를 만나보세요</div>
-      <article class="city-card" data-empty="true" aria-live="polite"></article>
       <section class="korea-map-host" aria-label="한국 가족 지도"></section>
     </section>
 
@@ -39,6 +38,7 @@ app.innerHTML = `
       </div>
       <p class="discovery-count"><strong data-visible-count>0</strong><span> places ready</span></p>
       <button class="ghost wide" data-action="toggle-tier" disabled>TOP 100 인기 도시 보기</button>
+      <article class="city-card" data-empty="true" aria-live="polite"></article>
       <div class="region-list" data-region-list></div>
     </aside>
   </main>
