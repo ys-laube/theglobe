@@ -6,7 +6,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 `dataProvenance.json` is the current source-of-truth contract for static app data. `src/data/worldCapitals.json`, `src/data/top100Cities.json`, and `src/data/cityContent.json` are the bounded static city assets that satisfy the current capital/TOP100 model. It locks:
 
-- **Korea boundaries**: the committed app asset is `korea-real-coordinate-boundaries-v3`, backed by `boundaryProvenance.json`. It uses static WGS84 KOSTAT-derived GeoJSON rings from `southkorea/southkorea-maps`, projected into the same NASA GIBS Korea raster bbox: 17 first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and Gyeongnam/Gimhae/Bonghwang family drilldowns. Never use live map APIs, GADM, or NC/ND census derivatives.
+- **Korea boundaries**: the committed app asset is `korea-real-coordinate-boundaries-v3`, backed by `boundaryProvenance.json`. It uses static WGS84 KOSTAT-derived GeoJSON rings from `southkorea/southkorea-maps`, normalized into a vector-only satellite-inspired viewBox: 17 first-level Korea regions plus Busan/Haeundae, Seoul/Mapo, and Gyeongnam/Gimhae/Bonghwang family drilldowns. Never use live map APIs, GADM, or NC/ND census derivatives.
 - **Capitals**: the committed dataset is `world-capitals-un-member-states-static-2026-06-16`, containing exactly 193 UN member-state capital markers. It uses the official United Nations Member States page for inclusion semantics, removes non-member/observer/dependency entries such as Vatican City, and joins to a static capital-coordinate CSV with no runtime query/API dependency.
 - **TOP100 cities**: the UI-facing ranked dataset must contain exactly 100 contiguous ranks. The locked exact-100 source is the public Euromonitor Top 100 City Destinations 2018 white paper (`2018-11-01`, 2017 international arrivals metric). Partial Agoda posts, incomplete previews, and Mastercard GDCI 2019 top-20-only tables are not enough for the exact-100 contract.
 - **City card content**: `cityContent.json` provides explicit city-level Landmark/Food overrides for every visible UN193 capital and every TOP100 city; missing content is a verification/build failure. It stores short original labels and source URLs, not copied prose.
@@ -15,7 +15,7 @@ This directory owns the bounded static data/provenance slice for the Korea famil
 
 ## Committed Korea geometry
 
-`koreaFamilyBoundaries.json` is a static, projected satellite-aligned SVG overlay with decorative island references for Jeju/Ulleungdo/Dokdo. It stores simplified WGS84 administrative rings projected to the NASA GIBS Korea image bbox, so the boundary lines naturally sit on the satellite-style raster; it is still not a legal, cadastral, survey, routing, emergency, or address dataset.
+`koreaFamilyBoundaries.json` is a static vector satellite-inspired SVG overlay with decorative island references for Jeju/Ulleungdo/Dokdo. It stores simplified WGS84 administrative rings normalized into the app viewBox; it is still not a legal, cadastral, survey, routing, emergency, or address dataset.
 
 `worldCountryBorders.json` is the separate bundled Natural Earth 110m country-border extraction used for non-pickable decorative globe context. It is static app data, not a live service dependency.
 
@@ -25,7 +25,7 @@ It is not legal, cadastral, survey, routing, emergency, or address data.
 
 `boundaryProvenance.json` records the permissive boundary-source strategy:
 
-- committed geometry: 17-region KOSTAT-derived static projected boundary rings aligned to the Korea NASA GIBS raster;
+- committed geometry: 17-region KOSTAT-derived static projected boundary rings normalized for the vector-only Korea family map;
 - future world/country boundary candidate: Natural Earth Admin 0 boundary/country layers, which Natural Earth describes as public-domain map data;
 - Korea legal-boundary source metadata: `국토교통부_일별법정구역정보 SHP` and VWorld legal-boundary download surfaces, processed/documented only as static simplified data;
 - excluded: GADM and NC/ND census-boundary layers for this public/static app.

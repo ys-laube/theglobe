@@ -31,18 +31,6 @@ export const NASA_GIBS_BLUE_MARBLE = {
 } as const;
 
 
-export const KOREA_GIBS_BLUE_MARBLE = {
-  endpoint: NASA_GIBS_BLUE_MARBLE.endpoint,
-  layer: NASA_GIBS_BLUE_MARBLE.layer,
-  crs: NASA_GIBS_BLUE_MARBLE.srs,
-  bbox: [33, 124, 39, 132] as const,
-  format: NASA_GIBS_BLUE_MARBLE.format,
-  width: 900,
-  height: 900,
-  attribution: 'NASA GIBS · NASA Earth Observatory Blue Marble',
-  sourceUrl: NASA_GIBS_BLUE_MARBLE.sourceUrl,
-} as const;
-
 export const EARTH_ASSETS = {
   day: {
     id: NASA_GIBS_BLUE_MARBLE.id,

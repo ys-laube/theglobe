@@ -10,7 +10,6 @@ const worldBorders = JSON.parse(await readFile(join(root, 'src/mapData/worldCoun
 const worldBordersRaw = await readFile(join(root, 'src/mapData/worldCountryBorders.json'), 'utf8');
 const householdConfigSource = await readFile(join(root, 'src/householdConfig.ts'), 'utf8');
 const koreaOverlaySource = await readFile(join(root, 'src/koreaFamilyOverlay.ts'), 'utf8');
-const koreaImagerySource = await readFile(join(root, 'src/koreaImagery.ts'), 'utf8');
 const mainSource = await readFile(join(root, 'src/main.ts'), 'utf8');
 const globeRendererSource = await readFile(join(root, 'src/globeRenderer.ts'), 'utf8');
 const assetsPolicySource = await readFile(join(root, 'src/assetsPolicy.ts'), 'utf8');
@@ -18,6 +17,7 @@ const packageLockSource = await readFile(join(root, 'package-lock.json'), 'utf8'
 const packageManifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
 const mapDataReadme = await readFile(join(root, 'src/mapData/README.md'), 'utf8');
 const rootReadme = await readFile(join(root, 'README.md'), 'utf8');
+const stylesSource = await readFile(join(root, 'src/styles.css'), 'utf8');
 
 async function listFiles(path) {
   const entries = await readdir(path, { withFileTypes: true });
@@ -128,7 +128,7 @@ const expectedTiers = new Map([
 
 assert(boundaries.schemaVersion === 3, 'Korea boundary schemaVersion must be 3 for projected real-coordinate rings');
 assert(boundaries.assetId === 'korea-real-coordinate-boundaries-v3', 'Korea map must use the real-coordinate boundary asset id');
-assert(boundaries.coordinateSystem === 'wgs84-epsg4326-projected-to-korea-gibs-bbox-124-33-132-39', 'boundary coordinate system must align with the NASA GIBS Korea raster bbox');
+assert(boundaries.coordinateSystem === 'normalized-static-vector-viewbox-0-100-derived-from-wgs84-epsg4326', 'boundary coordinate system must describe the normalized vector-only viewBox');
 assert(boundaries.geometryKind === 'static-projected-geojson-rings', 'Korea map must use projected static GeoJSON rings');
 assert(boundaries.sourceClassification === 'official-derived', 'boundary sourceClassification must be official-derived');
 assert(boundaries.provenanceId === provenance.id, 'boundary provenanceId must match provenance document');
@@ -137,7 +137,7 @@ assert(dataProvenance.koreaBoundaries.committedAssetId === boundaries.assetId, '
 assert(dataProvenance.koreaBoundaries.committedProvenanceId === provenance.id, 'data provenance must lock boundary provenance id');
 
 assert(boundaries.officialSourceSnapshot?.firstLevelRegionCount === 17, 'official source snapshot must document 17 first-level Korea regions');
-assert(/satellite-style|GIBS Korea raster/i.test(boundaries.officialSourceSnapshot?.note ?? ''), 'official source snapshot must document the static satellite/raster-aligned treatment');
+assert(/vector-only|satellite-inspired/i.test(boundaries.officialSourceSnapshot?.note ?? ''), 'official source snapshot must document the static vector-only satellite-inspired treatment');
 assert(boundaries.firstLevelRegionPolicy?.expectedOfficialRegionCount === 17, 'boundary data must document expected 17 first-level regions');
 sameMembers(boundaries.firstLevelRegionPolicy.expectedOfficialRegionsKo, expectedRegionNames, 'boundary official first-level region names');
 assert(dataProvenance.koreaBoundaries.officialFirstLevelRegionContract?.expectedCount === 17, 'data provenance must lock expected 17 first-level regions');
@@ -220,12 +220,12 @@ for (const island of boundaries.islandReferences) {
 }
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
 assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
-assert(koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must keep 제주도 visible text hidden while preserving its island reference dot');
+assert(!koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must render 제주도 label instead of hiding it');
 assert(koreaOverlaySource.includes('KOREA_MAP_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named square SVG viewBox contract');
-for (const requiredAlignmentFragment of ['translateX: 19', 'translateY: 18.5', 'originX: 50', 'originY: 50', 'scale: 1.34']) {
-  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea SVG/raster alignment contract must preserve ${requiredAlignmentFragment}`);
+for (const requiredAlignmentFragment of ['translateX: -0.2', 'translateY: 0', 'originX: 50', 'originY: 50', 'scale: 0.99']) {
+  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve ${requiredAlignmentFragment}`);
 }
-assert(koreaOverlaySource.includes('BBOX=33,124,39,132') || koreaOverlaySource.includes('BBOX=33,124,39,132'), 'Korea overlay alignment comment must document the locked raster crop bbox');
+assert(koreaOverlaySource.includes('single visual source of truth'), 'Korea overlay alignment comment must document vector-only source-of-truth contract');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
@@ -287,6 +287,11 @@ assert(globeRendererSource.includes('loadPrimaryEarthTexture'), 'globe renderer 
 assert(globeRendererSource.includes('loadPrimaryEarthTexture(EARTH_ASSETS.day.url, EARTH_ASSETS.day.label)'), 'globe renderer must load primary Earth imagery with configured day asset url and label');
 assert(globeRendererSource.includes('FALLBACK_ATTRIBUTION'), 'globe renderer must retain fallback attribution when primary Earth imagery fails');
 assert(!/"(leaflet|mapbox-gl|@googlemaps\/[^\"]+|ol|kakao)"/.test(packageLockSource), 'package lock must not include runtime map API dependencies');
+
+assert(stylesSource.includes('@font-face') && stylesSource.includes('Great Vibes Self Hosted'), 'hero script title must declare a self-hosted premium script font');
+assert(stylesSource.includes('./assets/fonts/great-vibes-v21-latin-regular.ttf'), 'hero script title font must be bundled from src/assets/fonts');
+assert(!/fonts\.(?:googleapis|gstatic)\.com/i.test(stylesSource), 'runtime CSS must not load the title font from Google/CDN hosts');
+assert(!/@import\s+url\(https?:/i.test(stylesSource), 'runtime CSS must not import remote font stylesheets');
 assert(worldBorders.schemaVersion === 1, 'world border schemaVersion must be 1');
 assert(worldBorders.assetId === 'natural-earth-110m-admin0-country-border-lines-v1', 'world border asset id must be stable');
 assert(Array.isArray(worldBorders.lines) && worldBorders.lines.length >= 150, 'world border asset must include broad country line coverage');
@@ -313,18 +318,11 @@ assert(koreaOverlaySource.includes('nameGateState') && koreaOverlaySource.includ
 assert(koreaOverlaySource.includes('setHighlightedRegion') && koreaOverlaySource.includes('data-region-id'), 'Korea overlay must cross-highlight route list and map regions');
 assert(koreaOverlaySource.includes('highlightedHouseholdId') && koreaOverlaySource.includes('data-household-id') && koreaOverlaySource.includes('setHighlightedHousehold'), 'Korea overlay must cross-highlight household cards and map markers by household id');
 assert(koreaOverlaySource.includes('pointerenter') && koreaOverlaySource.includes('focus'), 'Korea overlay cross-highlight must support pointer and keyboard focus');
-for (const requiredImageryConstant of [
-  'https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi',
-  'BlueMarble_NextGeneration',
-  'EPSG:4326',
-  '33,124,39,132',
-  'image/jpeg',
-  'NASA GIBS · NASA Earth Observatory Blue Marble',
-]) {
-  assert(koreaImagerySource.includes(requiredImageryConstant) || assetsPolicySource.includes(requiredImageryConstant) || (requiredImageryConstant === '33,124,39,132' && assetsPolicySource.includes('bbox: [33, 124, 39, 132]')), `Korea imagery policy must preserve ${requiredImageryConstant}`);
-}
-assert(koreaOverlaySource.includes('dataset.imageryState') && koreaOverlaySource.includes('korea-raster-layer'), 'Korea overlay must expose raster imagery telemetry hooks');
-assert(koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__') || koreaImagerySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea imagery must retain deterministic fallback test hook');
+assert(koreaOverlaySource.includes("dataset.mapStyle = 'vector-satellite-inspired'"), 'Korea overlay must expose the vector-only map style marker');
+assert(!koreaOverlaySource.includes('korea-raster-layer') && !koreaOverlaySource.includes('korea-raster-image'), 'Korea overlay must not render raster layers or images');
+assert(!koreaOverlaySource.includes('dataset.imageryState') && !koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea overlay must not retain raster imagery telemetry or fallback hooks');
+assert(!assetsPolicySource.includes('KOREA_GIBS_BLUE_MARBLE'), 'Korea-specific GIBS raster constants must be removed while global Earth imagery remains');
+assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after'), 'Korea CSS must provide vector-only blue-ocean/green-land texture hooks');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');

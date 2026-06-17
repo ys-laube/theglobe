@@ -385,20 +385,18 @@ try {
             overlayOverflowY: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).overflowY : null,
             overlayGridColumns: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).gridTemplateColumns : null,
             canvasAspectDelta: canvasRect ? Math.abs(canvasRect.width - canvasRect.height) : null,
+            canvasPanelGap: canvasRect && panel ? panel.top - canvasRect.bottom : null,
+            panelOverlayBottomGap: overlay && panel ? overlay.bottom - panel.bottom : null,
+            routePanelBottomGap: overlay && panel ? overlay.bottom - panel.bottom : null,
           };
         })();
-        await waitFor(() => document.querySelector('.korea-raster-layer'), 'Korea raster imagery layer');
-        const readImageryTelemetry = () => ({
-          state: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state'),
-          source: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-source'),
-          layer: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-layer'),
-          crs: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-crs'),
-          attribution: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-attribution'),
-          hostState: document.querySelector('.korea-map-overlay')?.getAttribute('data-imagery-state'),
+        const vectorMapTelemetry = {
+          style: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-style'),
+          hostStyle: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-style'),
           rasterLayerPresent: Boolean(document.querySelector('.korea-raster-layer')),
-          rasterImageSrc: document.querySelector('.korea-raster-image')?.getAttribute('src') ?? '',
-        });
-        const imageryTelemetry = readImageryTelemetry();
+          rasterImagePresent: Boolean(document.querySelector('.korea-raster-image')),
+          imageryStatePresent: document.querySelector('.korea-map-canvas')?.hasAttribute('data-imagery-state') ?? false,
+        };
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const officialFirstLevelRegions = [
           ['kr-seoul', '서울특별시'],
@@ -432,12 +430,6 @@ try {
           await clickButtonByStrong('대한민국');
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'Korea overview tier');
         };
-        window.__KOREA_IMAGERY_FORCE_FALLBACK__ = true;
-        await clickButtonByStrong('부산광역시');
-        await openRoot();
-        await waitFor(() => document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state') === 'fallback', 'forced Korea imagery fallback');
-        const fallbackImageryTelemetry = readImageryTelemetry();
-        window.__KOREA_IMAGERY_FORCE_FALLBACK__ = false;
         const clickFirstLevelRegionByViewportHit = async ([regionId, label]) => {
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'overview before coordinate click ' + regionId);
           const hitPoint = findViewportHitForRegion(regionId);
@@ -483,11 +475,18 @@ try {
         const overviewHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
-        const satelliteTextureLayerPresent = Boolean(
+        const vectorTextureLayerPresent = Boolean(
           document.querySelector('.korea-static-texture')
           && document.querySelector('.korea-map-vignette')
           && document.querySelector('#korea-static-grain')
         );
+        const vectorPremiumStyle = {
+          palette: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-palette'),
+          canvasPalette: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-palette'),
+          islandCoverage: document.querySelector('.korea-map-overlay')?.getAttribute('data-island-coverage'),
+          terrainGradientPresent: Boolean(document.querySelector('#korea-land-terrain') && document.querySelector('#korea-selected-terrain')),
+          terrainContoursPresent: Boolean(document.querySelector('.korea-terrain-contours') && document.querySelector('#korea-terrain-contours')),
+        };
         const removedSatelliteCopyAbsent = !/static satellite-style Korea family map|공식 공공데이터 경계 데이터셋|위성풍/.test(document.body.textContent ?? '');
         const checkFamilyRegionInfo = async ({ label, region, nextLabel, landmark, food }) => {
           await openRoot();
@@ -587,8 +586,7 @@ try {
           viewMode: window.__GLOBE_QA__?.viewMode,
           selectedRegion: window.__GLOBE_QA__?.selectedRegion,
           mobileLayout,
-          imageryTelemetry,
-          fallbackImageryTelemetry,
+          vectorMapTelemetry,
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           koreaRegionCount,
           koreaRegionLabels,
@@ -606,7 +604,8 @@ try {
           overviewHouseholdMarkerLabels,
           islandReferenceCount,
           islandReferenceLabels,
-          satelliteTextureLayerPresent,
+          vectorTextureLayerPresent,
+          vectorPremiumStyle,
           removedSatelliteCopyAbsent,
           routeChoiceLabels,
           busanFirstLevelInfo,
@@ -671,7 +670,10 @@ try {
   if (!/auto|scroll/.test(result.mobileLayout?.overlayOverflowY ?? '')) throw new Error(`Expected mobile Korea overlay to allow vertical scrolling, found overflow-y=${result.mobileLayout?.overlayOverflowY}`);
   if (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' ')) throw new Error(`Expected single-column Korea overlay grid at 390px, found ${result.mobileLayout?.overlayGridColumns}`);
   if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 260 || (result.mobileLayout.canvasAspectDelta ?? Infinity) > 1) throw new Error(`Expected square Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)}`);
+  if ((result.mobileLayout?.canvasPanelGap ?? 0) < 6 || (result.mobileLayout?.canvasPanelGap ?? 99) > 24) throw new Error(`Expected tight Korea map/panel spacing at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
+  if ((result.mobileLayout?.panelOverlayBottomGap ?? -1) < 8) throw new Error(`Expected Korea route panel to keep bottom breathing room at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
   if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom - 1) throw new Error(`Expected Korea route panel to stack below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
+  if (!Number.isFinite(result.mobileLayout?.routePanelBottomGap) || result.mobileLayout.routePanelBottomGap < 14) throw new Error(`Expected Korea route panel bottom spacing inside mobile overlay, found ${JSON.stringify(result.mobileLayout)}`);
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
@@ -689,14 +691,8 @@ try {
   }
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
-  if (!result.imageryTelemetry?.rasterLayerPresent) throw new Error('Expected Korea raster/fallback layer under SVG boundaries');
-  if (!['loading', 'ready', 'fallback', 'error'].includes(result.imageryTelemetry?.state)) throw new Error(`Expected Korea imagery state telemetry, found ${JSON.stringify(result.imageryTelemetry)}`);
-  if (result.imageryTelemetry?.source !== 'nasa-gibs-blue-marble-wms') throw new Error(`Expected normal Korea imagery source nasa-gibs-blue-marble-wms, found ${result.imageryTelemetry?.source}`);
-  if (result.imageryTelemetry?.layer !== 'BlueMarble_NextGeneration') throw new Error(`Expected BlueMarble_NextGeneration layer, found ${result.imageryTelemetry?.layer}`);
-  if (result.imageryTelemetry?.crs !== 'EPSG:4326') throw new Error(`Expected EPSG:4326 imagery CRS, found ${result.imageryTelemetry?.crs}`);
-  if (!result.imageryTelemetry?.rasterImageSrc?.includes('BlueMarble_NextGeneration') || !result.imageryTelemetry?.rasterImageSrc?.includes('BBOX=33%2C124%2C39%2C132')) throw new Error(`Expected GIBS Korea GetMap URL with locked layer/bbox, found ${result.imageryTelemetry?.rasterImageSrc}`);
-  if (!/NASA GIBS/.test(result.imageryTelemetry?.attribution ?? '') || !/Blue Marble/.test(result.imageryTelemetry?.attribution ?? '')) throw new Error(`Expected NASA GIBS/Blue Marble attribution metadata, found ${result.imageryTelemetry?.attribution}`);
-  if (result.fallbackImageryTelemetry?.state !== 'fallback' || result.fallbackImageryTelemetry?.source !== 'static-fallback' || !result.fallbackImageryTelemetry?.rasterLayerPresent) throw new Error(`Expected deterministic static fallback telemetry, found ${JSON.stringify(result.fallbackImageryTelemetry)}`);
+  if (result.vectorMapTelemetry?.style !== 'vector-satellite-inspired' || result.vectorMapTelemetry?.hostStyle !== 'vector-satellite-inspired') throw new Error(`Expected vector-only Korea map style marker, found ${JSON.stringify(result.vectorMapTelemetry)}`);
+  if (result.vectorMapTelemetry?.rasterLayerPresent || result.vectorMapTelemetry?.rasterImagePresent || result.vectorMapTelemetry?.imageryStatePresent) throw new Error(`Expected no Korea raster layer/image/imagery telemetry, found ${JSON.stringify(result.vectorMapTelemetry)}`);
   if (!result.mapCanvasPresent) throw new Error('Expected Korea map SVG canvas to render');
   if (!result.daeguInfoText?.includes('Landmark') || !result.daeguInfoText?.includes('Food') || !result.daeguInfoText?.includes('서문시장') || !result.daeguInfoText?.includes('막창구이')) throw new Error(`Expected non-family region Landmark/Food panel, found ${result.daeguInfoText}`);
   if (!result.daeguInfoHref?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected non-family region Namuwiki link, found ${result.daeguInfoHref}`);
@@ -707,11 +703,13 @@ try {
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
   if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
-  if (result.islandReferenceLabels?.includes('제주도')) throw new Error(`Expected 제주도 visible label to stay hidden, found ${result.islandReferenceLabels?.join(', ')}`);
-  for (const requiredIslandLabel of ['울릉도', '독도']) {
+  for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
   }
-  if (!result.satelliteTextureLayerPresent) throw new Error('Expected static satellite-style Korea texture layers');
+  if (!result.vectorTextureLayerPresent) throw new Error('Expected static vector Korea texture layers');
+  if (result.vectorPremiumStyle?.palette !== 'green-terrain-blue-sea' || result.vectorPremiumStyle?.canvasPalette !== 'green-terrain-blue-sea') throw new Error(`Expected green terrain / blue sea Korea map palette telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (result.vectorPremiumStyle?.islandCoverage !== 'jeju-ulleungdo-dokdo') throw new Error(`Expected Jeju/Ulleungdo/Dokdo island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (!result.vectorPremiumStyle?.terrainGradientPresent || !result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients/contours, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');
   const expectedFirstLevelInfos = [
     { key: 'busanFirstLevelInfo', label: '부산광역시', region: 'kr-busan', nextLabel: '해운대구' },

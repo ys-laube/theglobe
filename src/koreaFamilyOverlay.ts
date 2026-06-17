@@ -1,4 +1,3 @@
-import { buildKoreaGibsImageUrl, KOREA_GIBS_BLUE_MARBLE, shouldForceKoreaImageryFallback, type KoreaImagerySource, type KoreaImageryState } from './koreaImagery';
 import koreaFamilyBoundaries from './mapData/koreaFamilyBoundaries.json';
 import { getHouseholdLinks, householdConfig, isAcceptedHouseholdName, type Household, type HouseholdId } from './householdConfig';
 
@@ -37,17 +36,17 @@ type OverlayData = {
 };
 
 const KOREA_MAP_VIEWBOX = '0 0 100 100';
-// Co-registration contract: the decorative SVG boundary set is authored in the
-// same normalized square viewBox used by the NASA GIBS Korea raster crop
-// (BBOX=33,124,39,132). These constants are intentionally named and locked by
-// verify-boundary-data plus the 390x844 Korea smoke so future raster/SVG retunes
+// Vector-only contract: the decorative SVG boundary set is authored in a
+// normalized square viewBox and is the single visual source of truth for the
+// Korea family map. These constants are intentionally named and locked by
+// verify-boundary-data plus the 390x844 Korea smoke so future vector retunes
 // are explicit rather than breakpoint-specific drift.
 const KOREA_VECTOR_ALIGNMENT = {
-  translateX: 19,
-  translateY: 18.5,
+  translateX: -0.2,
+  translateY: 0,
   originX: 50,
   originY: 50,
-  scale: 1.34,
+  scale: 0.99,
 } as const;
 
 function koreaVectorTransform() {
@@ -312,9 +311,11 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   closeButton.textContent = '지구본으로 돌아가기';
 
   host.classList.add('korea-map-overlay');
-  host.dataset.mapStyle = 'satellite-relief-25d';
+  host.dataset.mapStyle = 'vector-satellite-inspired';
+  host.dataset.mapPalette = 'green-terrain-blue-sea';
+  host.dataset.islandCoverage = 'jeju-ulleungdo-dokdo';
   host.dataset.familyTraces = 'hidden';
-  mapMount.dataset.mapStyle = 'satellite-relief-25d';
+  mapMount.dataset.mapStyle = 'vector-satellite-inspired';
   mapMount.dataset.familyTraces = 'hidden';
   host.hidden = true;
   host.setAttribute('aria-hidden', 'true');
@@ -348,11 +349,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function setHighlightedRegion(region: RegionId | null) {
     highlightedRegion = region;
     syncHighlightState();
+    onStateChange();
   }
 
   function setHighlightedHousehold(householdId: HouseholdId | null) {
     highlightedHouseholdId = householdId;
     syncHighlightState();
+    onStateChange();
   }
 
   function setRegion(region: RegionId) {
@@ -404,66 +407,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     header.append(copy, closeButton);
   }
 
-  function setImageryTelemetry(state: KoreaImageryState, source: KoreaImagerySource) {
-    [host, mapMount].forEach((element) => {
-      element.dataset.imageryState = state;
-      element.dataset.imagerySource = source;
-      element.dataset.imageryLayer = source === 'nasa-gibs-blue-marble-wms' ? KOREA_GIBS_BLUE_MARBLE.layer : 'static-fallback';
-      element.dataset.imageryCrs = source === 'nasa-gibs-blue-marble-wms' ? KOREA_GIBS_BLUE_MARBLE.crs : 'none';
-      element.dataset.imageryAttribution = KOREA_GIBS_BLUE_MARBLE.attribution;
-    });
-  }
-
-  function createRasterLayer() {
-    const layer = document.createElement('div');
-    layer.className = 'korea-raster-layer';
-    layer.setAttribute('aria-hidden', 'true');
-    layer.dataset.imageryAttribution = KOREA_GIBS_BLUE_MARBLE.attribution;
-
-    if (shouldForceKoreaImageryFallback()) {
-      setImageryTelemetry('fallback', 'static-fallback');
-      layer.dataset.imageryState = 'fallback';
-      layer.dataset.imagerySource = 'static-fallback';
-      return layer;
-    }
-
-    setImageryTelemetry('loading', 'nasa-gibs-blue-marble-wms');
-    layer.dataset.imageryState = 'loading';
-    layer.dataset.imagerySource = 'nasa-gibs-blue-marble-wms';
-    const image = document.createElement('img');
-    let imageRequestActive = true;
-    const activateFallback = () => {
-      if (!layer.isConnected || layer.dataset.imageryState !== 'loading') return;
-      imageRequestActive = false;
-      image.onload = null;
-      image.onerror = null;
-      image.src = '';
-      layer.dataset.imageryState = 'fallback';
-      layer.dataset.imagerySource = 'static-fallback';
-      layer.replaceChildren();
-      setImageryTelemetry('fallback', 'static-fallback');
-    };
-    image.className = 'korea-raster-image';
-    image.alt = '';
-    image.decoding = 'async';
-    image.loading = 'eager';
-    image.crossOrigin = 'anonymous';
-    image.onload = () => {
-      if (!imageRequestActive || !layer.isConnected || layer.dataset.imageryState !== 'loading') return;
-      imageRequestActive = false;
-      layer.dataset.imageryState = 'ready';
-      setImageryTelemetry('ready', 'nasa-gibs-blue-marble-wms');
-    };
-    image.onerror = activateFallback;
-    image.src = buildKoreaGibsImageUrl();
-    layer.append(image);
-    window.setTimeout(activateFallback, 4000);
-    return layer;
-  }
-
   function renderMap() {
     mapMount.replaceChildren();
-    mapMount.append(createRasterLayer());
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', KOREA_MAP_VIEWBOX);
     svg.setAttribute('role', 'img');
@@ -472,22 +417,38 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const data = koreaFamilyBoundaries as unknown as OverlayData;
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     defs.innerHTML = `
-      <radialGradient id="korea-map-glow" cx="50%" cy="48%" r="58%">
-        <stop offset="0%" stop-color="#bae6fd" stop-opacity="0.20"/>
-        <stop offset="62%" stop-color="#2563eb" stop-opacity="0.08"/>
-        <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+      <radialGradient id="korea-map-glow" cx="52%" cy="46%" r="62%">
+        <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.34"/>
+        <stop offset="54%" stop-color="#0284c7" stop-opacity="0.24"/>
+        <stop offset="100%" stop-color="#082f49" stop-opacity="0.10"/>
       </radialGradient>
+      <linearGradient id="korea-land-terrain" x1="18%" y1="10%" x2="86%" y2="92%">
+        <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0.64"/>
+        <stop offset="43%" stop-color="#4ade80" stop-opacity="0.50"/>
+        <stop offset="72%" stop-color="#16a34a" stop-opacity="0.42"/>
+        <stop offset="100%" stop-color="#14532d" stop-opacity="0.34"/>
+      </linearGradient>
+      <linearGradient id="korea-selected-terrain" x1="16%" y1="8%" x2="86%" y2="92%">
+        <stop offset="0%" stop-color="#ecfccb" stop-opacity="0.78"/>
+        <stop offset="58%" stop-color="#86efac" stop-opacity="0.60"/>
+        <stop offset="100%" stop-color="#22c55e" stop-opacity="0.46"/>
+      </linearGradient>
+      <pattern id="korea-terrain-contours" width="7" height="7" patternUnits="userSpaceOnUse">
+        <path d="M-1 5.6C1.2 4.4 3.2 4.4 5.2 5.6S9.2 6.8 11 5.5" fill="none" stroke="#dcfce7" stroke-opacity="0.10" stroke-width="0.28"/>
+        <path d="M0.8 1.6C2.4 0.9 4 0.9 5.8 1.7" fill="none" stroke="#052e16" stroke-opacity="0.08" stroke-width="0.22"/>
+      </pattern>
       <radialGradient id="korea-map-vignette" cx="50%" cy="48%" r="68%">
         <stop offset="58%" stop-color="#0f172a" stop-opacity="0"/>
         <stop offset="100%" stop-color="#020617" stop-opacity="0.74"/>
       </radialGradient>
       <pattern id="korea-static-grain" width="6" height="6" patternUnits="userSpaceOnUse">
-        <path d="M0 5.5H6M5.5 0V6" stroke="#bae6fd" stroke-opacity="0.08" stroke-width="0.16"/>
         <circle cx="1.2" cy="1.4" r="0.22" fill="#fef3c7" fill-opacity="0.12"/>
         <circle cx="4.6" cy="3.8" r="0.18" fill="#67e8f9" fill-opacity="0.10"/>
+        <circle cx="2.9" cy="5.1" r="0.14" fill="#bbf7d0" fill-opacity="0.11"/>
       </pattern>
       <filter id="korea-land-soft-shadow" x="-18%" y="-18%" width="136%" height="136%">
         <feDropShadow dx="0" dy="0.35" stdDeviation="0.42" flood-color="#020617" flood-opacity="0.55"/>
+        <feDropShadow dx="0" dy="-0.12" stdDeviation="0.18" flood-color="#dcfce7" flood-opacity="0.16"/>
       </filter>`;
     svg.append(defs);
     const oceanGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
@@ -506,6 +467,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     staticTexture.setAttribute('fill', 'url(#korea-static-grain)');
     staticTexture.setAttribute('aria-hidden', 'true');
     svg.append(staticTexture);
+    const terrainContours = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    terrainContours.setAttribute('x', '0');
+    terrainContours.setAttribute('y', '0');
+    terrainContours.setAttribute('width', '100');
+    terrainContours.setAttribute('height', '100');
+    terrainContours.setAttribute('class', 'korea-terrain-contours');
+    terrainContours.setAttribute('fill', 'url(#korea-terrain-contours)');
+    terrainContours.setAttribute('aria-hidden', 'true');
+    svg.append(terrainContours);
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
@@ -582,14 +552,12 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       dot.setAttribute('r', String(island.radius));
       dot.setAttribute('class', 'korea-island-dot');
       group.append(halo, dot);
-      if (island.id !== 'jeju-reference') {
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', String(x + dx));
-        label.setAttribute('y', String(y + dy));
-        label.setAttribute('class', 'korea-island-label');
-        label.textContent = island.nameKo;
-        group.append(label);
-      }
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', String(x + dx));
+      label.setAttribute('y', String(y + dy));
+      label.setAttribute('class', 'korea-island-label');
+      label.textContent = island.nameKo;
+      group.append(label);
       islandLayer.append(group);
     });
     vectorLayer.append(islandLayer);
@@ -650,6 +618,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vignette.setAttribute('aria-hidden', 'true');
     svg.append(vignette);
 
+    mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'green-terrain-blue-sea';
+    mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'jeju-ulleungdo-dokdo';
     mapMount.append(svg);
   }
 
