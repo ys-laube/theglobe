@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ command }) => ({
-  base: command === 'build' ? '/theglobe/' : '/',
+  base: process.env.VITE_BASE ?? (command === 'build' ? '/theglobe/' : '/'),
   build: {
     chunkSizeWarningLimit: 550,
     rollupOptions: {

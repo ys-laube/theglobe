@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 const appPort = Number(process.env.SMOKE_APP_PORT ?? 4175);
 const debugPort = Number(process.env.SMOKE_CHROME_DEBUG_PORT ?? 9225);
 const chromeBin = process.env.CHROME_BIN ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const appUrl = `http://127.0.0.1:${appPort}/theglobe/?earthTexture=fail`;
+const appUrl = `http://127.0.0.1:${appPort}/?earthTexture=fail`;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -79,7 +79,7 @@ let chrome;
 let profileDir;
 
 try {
-  preview = spawnProcess('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(appPort), '--strictPort']);
+  preview = spawnProcess('npx', ['vite', 'preview', '--host', '127.0.0.1', '--port', String(appPort), '--strictPort', '--base', '/']);
   await waitForHttp(appUrl);
 
   profileDir = await mkdtemp(join(tmpdir(), 'theglobe-chrome-'));

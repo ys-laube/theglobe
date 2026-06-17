@@ -7,7 +7,7 @@
     "dev": "vite --host 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "verify:data": "node scripts/verify-boundary-data.mjs && node scripts/verify-city-data.mjs && node scripts/smoke-ui-copy.mjs",
-    "smoke:korea": "npm run build && node scripts/smoke-korea-family-map.mjs",
+    "smoke:korea": "VITE_BASE=/ npm run build && node scripts/smoke-korea-family-map.mjs",
     "verify": "npm run typecheck && npm run verify:data && npm run build",
     "build": "tsc && vite build",
     "preview": "vite preview --host 0.0.0.0",
