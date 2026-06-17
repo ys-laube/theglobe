@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 const appPort = Number(process.env.SMOKE_APP_PORT ?? 4175);
 const debugPort = Number(process.env.SMOKE_CHROME_DEBUG_PORT ?? 9225);
 const chromeBin = process.env.CHROME_BIN ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const appUrl = `http://127.0.0.1:${appPort}`;
+const appUrl = `http://127.0.0.1:${appPort}/?earthTexture=fail`;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -96,14 +96,23 @@ try {
   ]);
   await waitForHttp(`http://127.0.0.1:${debugPort}/json/version`);
 
-  const newPageResponse = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent(appUrl)}`, { method: 'PUT' });
+  const newPageResponse = await fetch(`http://127.0.0.1:${debugPort}/json/new?${encodeURIComponent('about:blank')}`, { method: 'PUT' });
   const page = await newPageResponse.json();
   const client = await cdp(page.webSocketDebuggerUrl);
+  await client.send('Page.enable');
   await client.send('Runtime.enable');
+  await client.send('Page.navigate', { url: appUrl });
   await client.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await client.send('Runtime.evaluate', {
+    awaitPromise: true,
+    expression: `new Promise((resolve) => {
+      if (document.readyState === 'complete') resolve(true);
+      else window.addEventListener('load', () => resolve(true), { once: true });
+    })`,
+  });
   await delay(1000);
 
-  const smoke = await client.send('Runtime.evaluate', {
+  const explorationSmoke = await client.send('Runtime.evaluate', {
     awaitPromise: true,
     returnByValue: true,
     expression: String.raw`
