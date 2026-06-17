@@ -6,7 +6,7 @@ import { spawn } from 'node:child_process';
 const appPort = Number(process.env.SMOKE_APP_PORT ?? 4175);
 const debugPort = Number(process.env.SMOKE_CHROME_DEBUG_PORT ?? 9225);
 const chromeBin = process.env.CHROME_BIN ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const appUrl = `http://127.0.0.1:${appPort}/?earthTexture=fail`;
+const appUrl = `http://127.0.0.1:${appPort}/theglobe/?earthTexture=fail`;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -124,7 +124,13 @@ try {
             if (value) return value;
             await new Promise((resolve) => setTimeout(resolve, 120));
           }
-          throw new Error('Timed out waiting for ' + label);
+          throw new Error('Timed out waiting for ' + label + ': ' + JSON.stringify({
+            href: location.href,
+            readyState: document.readyState,
+            qaState: window.__GLOBE_QA__?.state,
+            earthState: document.querySelector('.globe-stage')?.getAttribute('data-earth-state'),
+            appText: document.body.textContent?.slice(0, 160),
+          }));
         };
         const readyStates = new Set(['earth-ready', 'fallback-earth', 'asset-enhancement-ready']);
         await waitFor(() => readyStates.has(window.__GLOBE_QA__?.state), 'earth ready state');
