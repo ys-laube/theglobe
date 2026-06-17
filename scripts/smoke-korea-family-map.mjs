@@ -100,7 +100,7 @@ try {
   const page = await newPageResponse.json();
   const client = await cdp(page.webSocketDebuggerUrl);
   await client.send('Runtime.enable');
-  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1000, deviceScaleFactor: 1, mobile: false });
   await delay(1000);
 
   const smoke = await client.send('Runtime.evaluate', {
@@ -217,6 +217,117 @@ try {
         const jejuMarkerGlowVisible = window.__GLOBE_QA__?.selectedCityMarkerGlowVisible;
         const jejuListHighlighted = window.__GLOBE_QA__?.selectedCityListHighlighted;
 
+        return {
+          qa: window.__GLOBE_QA__,
+          rejectedCopy,
+          approvedFirstScreenCopyPresent,
+          koreaButtonPresent,
+          capitalsTitle,
+          capitalsCopy,
+          capitalFocusOk,
+          capitalCardTitle,
+          capitalCardDetails,
+          capitalCardText,
+          toggleLabelBefore,
+          top100Title,
+          toggleLabelAfter,
+          count: top100Count,
+          top100GroupCount,
+          top100ListEntryCount,
+          top100RankGroups,
+          focusedCityCardTitle,
+          focusedCityCardKicker,
+          focusedCityCardOpen,
+          focusedCityCardLink,
+          listFocusRotationDeltaY,
+          selectedCityFromQa,
+          listSelectedGlowVisible,
+          listSelectedHighlighted,
+          seoulMarkerCardTitle,
+          seoulMarkerGlowVisible,
+          seoulListHighlighted,
+          jejuMarkerCardTitle,
+          jejuMarkerGlowVisible,
+          jejuListHighlighted,
+          panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
+          cityCardPresent: Boolean(document.querySelector('.city-card')),
+          rotationDeltaY: Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? initialRotationY) - initialRotationY),
+          weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
+          weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
+        };
+      })()
+    `,
+  });
+
+  if (explorationSmoke.exceptionDetails) {
+    throw new Error(`Browser exploration smoke failed: ${explorationSmoke.exceptionDetails.text ?? JSON.stringify(explorationSmoke.exceptionDetails)}`);
+  }
+  const explorationResult = explorationSmoke.result.value;
+  if (!explorationResult) throw new Error(`Browser exploration smoke returned no serializable result: ${JSON.stringify(explorationSmoke)}`);
+
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+  await delay(250);
+
+  const koreaSmoke = await client.send('Runtime.evaluate', {
+    awaitPromise: true,
+    returnByValue: true,
+    expression: String.raw`
+      (async () => {
+        const waitFor = async (predicate, label) => {
+          const deadline = Date.now() + 12000;
+          while (Date.now() < deadline) {
+            const value = predicate();
+            if (value) return value;
+            await new Promise((resolve) => setTimeout(resolve, 120));
+          }
+          throw new Error('Timed out waiting for ' + label);
+        };
+        const clickButtonByStrong = async (text) => {
+          const button = await waitFor(
+            () => [...document.querySelectorAll('button')].find((candidate) => candidate.querySelector('strong')?.textContent?.trim() === text || candidate.textContent?.includes(text)),
+            'button ' + text
+          );
+          button.click();
+        };
+        const closestRegion = (node) => {
+          let current = node;
+          while (current && current !== document) {
+            if (current.classList?.contains('korea-region')) return current;
+            current = current.parentElement ?? current.parentNode;
+          }
+          return null;
+        };
+        const findViewportHitForRegion = (regionId) => {
+          const region = document.querySelector('.korea-region[data-region-id="' + regionId + '"]');
+          if (!region) throw new Error('Missing SVG polygon for ' + regionId);
+          const rect = region.getBoundingClientRect();
+          const samples = [];
+          for (let yi = 1; yi <= 11; yi += 1) {
+            for (let xi = 1; xi <= 11; xi += 1) {
+              samples.push([xi / 12, yi / 12]);
+            }
+          }
+          samples.unshift([0.5, 0.5], [0.35, 0.35], [0.65, 0.65], [0.35, 0.65], [0.65, 0.35]);
+          const misses = [];
+          for (const [fx, fy] of samples) {
+            const clientX = rect.left + rect.width * fx;
+            const clientY = rect.top + rect.height * fy;
+            const hit = document.elementFromPoint(clientX, clientY);
+            const stackRegion = [...document.elementsFromPoint(clientX, clientY)]
+              .map((node) => closestRegion(node))
+              .find((candidate) => candidate?.getAttribute('data-region-id') === regionId);
+            const hitRegion = closestRegion(hit);
+            if (hitRegion?.getAttribute('data-region-id') === regionId) {
+              return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id'), elementFromPointVerified: true };
+            }
+            if (stackRegion) {
+              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', coveredRegionId: regionId });
+            } else if (misses.length < 6) {
+              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', topRegion: hitRegion?.getAttribute('data-region-id') ?? null });
+            }
+          }
+          throw new Error('No document.elementFromPoint hit inside SVG polygon for ' + regionId + ': ' + JSON.stringify(misses.slice(0, 8)));
+        };
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
@@ -306,45 +417,6 @@ try {
         await waitFor(() => document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state') === 'fallback', 'forced Korea imagery fallback');
         const fallbackImageryTelemetry = readImageryTelemetry();
         window.__KOREA_IMAGERY_FORCE_FALLBACK__ = false;
-        const closestRegion = (node) => {
-          let current = node;
-          while (current && current !== document) {
-            if (current.classList?.contains('korea-region')) return current;
-            current = current.parentElement ?? current.parentNode;
-          }
-          return null;
-        };
-        const findViewportHitForRegion = (regionId) => {
-          const region = document.querySelector('.korea-region[data-region-id="' + regionId + '"]');
-          if (!region) throw new Error('Missing SVG polygon for ' + regionId);
-          const rect = region.getBoundingClientRect();
-          const samples = [];
-          for (let yi = 1; yi <= 11; yi += 1) {
-            for (let xi = 1; xi <= 11; xi += 1) {
-              samples.push([xi / 12, yi / 12]);
-            }
-          }
-          samples.unshift([0.5, 0.5], [0.35, 0.35], [0.65, 0.65], [0.35, 0.65], [0.65, 0.35]);
-          const misses = [];
-          for (const [fx, fy] of samples) {
-            const clientX = rect.left + rect.width * fx;
-            const clientY = rect.top + rect.height * fy;
-            const hit = document.elementFromPoint(clientX, clientY);
-            const stackRegion = [...document.elementsFromPoint(clientX, clientY)]
-              .map((node) => closestRegion(node))
-              .find((candidate) => candidate?.getAttribute('data-region-id') === regionId);
-            const hitRegion = closestRegion(hit);
-            if (hitRegion?.getAttribute('data-region-id') === regionId) {
-              return { clientX, clientY, hitTag: hit.tagName.toLowerCase(), hitRegionId: hitRegion.getAttribute('data-region-id'), elementFromPointVerified: true };
-            }
-            if (stackRegion) {
-              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', coveredRegionId: regionId });
-            } else if (misses.length < 6) {
-              misses.push({ clientX, clientY, top: hit?.tagName?.toLowerCase(), topClass: hit?.getAttribute?.('class') ?? '', topRegion: hitRegion?.getAttribute('data-region-id') ?? null });
-            }
-          }
-          throw new Error('No document.elementFromPoint hit inside SVG polygon for ' + regionId + ': ' + JSON.stringify(misses.slice(0, 8)));
-        };
         const clickFirstLevelRegionByViewportHit = async ([regionId, label]) => {
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview', 'overview before coordinate click ' + regionId);
           const hitPoint = findViewportHitForRegion(regionId);
@@ -486,46 +558,10 @@ try {
         const links = busanSisterPath.links;
 
         return {
-          qa: window.__GLOBE_QA__,
-          rejectedCopy,
-          approvedFirstScreenCopyPresent,
-          koreaButtonPresent,
-          capitalsTitle,
-          capitalsCopy,
-          capitalFocusOk,
-          capitalCardTitle,
-          capitalCardDetails,
-          capitalCardText,
-          toggleLabelBefore,
-          top100Title,
-          toggleLabelAfter,
-          count: top100Count,
-          top100GroupCount,
-          top100ListEntryCount,
-          top100RankGroups,
-          focusedCityCardTitle,
-          focusedCityCardKicker,
-          focusedCityCardOpen,
-          focusedCityCardLink,
-          listFocusRotationDeltaY,
-          selectedCityFromQa,
-          listSelectedGlowVisible,
-          listSelectedHighlighted,
-          seoulMarkerCardTitle,
-          seoulMarkerGlowVisible,
-          seoulListHighlighted,
-          jejuMarkerCardTitle,
-          jejuMarkerGlowVisible,
-          jejuListHighlighted,
-          panelHasStatsLanguage: /regions|visible capitals|Premium highlights/.test(bodyText),
-          cityCardPresent: Boolean(document.querySelector('.city-card')),
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
           koreaOverlayOpen: window.__GLOBE_QA__?.koreaOverlayOpen,
           viewMode: window.__GLOBE_QA__?.viewMode,
           selectedRegion: window.__GLOBE_QA__?.selectedRegion,
-          rotationDeltaY: Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? initialRotationY) - initialRotationY),
-          weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
-          weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
           mobileLayout,
           imageryTelemetry,
           fallbackImageryTelemetry,
@@ -565,11 +601,12 @@ try {
   });
   await client.close();
 
-  if (smoke.exceptionDetails) {
-    throw new Error(`Browser smoke failed: ${smoke.exceptionDetails.text ?? JSON.stringify(smoke.exceptionDetails)}`);
+  if (koreaSmoke.exceptionDetails) {
+    throw new Error(`Browser Korea smoke failed: ${koreaSmoke.exceptionDetails.text ?? JSON.stringify(koreaSmoke.exceptionDetails)}`);
   }
-  const result = smoke.result.value;
-  if (!result) throw new Error(`Browser smoke returned no serializable result: ${JSON.stringify(smoke)}`);
+  const koreaResult = koreaSmoke.result.value;
+  if (!koreaResult) throw new Error(`Browser Korea smoke returned no serializable result: ${JSON.stringify(koreaSmoke)}`);
+  const result = { ...explorationResult, ...koreaResult };
   if (result.rejectedCopy.length) throw new Error(`Rejected copy still present: ${result.rejectedCopy.join(', ')}`);
   if (result.koreaButtonPresent) throw new Error('Expected primary Korea family button to be removed');
   if (!result.approvedFirstScreenCopyPresent) throw new Error('Expected approved first-screen copy to be rendered');
