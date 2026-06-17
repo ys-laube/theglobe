@@ -345,7 +345,7 @@ try {
         };
         window.dispatchEvent(new CustomEvent('korea-family-map-request'));
         await waitFor(() => window.__GLOBE_QA__?.viewMode === 'korea-focus', 'Korea focus view mode');
-        await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
+        await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true && document.querySelector('.korea-map-overlay .korea-map-canvas'), 'same-stage Korea map');
         document.querySelector('.korea-map-canvas')?.scrollIntoView({ block: 'center', inline: 'center' });
         await new Promise((resolve) => setTimeout(resolve, 120));
         const readRect = (selector) => {
