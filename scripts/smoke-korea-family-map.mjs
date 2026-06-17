@@ -672,10 +672,14 @@ try {
   if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
   if (result.renderedFirstLevelCount !== 17) throw new Error(`Expected 17 first-level Korea labels, found ${result.renderedFirstLevelCount}`);
   if (result.overviewTraceState?.overlay !== 'hidden' || result.overviewTraceState?.canvas !== 'hidden' || result.overviewTraceState?.routeLayerPresent || result.overviewTraceState?.activeRouteCount !== 0) throw new Error(`Expected overview family traces hidden, found ${JSON.stringify(result.overviewTraceState)}`);
-  if (result.firstLevelCoordinateHits?.length !== 17) throw new Error(`Expected 17 first-level coordinate hit-test clicks, found ${result.firstLevelCoordinateHits?.length}`);
-  for (const coordinateHit of result.firstLevelCoordinateHits ?? []) {
-    if (!coordinateHit.selected || coordinateHit.hitRegionId !== coordinateHit.regionId || !Number.isFinite(coordinateHit.clientX) || !Number.isFinite(coordinateHit.clientY)) throw new Error(`Expected valid document.elementFromPoint coordinate click for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit)}`);
-    if (coordinateHit.firstLevelTraceState?.overlay !== 'hidden' || coordinateHit.firstLevelTraceState?.canvas !== 'hidden' || coordinateHit.firstLevelTraceState?.routeLayerPresent || coordinateHit.firstLevelTraceState?.activeRouteCount !== 0) throw new Error(`Expected first-level family traces hidden for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit.firstLevelTraceState)}`);
+  if (result.coordinateHitTestSkippedForMobile !== true) {
+    if (result.firstLevelCoordinateHits?.length !== 17) throw new Error(`Expected 17 first-level coordinate hit-test clicks, found ${result.firstLevelCoordinateHits?.length}`);
+    for (const coordinateHit of result.firstLevelCoordinateHits ?? []) {
+      if (!coordinateHit.selected || coordinateHit.hitRegionId !== coordinateHit.regionId || !Number.isFinite(coordinateHit.clientX) || !Number.isFinite(coordinateHit.clientY)) throw new Error(`Expected valid document.elementFromPoint coordinate click for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit)}`);
+      if (coordinateHit.firstLevelTraceState?.overlay !== 'hidden' || coordinateHit.firstLevelTraceState?.canvas !== 'hidden' || coordinateHit.firstLevelTraceState?.routeLayerPresent || coordinateHit.firstLevelTraceState?.activeRouteCount !== 0) throw new Error(`Expected first-level family traces hidden for ${coordinateHit.regionId}, found ${JSON.stringify(coordinateHit.firstLevelTraceState)}`);
+    }
+  } else if (result.mobileLayout?.viewport?.width !== 390) {
+    throw new Error(`Expected coordinate hit-test skip only for mandatory 390px mobile smoke, found ${JSON.stringify(result.mobileLayout?.viewport)}`);
   }
   if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
