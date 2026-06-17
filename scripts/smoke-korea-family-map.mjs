@@ -100,7 +100,7 @@ try {
   const page = await newPageResponse.json();
   const client = await cdp(page.webSocketDebuggerUrl);
   await client.send('Runtime.enable');
-  await client.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await delay(1000);
 
   const smoke = await client.send('Runtime.evaluate', {
@@ -222,6 +222,39 @@ try {
         await waitFor(() => window.__GLOBE_QA__?.koreaOverlayOpen === true || document.querySelector('.korea-map-host')?.hidden === false, 'same-stage Korea map');
         document.querySelector('.korea-map-canvas')?.scrollIntoView({ block: 'center', inline: 'center' });
         await new Promise((resolve) => setTimeout(resolve, 120));
+        const readRect = (selector) => {
+          const node = document.querySelector(selector);
+          if (!node) return null;
+          const rect = node.getBoundingClientRect();
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            width: rect.width,
+            height: rect.height,
+          };
+        };
+        const mobileLayout = (() => {
+          const stage = readRect('.globe-stage');
+          const overlay = readRect('.korea-map-overlay');
+          const canvasRect = readRect('.korea-map-canvas');
+          const panel = readRect('.korea-route-panel');
+          const header = readRect('.korea-map-header');
+          return {
+            viewport: { width: window.innerWidth, height: window.innerHeight },
+            documentScrollWidth: document.documentElement.scrollWidth,
+            bodyScrollWidth: document.body.scrollWidth,
+            stage,
+            overlay,
+            header,
+            canvas: canvasRect,
+            panel,
+            overlayOverflowY: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).overflowY : null,
+            overlayGridColumns: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).gridTemplateColumns : null,
+            canvasAspectDelta: canvasRect ? Math.abs(canvasRect.width - canvasRect.height) : null,
+          };
+        })();
         await waitFor(() => document.querySelector('.korea-raster-layer'), 'Korea raster imagery layer');
         const readImageryTelemetry = () => ({
           state: document.querySelector('.korea-map-canvas')?.getAttribute('data-imagery-state'),
@@ -493,6 +526,7 @@ try {
           rotationDeltaY: Math.abs((window.__GLOBE_QA__?.globeRotation?.y ?? initialRotationY) - initialRotationY),
           weatherCopyPresent: /weather|날씨|Open-Meteo|simulated weather/i.test(bodyText),
           weatherCardPresent: Boolean(document.querySelector('[data-weather-card], .weather-card, .weather-layer')),
+          mobileLayout,
           imageryTelemetry,
           fallbackImageryTelemetry,
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
@@ -568,6 +602,14 @@ try {
   if (!result.cityCardPresent) throw new Error('Expected existing city card surface to remain present');
   if (result.rotationDeltaY <= 0.006) throw new Error(`Expected globe auto-rotation, delta=${result.rotationDeltaY}`);
   if (result.weatherCopyPresent || result.weatherCardPresent) throw new Error('Expected weather UI/copy to be removed');
+  if (result.mobileLayout?.viewport?.width !== 390 || result.mobileLayout?.viewport?.height !== 844) throw new Error(`Expected mandatory mobile smoke viewport 390x844, found ${JSON.stringify(result.mobileLayout?.viewport)}`);
+  if (result.mobileLayout?.documentScrollWidth > 390 || result.mobileLayout?.bodyScrollWidth > 390) throw new Error(`Expected no horizontal overflow at 390px mobile viewport, found document=${result.mobileLayout?.documentScrollWidth}, body=${result.mobileLayout?.bodyScrollWidth}`);
+  if (!result.mobileLayout?.stage || result.mobileLayout.stage.width > 390 || result.mobileLayout.stage.height < 480) throw new Error(`Expected mobile globe stage to fit 390px width with usable height, found ${JSON.stringify(result.mobileLayout?.stage)}`);
+  if (!result.mobileLayout?.overlay || result.mobileLayout.overlay.left < -1 || result.mobileLayout.overlay.right > 391 || result.mobileLayout.overlay.width > 390) throw new Error(`Expected Korea overlay to fit within 390px viewport, found ${JSON.stringify(result.mobileLayout?.overlay)}`);
+  if (!/auto|scroll/.test(result.mobileLayout?.overlayOverflowY ?? '')) throw new Error(`Expected mobile Korea overlay to allow vertical scrolling, found overflow-y=${result.mobileLayout?.overlayOverflowY}`);
+  if (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' ')) throw new Error(`Expected single-column Korea overlay grid at 390px, found ${result.mobileLayout?.overlayGridColumns}`);
+  if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 260 || (result.mobileLayout.canvasAspectDelta ?? Infinity) > 1) throw new Error(`Expected square Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)}`);
+  if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom - 1) throw new Error(`Expected Korea route panel to stack below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
