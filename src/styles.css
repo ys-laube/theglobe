@@ -143,13 +143,16 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
 
 .city-card {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 96px minmax(0, 1fr);
   gap: 1rem;
   padding: 1rem;
+  max-height: min(38vh, 340px);
+  overflow: auto;
   opacity: 1;
   transform: none;
   pointer-events: auto;
   transition: border-color 220ms ease, background 220ms ease, transform 220ms ease;
+  -webkit-overflow-scrolling: touch;
 }
 .city-card[hidden] { display: none; }
 .city-card[data-empty="true"] {
@@ -167,6 +170,7 @@ button:not(:disabled):hover, .card-copy a:hover { transform: translateY(-2px); }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
 }
 .card-art span { font-size: 2.8rem; font-weight: 900; }
+.card-copy { min-width: 0; }
 .card-copy h2 { margin: 0 0 0.3rem; font-size: 1.55rem; }
 .card-copy p { margin: 0; color: #cbd5e1; line-height: 1.55; }
 dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin: 0.85rem 0; }
@@ -184,9 +188,13 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   max-height: min(76vh, 820px);
   overflow: hidden;
 }
+.panel > div:first-child,
+.discovery-count,
+.panel .wide,
+.city-card { flex: 0 0 auto; }
 .panel h2 { margin: 0; font-size: 1.45rem; }
 .panel p { color: #cbd5e1; line-height: 1.6; }
-.discovery-count { margin: 1.4rem 0 1rem; border-radius: 1.2rem; padding: 1rem; background: rgba(255,255,255,0.06); color: #cbd5e1; }
+.discovery-count { margin: 0.4rem 0 0; border-radius: 1.2rem; padding: 1rem; background: rgba(255,255,255,0.06); color: #cbd5e1; }
 .discovery-count strong { color: #f8fafc; font-size: 2rem; margin-right: 0.35rem; }
 .stats { display: grid; gap: 0.75rem; margin: 1.5rem 0; }
 .stats span { border-radius: 1rem; padding: 0.9rem; background: rgba(255,255,255,0.06); color: #cbd5e1; }
@@ -220,6 +228,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .globe-stage { order: 2; height: 68vh; min-height: 540px; }
   .hero { order: 1; }
   .panel { order: 3; margin-top: 0; max-height: none; overflow: visible; }
+  .region-list { overflow: visible; }
 }
 
 @media (max-width: 640px) {
@@ -228,6 +237,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .hero { padding: 1.1rem 0.95rem; }
   .message { margin-top: 0.8rem; line-height: 1.45; }
   .actions { margin-top: 1rem; }
+  .actions button { flex: 1 1 13rem; }
   .globe-stage {
     height: min(78svh, 680px);
     min-height: 500px;
