@@ -100,7 +100,7 @@ try {
   const page = await newPageResponse.json();
   const client = await cdp(page.webSocketDebuggerUrl);
   await client.send('Runtime.enable');
-  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   await delay(1000);
 
   const smoke = await client.send('Runtime.evaluate', {
