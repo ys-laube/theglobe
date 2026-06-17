@@ -37,6 +37,11 @@ type OverlayData = {
 };
 
 const KOREA_MAP_VIEWBOX = '0 0 100 100';
+// Co-registration contract: the decorative SVG boundary set is authored in the
+// same normalized square viewBox used by the NASA GIBS Korea raster crop
+// (BBOX=33,124,39,132). These constants are intentionally named and locked by
+// verify-boundary-data plus the 390x844 Korea smoke so future raster/SVG retunes
+// are explicit rather than breakpoint-specific drift.
 const KOREA_VECTOR_ALIGNMENT = {
   translateX: 19,
   translateY: 18.5,

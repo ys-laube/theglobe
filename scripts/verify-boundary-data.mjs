@@ -220,6 +220,12 @@ for (const island of boundaries.islandReferences) {
 }
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
 assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
+assert(koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must keep 제주도 visible text hidden while preserving its island reference dot');
+assert(koreaOverlaySource.includes('KOREA_MAP_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named square SVG viewBox contract');
+for (const requiredAlignmentFragment of ['translateX: 19', 'translateY: 18.5', 'originX: 50', 'originY: 50', 'scale: 1.34']) {
+  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea SVG/raster alignment contract must preserve ${requiredAlignmentFragment}`);
+}
+assert(koreaOverlaySource.includes('BBOX=33,124,39,132') || koreaOverlaySource.includes('BBOX=33,124,39,132'), 'Korea overlay alignment comment must document the locked raster crop bbox');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
