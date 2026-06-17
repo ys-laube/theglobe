@@ -513,19 +513,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vectorLayer.setAttribute('transform', koreaVectorTransform());
     svg.append(vectorLayer);
 
-    const contextLineLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    contextLineLayer.setAttribute('aria-hidden', 'true');
-    [
-      'M18 28 C34 20 51 21 68 31 S89 49 94 68',
-      'M13 76 C31 66 45 68 60 78 S82 90 94 83',
-    ].forEach((pathData) => {
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      line.setAttribute('class', 'korea-context-line');
-      line.setAttribute('d', pathData);
-      contextLineLayer.append(line);
-    });
-    vectorLayer.append(contextLineLayer);
-
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {
       const feature = featureById(id);
@@ -590,12 +577,14 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       dot.setAttribute('r', String(island.radius));
       dot.setAttribute('class', 'korea-island-dot');
       group.append(halo, dot);
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', String(x + dx));
-      label.setAttribute('y', String(y + dy));
-      label.setAttribute('class', 'korea-island-label');
-      label.textContent = island.nameKo;
-      group.append(label);
+      if (island.id !== 'jeju-reference') {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', String(x + dx));
+        label.setAttribute('y', String(y + dy));
+        label.setAttribute('class', 'korea-island-label');
+        label.textContent = island.nameKo;
+        group.append(label);
+      }
       islandLayer.append(group);
     });
     vectorLayer.append(islandLayer);

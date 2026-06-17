@@ -34,14 +34,20 @@ function spawnProcess(command, args) {
 }
 
 function terminate(child) {
-  if (!child || child.killed) return Promise.resolve();
+  if (!child || child.killed || child.exitCode !== null || child.signalCode !== null) return Promise.resolve();
   return new Promise((resolve) => {
-    child.once('exit', resolve);
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    child.once('exit', done);
     child.kill('SIGTERM');
     setTimeout(() => {
-      if (!child.killed) child.kill('SIGKILL');
-      resolve();
-    }, 1200).unref();
+      if (child.exitCode === null && child.signalCode === null && !child.killed) child.kill('SIGKILL');
+      done();
+    }, 1200);
   });
 }
 
@@ -701,7 +707,8 @@ try {
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
   if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
-  for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
+  if (result.islandReferenceLabels?.includes('제주도')) throw new Error(`Expected 제주도 visible label to stay hidden, found ${result.islandReferenceLabels?.join(', ')}`);
+  for (const requiredIslandLabel of ['울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
   }
   if (!result.satelliteTextureLayerPresent) throw new Error('Expected static satellite-style Korea texture layers');
