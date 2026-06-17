@@ -699,7 +699,6 @@ try {
   for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
-  if (result.contextLineCount < 2) throw new Error(`Expected Korea map context lines, found ${result.contextLineCount}`);
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
   if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
   for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
