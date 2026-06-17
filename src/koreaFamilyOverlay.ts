@@ -36,6 +36,20 @@ type OverlayData = {
   readonly islandReferences: readonly IslandReference[];
 };
 
+const KOREA_MAP_VIEWBOX = '0 0 100 100';
+const KOREA_VECTOR_ALIGNMENT = {
+  translateX: 19,
+  translateY: 18.5,
+  originX: 50,
+  originY: 50,
+  scale: 1.34,
+} as const;
+
+function koreaVectorTransform() {
+  const { translateX, translateY, originX, originY, scale } = KOREA_VECTOR_ALIGNMENT;
+  return `translate(${translateX} ${translateY}) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`;
+}
+
 type RegionId =
   | 'kr-korea-overview'
   | 'kr-seoul'
@@ -446,7 +460,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     mapMount.replaceChildren();
     mapMount.append(createRasterLayer());
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('viewBox', KOREA_MAP_VIEWBOX);
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', '가족 경로 중심의 한국 지도');
 
@@ -496,7 +510,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
     const vectorLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     vectorLayer.setAttribute('class', 'korea-vector-layer');
-    vectorLayer.setAttribute('transform', 'translate(19 18.5) translate(50 50) scale(1.34) translate(-50 -50)');
+    vectorLayer.setAttribute('transform', koreaVectorTransform());
     svg.append(vectorLayer);
 
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));

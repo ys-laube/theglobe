@@ -260,8 +260,11 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   inset: 1.1rem;
   z-index: 8;
   display: grid;
-  grid-template-columns: minmax(260px, 0.9fr) minmax(280px, 1.1fr);
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(280px, min(46%, 560px)) minmax(320px, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "header header"
+    "map route";
   gap: 1rem;
   padding: 1rem;
   border: 1px solid rgba(226, 232, 240, 0.20);
@@ -282,7 +285,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 }
 
 .korea-map-header {
-  grid-column: 1 / -1;
+  grid-area: header;
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -308,9 +311,14 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-breadcrumbs span { color: #e0f2fe; font-size: 0.9rem; }
 .korea-close { white-space: nowrap; }
 .korea-map-canvas {
+  grid-area: map;
   position: relative;
+  width: min(100%, 62vh, 560px);
+  min-width: 0;
   min-height: 320px;
   aspect-ratio: 1 / 1;
+  align-self: start;
+  justify-self: center;
   border-radius: 1.5rem;
   border: 1px solid rgba(226, 232, 240, 0.14);
   background:
@@ -369,6 +377,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   height: 100%;
   min-height: 0;
   display: block;
+  overflow: visible;
 }
 .korea-vector-layer { transform-box: fill-box; transform-origin: center; }
 .korea-static-texture {
@@ -503,6 +512,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .korea-map-label.is-highlighted { opacity: 1; }
 .korea-map-label.is-next-label { font-size: 2.05px; }
 .korea-route-panel {
+  grid-area: route;
   border-radius: 1.5rem;
   padding: 1rem;
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.38));
@@ -628,7 +638,11 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .korea-map-overlay {
     inset: 0.55rem;
     grid-template-columns: 1fr;
-    grid-template-rows: auto minmax(260px, auto) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas:
+      "header"
+      "map"
+      "route";
     gap: 0.72rem;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -648,6 +662,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .korea-route-panel {
     padding: 0.85rem;
     max-height: none;
+    overflow: visible;
   }
   .route-choice,
   .household-card,
