@@ -492,13 +492,9 @@ try {
         const selectedRegionToggleUpOk = window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview';
         const overviewHouseholdMarkerCount = document.querySelectorAll('.household-marker').length;
         const overviewHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
-        const northSilhouette = document.querySelector('[data-decorative-north-silhouette="true"]');
-        const northSilhouetteStyle = northSilhouette ? getComputedStyle(northSilhouette) : null;
+        const northSilhouette = document.querySelector('[data-decorative-north-silhouette="true"], .korea-north-silhouette');
         const decorativeNorthSilhouette = {
           present: Boolean(northSilhouette),
-          ariaHidden: northSilhouette?.getAttribute('aria-hidden') === 'true',
-          pointerEvents: northSilhouetteStyle?.pointerEvents ?? null,
-          hasRegionId: northSilhouette?.hasAttribute('data-region-id') ?? false,
         };
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
@@ -758,6 +754,7 @@ try {
   if (!/auto|scroll/.test(result.mobileLayout?.overlayOverflowY ?? '')) throw new Error(`Expected mobile Korea overlay to allow vertical scrolling, found overflow-y=${result.mobileLayout?.overlayOverflowY}`);
   if (result.mobileLayout?.overlayDisplay !== 'flex' && (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' '))) throw new Error(`Expected one-column or flex-stacked Korea overlay at 390px, found display=${result.mobileLayout?.overlayDisplay} grid=${result.mobileLayout?.overlayGridColumns}`);
   if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 240 || !Number.isFinite(result.mobileLayout.canvasAspectRatio) || result.mobileLayout.canvasAspectRatio < 0.72 || result.mobileLayout.canvasAspectRatio > 0.86) throw new Error(`Expected rectangular Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)} ratio=${result.mobileLayout?.canvasAspectRatio}`);
+  if (result.mobileLayout?.overlay && result.mobileLayout?.canvas && Math.abs(((result.mobileLayout.canvas.left + result.mobileLayout.canvas.right) / 2) - ((result.mobileLayout.overlay.left + result.mobileLayout.overlay.right) / 2)) > 3) throw new Error(`Expected mobile Korea map canvas to be centered in overlay, found ${JSON.stringify(result.mobileLayout)}`);
   if ((result.mobileLayout?.canvasPanelGap ?? 0) < 24) throw new Error(`Expected clearly separated Korea map/panel spacing at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
   if (result.mobileLayout?.overlayDisplay !== 'flex' && (result.mobileLayout?.panelOverlayBottomGap ?? -1) < 8) throw new Error(`Expected Korea route panel to keep bottom breathing room at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
   if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom + 20) throw new Error(`Expected Korea route panel to be a distinct card below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
@@ -791,7 +788,7 @@ try {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
-  if (!result.decorativeNorthSilhouette?.present || !result.decorativeNorthSilhouette?.ariaHidden || result.decorativeNorthSilhouette?.pointerEvents !== 'none' || result.decorativeNorthSilhouette?.hasRegionId) throw new Error(`Expected non-interactive decorative north peninsula silhouette, found ${JSON.stringify(result.decorativeNorthSilhouette)}`);
+  if (result.decorativeNorthSilhouette?.present) throw new Error(`Expected deleted decorative north peninsula silhouette to be absent, found ${JSON.stringify(result.decorativeNorthSilhouette)}`);
   if (result.islandReferenceCount !== 0) throw new Error(`Expected no decorative island references after Ulleungdo/Dokdo removal, found ${result.islandReferenceCount}`);
   if ((result.islandReferenceLabels ?? []).length !== 0) throw new Error(`Expected no decorative island labels, found ${result.islandReferenceLabels?.join(', ')}`);
   if ((result.islandHitTargets ?? []).length !== 0 || result.dokdoHighlightsGyeongbuk) throw new Error(`Expected no decorative island hit targets, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);

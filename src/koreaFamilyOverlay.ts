@@ -33,11 +33,11 @@ const KOREA_MAP_RENDER_HEIGHT = 124;
 // apply one shared zoomed peninsula composition transform, but not
 // breakpoint-specific manual offsets or live map alignment.
 const KOREA_VECTOR_ALIGNMENT = {
-  translateX: 1.8,
-  translateY: 12,
-  originX: 49,
-  originY: 52,
-  scale: 1.16,
+  translateX: 0.6,
+  translateY: 9.2,
+  originX: 50,
+  originY: 54,
+  scale: 1.24,
 } as const;
 
 function koreaVectorTransform() {
@@ -246,8 +246,11 @@ function closedRingPath(points: readonly (readonly [number, number])[]) {
 }
 
 function featurePath(feature: BoundaryFeature) {
-  const rings = feature.rings?.length ? feature.rings : [feature.polygon];
-  return rings.map(closedRingPath).join(' ');
+  // Gift-map visual contract: render the primary administrative landmass only.
+  // The source data can contain many tiny detached island rings; they read as
+  // stray dots at this scale. Jeju remains visible because its primary polygon
+  // is the island itself.
+  return closedRingPath(feature.polygon);
 }
 
 function pathPoints(points: readonly (readonly [number, number])[]) {
@@ -266,27 +269,6 @@ function centroidOf(id: RegionId) {
   return featureById(id).centroid;
 }
 
-function decorativeNorthSilhouettePath() {
-  return [
-    'M 24.8 3.6',
-    'C 30.0 0.6 37.4 -0.6 44.0 1.0',
-    'C 52.7 3.1 61.7 2.8 69.7 7.7',
-    'C 76.0 11.5 79.7 17.5 78.2 23.7',
-    'C 76.9 29.0 72.8 31.9 68.6 33.2',
-    'C 63.8 34.7 59.1 34.1 55.0 31.8',
-    'C 51.1 29.7 46.9 29.4 42.9 31.2',
-    'C 38.7 33.1 35.4 36.2 31.8 39.4',
-    'L 29.8 37.5',
-    'C 33.4 34.0 36.8 30.7 41.4 28.5',
-    'C 46.0 26.3 51.3 26.5 56.0 28.8',
-    'C 60.5 31.0 65.6 31.0 69.7 28.8',
-    'C 73.1 26.9 75.4 23.5 75.1 19.6',
-    'C 74.6 13.9 68.9 9.8 62.5 7.4',
-    'C 55.3 4.7 48.0 5.5 41.4 3.8',
-    'C 34.9 2.2 29.4 3.0 25.8 6.0',
-    'Z',
-  ].join(' ');
-}
 
 function routePath(segment: FamilyRouteSegment) {
   const [x1, y1] = centroidOf(segment.from);
@@ -481,13 +463,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vectorLayer.setAttribute('class', 'korea-vector-layer');
     vectorLayer.setAttribute('transform', koreaVectorTransform());
     svg.append(vectorLayer);
-
-    const northSilhouette = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    northSilhouette.setAttribute('d', decorativeNorthSilhouettePath());
-    northSilhouette.setAttribute('class', 'korea-north-silhouette');
-    northSilhouette.setAttribute('aria-hidden', 'true');
-    northSilhouette.dataset.decorativeNorthSilhouette = 'true';
-    vectorLayer.append(northSilhouette);
 
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {

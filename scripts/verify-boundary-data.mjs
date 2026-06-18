@@ -63,6 +63,26 @@ function segmentsProperlyIntersect(a, b, c, d) {
   return abC * abD < -1e-9 && cdA * cdB < -1e-9;
 }
 
+
+function polygonArea(points) {
+  const doubledArea = points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + point[0] * next[1] - next[0] * point[1];
+  }, 0);
+  return Math.abs(doubledArea) / 2;
+}
+
+function samePolygon(left, right) {
+  return Array.isArray(left)
+    && Array.isArray(right)
+    && left.length === right.length
+    && left.every((point, index) => point[0] === right[index][0] && point[1] === right[index][1]);
+}
+
+function primaryRing(feature) {
+  return [...feature.rings].sort((left, right) => polygonArea(right) - polygonArea(left))[0];
+}
+
 function pointInPolygon(polygon, point) {
   for (let index = 0; index < polygon.length; index += 1) {
     if (pointOnSegment(polygon[index], polygon[(index + 1) % polygon.length], point)) return true;
@@ -153,6 +173,7 @@ for (const feature of boundaries.features) {
   assert(feature.tier === expectedTiers.get(feature.id), `${feature.id} must keep approved tier`);
   assert(Array.isArray(feature.polygon) && feature.polygon.length >= 4, `${feature.id} needs a bounded polygon`);
   assert(Array.isArray(feature.rings) && feature.rings.length >= 1, `${feature.id} needs projected geometry rings`);
+  assert(samePolygon(feature.polygon, primaryRing(feature)), `${feature.id} polygon must be the primary/largest renderable landmass ring`);
   assert(Array.isArray(feature.centroid) && feature.centroid.length === 2, `${feature.id} needs a centroid`);
   for (const ring of feature.rings) {
     assert(Array.isArray(ring) && ring.length >= 4, `${feature.id} ring must be bounded`);
@@ -201,17 +222,16 @@ assert(!koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay mu
 assert(!koreaOverlaySource.includes('korea-island-label') && !koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must not render decorative island reference labels');
 assert(!koreaOverlaySource.includes('data-island-hit-target') && !koreaOverlaySource.includes('dataset.islandHitTarget'), 'Korea overlay must not render island click/touch targets');
 assert(!koreaOverlaySource.includes('울릉도') && !koreaOverlaySource.includes('독도') && !koreaOverlaySource.includes('제주도 정적'), 'Korea overlay must remove Ulleungdo/Dokdo and extra Jeju decorative copy');
-assert(koreaOverlaySource.includes('decorativeNorthSilhouettePath') && koreaOverlaySource.includes('dataset.decorativeNorthSilhouette'), 'Korea overlay must render a non-interactive decorative northern peninsula silhouette');
+assert(!koreaOverlaySource.includes('decorativeNorthSilhouettePath') && !koreaOverlaySource.includes('dataset.decorativeNorthSilhouette'), 'Korea overlay must not render the deleted decorative northern peninsula silhouette');
 assert(koreaOverlaySource.includes('KOREA_MAP_SOURCE_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named normalized source SVG viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124'"), 'Korea overlay must keep a named rectangular render viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_HEIGHT') && koreaOverlaySource.includes('KOREA_MAP_RENDER_WIDTH'), 'Korea overlay must size render background layers from render constants');
-for (const requiredAlignmentFragment of ['translateX: 1.8', 'translateY: 12', 'originX: 49', 'originY: 52', 'scale: 1.16']) {
-  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve centered peninsula composition ${requiredAlignmentFragment}`);
-}
+assert(koreaOverlaySource.includes('const KOREA_VECTOR_ALIGNMENT') && koreaOverlaySource.includes('scale:'), 'Korea overlay must keep a named shared vector alignment transform');
+assert(koreaOverlaySource.includes('return closedRingPath(feature.polygon)'), 'Korea overlay must render the structurally verified primary landmass polygon only to suppress tiny detached island-ring clutter');
 assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('zoomed peninsula composition'), 'Korea overlay alignment comment must document source-vs-render zoomed composition contract');
 assert(!koreaOverlaySource.includes('korea-static-grain') && !koreaOverlaySource.includes('korea-terrain-contours'), 'Korea overlay must not render grain/wave texture layers over the ocean');
 assert(!stylesSource.includes('.korea-island-reference') && !stylesSource.includes('.korea-island-hit-target'), 'Korea styles must not retain decorative island marker styling');
-assert(stylesSource.includes('.korea-north-silhouette') && stylesSource.includes('pointer-events: none'), 'Korea styles must keep the north silhouette non-interactive');
+assert(!stylesSource.includes('.korea-north-silhouette'), 'Korea styles must remove the deleted north silhouette styling');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
@@ -308,8 +328,9 @@ assert(koreaOverlaySource.includes("dataset.mapStyle = 'vector-satellite-inspire
 assert(!koreaOverlaySource.includes('korea-raster-layer') && !koreaOverlaySource.includes('korea-raster-image'), 'Korea overlay must not render raster layers or images');
 assert(!koreaOverlaySource.includes('dataset.imageryState') && !koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea overlay must not retain raster imagery telemetry or fallback hooks');
 assert(!assetsPolicySource.includes('KOREA_GIBS_BLUE_MARBLE'), 'Korea-specific GIBS raster constants must be removed while global Earth imagery remains');
+assert(/grid-template-columns:\s*minmax\([^)]*1fr\)\s+minmax\([^)]*1fr\)/.test(stylesSource), 'Korea CSS must keep equal flexible PC map/detail columns');
+assert(/@media \(max-width: 430px\)[\s\S]*\.korea-map-canvas[\s\S]*align-self:\s*center/.test(stylesSource), 'Korea CSS must center the smallest-mobile map canvas');
 assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after') && stylesSource.includes('aspect-ratio: 5 / 6.2'), 'Korea CSS must provide vector-only blue-ocean/green-land rectangular texture hooks');
-assert(stylesSource.includes('.korea-north-silhouette') && stylesSource.includes('pointer-events: none'), 'Korea CSS must style decorative north silhouette as non-interactive');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
