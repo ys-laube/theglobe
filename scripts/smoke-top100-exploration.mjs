@@ -31,7 +31,7 @@ const buckets = Array.from({ length: 10 }, (_value, index) => {
 assert(buckets.every((bucket) => bucket.length === 10), 'TOP100 data must split into ten rank buckets of ten cities');
 assert(overlaySource.includes('top100PageIndex'), 'overlay must keep shared TOP100 pagination state');
 assert(overlaySource.includes('top100PageCount = 10'), 'overlay must define ten TOP100 pages');
-assert(overlaySource.includes('data-action', 'top100-page') || overlaySource.includes("button.dataset.action = 'top100-page'"), 'overlay must render TOP100 page controls');
+assert(overlaySource.includes("button.dataset.action = 'top100-page'"), 'overlay must render TOP100 page controls');
 assert(overlaySource.includes('data-rank-group'), 'overlay must render active rank group elements for TOP100');
 assert(overlaySource.includes('button.dataset.cityId = capital.id'), 'overlay must render clickable city list buttons');
 assert(!overlaySource.includes("appendText(button, 'span', `${capital.rank}. ${capital.city}`, 'rank-city')"), 'TOP100 rows must not combine native ol numbering with inline dotted rank');
@@ -45,6 +45,7 @@ assert(overlaySource.includes('selectedCityGlow'), 'overlay must add a selected 
 assert(overlaySource.includes("button.setAttribute('aria-current', 'true')"), 'overlay must mark the selected TOP100 list city');
 assert(overlaySource.includes('selectedGlow.visible = visible && isSelected'), 'overlay must only show marker glow for the selected visible city');
 assert(overlaySource.includes('selected && selected.mode !== cityMode'), 'selected TOP100 card must persist when paging away and clear only on mode change/closed markers');
+assert(overlaySource.includes("cityMode !== 'top100' || isCapitalOnTop100Page(capital)"), 'overlay must filter TOP100 visible list to the active page');
 assert(overlaySource.includes('top100ActiveEntryCount'), 'QA state must expose active TOP100 entry count');
 assert(overlaySource.includes('top100PageControlCount'), 'QA state must expose TOP100 page control count');
 assert(rendererSource.includes('focusLocation'), 'renderer must expose focusLocation for city focus');

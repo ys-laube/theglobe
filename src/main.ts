@@ -66,11 +66,6 @@ function updateQaState() {
     selectedCityMarkerGlowVisible: false,
     selectedMarkerGlowCityId: null,
     selectedCityListHighlighted: false,
-    top100PageIndex: 0,
-    top100PageCount: 10,
-    top100ActiveRange: null,
-    top100ActiveEntryCount: 0,
-    top100PageControlCount: 0,
   };
   (window as Window & { __GLOBE_QA__?: Record<string, unknown> }).__GLOBE_QA__ = {
     state: globe.getState(),
@@ -89,11 +84,6 @@ function updateQaState() {
     selectedCityMarkerGlowVisible: overlayQa.selectedCityMarkerGlowVisible,
     selectedMarkerGlowCityId: overlayQa.selectedMarkerGlowCityId,
     selectedCityListHighlighted: overlayQa.selectedCityListHighlighted,
-    top100PageIndex: overlayQa.top100PageIndex,
-    top100PageCount: overlayQa.top100PageCount,
-    top100ActiveRange: overlayQa.top100ActiveRange,
-    top100ActiveEntryCount: overlayQa.top100ActiveEntryCount,
-    top100PageControlCount: overlayQa.top100PageControlCount,
     lastFocusedCityId: lastFocus?.cityId ?? null,
     lastFocusRotationDelta: lastFocus?.delta ?? 0,
     koreaFamilyEntryRequested,
