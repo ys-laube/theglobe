@@ -489,8 +489,20 @@ try {
         const selectedRegionToggleUpOk = window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview';
         const overviewHouseholdMarkerCount = document.querySelectorAll('.household-marker').length;
         const overviewHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+        const northSilhouette = document.querySelector('[data-decorative-north-silhouette="true"]');
+        const northSilhouetteStyle = northSilhouette ? getComputedStyle(northSilhouette) : null;
+        const decorativeNorthSilhouette = {
+          present: Boolean(northSilhouette),
+          ariaHidden: northSilhouette?.getAttribute('aria-hidden') === 'true',
+          pointerEvents: northSilhouetteStyle?.pointerEvents ?? null,
+          hasRegionId: northSilhouette?.hasAttribute('data-region-id') ?? false,
+        };
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+        const islandLabelDefaultVisibility = [...document.querySelectorAll('.korea-island-label')].map((node) => ({
+          label: node.textContent?.trim(),
+          opacity: Number.parseFloat(getComputedStyle(node).opacity || '1'),
+        }));
         const islandHitTargets = [...document.querySelectorAll('[data-island-hit-target="true"]')].map((node) => ({ islandId: node.getAttribute('data-island-id'), regionId: node.getAttribute('data-region-id'), label: node.getAttribute('aria-label') }));
         const dokdoHit = document.querySelector('[data-island-hit-target="true"][data-island-id*="dokdo"], [data-island-hit-target="true"][aria-label*="독도"]');
         dokdoHit?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
@@ -510,14 +522,39 @@ try {
           terrainContoursPresent: Boolean(document.querySelector('.korea-terrain-contours') && document.querySelector('#korea-terrain-contours')),
         };
         const removedSatelliteCopyAbsent = !/static satellite-style Korea family map|공식 공공데이터 경계 데이터셋|위성풍/.test(document.body.textContent ?? '');
+        const routeNodesFallback = { '해운대구': 'kr-busan-haeundae', '마포구': 'kr-seoul-mapo', '김해시': 'kr-gimhae' };
+        const labelOpacity = (selector) => {
+          const node = document.querySelector(selector);
+          return node ? Number.parseFloat(getComputedStyle(node).opacity || '1') : null;
+        };
         const checkFamilyRegionInfo = async ({ label, region, nextLabel, landmark, food }) => {
           await openRoot();
           await clickButtonByStrong(label);
           await waitFor(() => window.__GLOBE_QA__?.selectedRegion === region, region + ' first-level info tier');
           const panelText = document.querySelector('.korea-route-panel')?.textContent ?? '';
           const href = document.querySelector('.region-info-link')?.href ?? '';
-          const routeChoiceLabels = [...document.querySelectorAll('.route-choice strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          const routeChoices = [...document.querySelectorAll('.route-choice')];
+          const routeChoiceLabels = routeChoices.map((node) => node.querySelector('strong')?.textContent?.trim()).filter(Boolean);
           const householdCardLabels = [...document.querySelectorAll('.household-card strong')].map((node) => node.textContent?.trim()).filter(Boolean);
+          const selectedParentLabelSelector = '.korea-map-label.is-selected-label.is-parent-label[data-region-id="' + region + '"]';
+          const selectedParentLabel = document.querySelector(selectedParentLabelSelector);
+          const parentLabelPinned = Boolean(selectedParentLabel) && labelOpacity(selectedParentLabelSelector) > 0.35;
+          const nextChoice = routeChoices.find((node) => (node.querySelector('strong')?.textContent?.trim() ?? '').includes(nextLabel));
+          const nextRegionId = nextChoice?.getAttribute('data-region-id') ?? routeNodesFallback[nextLabel] ?? null;
+          let parentSuppressedForChildHover = false;
+          let childLabelHighlighted = false;
+          if (nextChoice && nextRegionId) {
+            nextChoice.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerId: 711, pointerType: 'mouse' }));
+            nextChoice.dispatchEvent(new PointerEvent('pointerenter', { bubbles: false, pointerId: 711, pointerType: 'mouse' }));
+            nextChoice.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+            nextChoice.dispatchEvent(new MouseEvent('mouseenter', { bubbles: false }));
+            await waitFor(() => (document.querySelector('.korea-map-label[data-region-id="' + nextRegionId + '"]')?.classList.contains('is-highlighted') ?? false), nextLabel + ' child label highlight');
+            await waitFor(() => (labelOpacity(selectedParentLabelSelector) ?? 1) < 0.12 && (labelOpacity('.korea-map-label[data-region-id="' + nextRegionId + '"]') ?? 0) > 0.35, nextLabel + ' child label opacity transition');
+            parentSuppressedForChildHover = (labelOpacity(selectedParentLabelSelector) ?? 1) < 0.12;
+            childLabelHighlighted = (labelOpacity('.korea-map-label[data-region-id="' + nextRegionId + '"]') ?? 0) > 0.35;
+            nextChoice.dispatchEvent(new PointerEvent('pointerout', { bubbles: true, pointerId: 711, pointerType: 'mouse' }));
+            nextChoice.dispatchEvent(new PointerEvent('pointerleave', { bubbles: false, pointerId: 711, pointerType: 'mouse' }));
+          }
           return {
             label,
             region,
@@ -526,6 +563,11 @@ try {
             href,
             routeChoiceLabels,
             householdCardLabels,
+            parentLabelPinned,
+            parentSuppressedForChildHover,
+            childLabelHighlighted,
+            nextRegionId,
+            routeChoiceCount: routeChoices.length,
             hasLandmark: panelText.includes('Landmark') && panelText.includes(landmark),
             hasFood: panelText.includes('Food') && panelText.includes(food),
             hasNextStep: panelText.includes('가족이 있는 지역으로 한 단계 더 들어가기') && routeChoiceLabels.includes(nextLabel),
@@ -624,8 +666,10 @@ try {
           mapHoverHighlightsList,
           overviewHouseholdMarkerCount,
           overviewHouseholdMarkerLabels,
+          decorativeNorthSilhouette,
           islandReferenceCount,
           islandReferenceLabels,
+          islandLabelDefaultVisibility,
           islandHitTargets,
           dokdoHighlightsGyeongbuk,
           vectorTextureLayerPresent,
@@ -731,9 +775,13 @@ try {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
+  if (!result.decorativeNorthSilhouette?.present || !result.decorativeNorthSilhouette?.ariaHidden || result.decorativeNorthSilhouette?.pointerEvents !== 'none' || result.decorativeNorthSilhouette?.hasRegionId) throw new Error(`Expected non-interactive decorative north peninsula silhouette, found ${JSON.stringify(result.decorativeNorthSilhouette)}`);
   if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
   for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
+  }
+  for (const islandVisibility of result.islandLabelDefaultVisibility ?? []) {
+    if (!(islandVisibility.opacity <= 0.08)) throw new Error(`Expected island label ${islandVisibility.label} to be hidden until hover/focus, found opacity=${islandVisibility.opacity}`);
   }
   if ((result.islandHitTargets ?? []).filter((target) => target.regionId === 'kr-gyeongbuk').length < 2 || !result.dokdoHighlightsGyeongbuk) throw new Error(`Expected Ulleungdo/Dokdo touch targets to select/highlight Gyeongbuk, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);
   if (!result.vectorTextureLayerPresent) throw new Error('Expected static vector Korea texture layers');
@@ -752,6 +800,7 @@ try {
     if (!actualInfo?.hasLandmark || !actualInfo?.hasFood) throw new Error(`Expected ${expectedInfo.label} Landmark/Food panel, found ${actualInfo?.panelText}`);
     if (!actualInfo?.href?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected ${expectedInfo.label} Namuwiki link, found ${actualInfo?.href}`);
     if (!actualInfo?.hasNextStep) throw new Error(`Expected ${expectedInfo.label} next-step ${expectedInfo.nextLabel}, found ${actualInfo?.routeChoiceLabels?.join(', ')}`);
+    if (!actualInfo?.parentLabelPinned || !actualInfo?.parentSuppressedForChildHover || !actualInfo?.childLabelHighlighted) throw new Error(`Expected ${expectedInfo.label} selected parent label to pin, then yield to child hover label, found ${JSON.stringify({ parentLabelPinned: actualInfo?.parentLabelPinned, parentSuppressedForChildHover: actualInfo?.parentSuppressedForChildHover, childLabelHighlighted: actualInfo?.childLabelHighlighted, nextRegionId: actualInfo?.nextRegionId })}`);
     if (actualInfo?.householdCardCount !== 0) throw new Error(`Expected no household cards before ${expectedInfo.label} terminal drilldown, found ${actualInfo?.householdCardLabels?.join(', ')}`);
   }
   const expectedFamilyPaths = [

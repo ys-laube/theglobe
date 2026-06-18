@@ -40,14 +40,15 @@ const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124';
 const KOREA_MAP_RENDER_WIDTH = 100;
 const KOREA_MAP_RENDER_HEIGHT = 124;
 // Vector-only contract: boundary coordinates stay normalized in the 0..100
-// static source space while the render viewBox is taller, giving mobile and PC
-// a stable rectangular sea frame without breakpoint-specific manual offsets.
+// static source space while the render viewBox is taller. The visual layer may
+// apply one shared zoomed peninsula composition transform, but not
+// breakpoint-specific manual offsets or live map alignment.
 const KOREA_VECTOR_ALIGNMENT = {
   translateX: 0,
-  translateY: 12,
+  translateY: 11,
   originX: 50,
-  originY: 50,
-  scale: 1,
+  originY: 51,
+  scale: 1.12,
 } as const;
 
 function koreaVectorTransform() {
@@ -276,6 +277,19 @@ function centroidOf(id: RegionId) {
   return featureById(id).centroid;
 }
 
+function decorativeNorthSilhouettePath() {
+  return [
+    'M 27.5 0.8',
+    'C 35.4 -3.8 49.8 -4.5 61.9 0.8',
+    'C 74.2 6.2 80.8 15.3 77.1 24.1',
+    'C 73.9 31.8 64.1 35.6 55.7 32.5',
+    'C 48.2 29.8 42.1 31.6 36.1 36.6',
+    'C 31.4 40.4 24.7 38.1 22.1 31.9',
+    'C 17.9 21.7 18.2 7.1 27.5 0.8',
+    'Z',
+  ].join(' ');
+}
+
 function routePath(segment: FamilyRouteSegment) {
   const [x1, y1] = centroidOf(segment.from);
   const [x2, y2] = centroidOf(segment.to);
@@ -336,8 +350,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   }
 
   function syncHighlightState() {
+    const suppressSelectedParentLabel = Boolean(
+      highlightedHouseholdId || (highlightedRegion && highlightedRegion !== selectedRegion)
+    );
     host.querySelectorAll<HTMLElement | SVGElement>('[data-region-id]').forEach((element) => {
       element.classList.toggle('is-highlighted', Boolean(highlightedRegion && element.dataset.regionId === highlightedRegion));
+      element.classList.toggle(
+        'is-suppressed',
+        element.classList.contains('is-parent-label') && element.dataset.regionId === selectedRegion && suppressSelectedParentLabel
+      );
     });
     host.querySelectorAll<HTMLElement | SVGElement>('[data-household-id]').forEach((element) => {
       const householdId = element.dataset.householdId as HouseholdId | undefined;
@@ -491,6 +512,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vectorLayer.setAttribute('transform', koreaVectorTransform());
     svg.append(vectorLayer);
 
+    const northSilhouette = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    northSilhouette.setAttribute('d', decorativeNorthSilhouettePath());
+    northSilhouette.setAttribute('class', 'korea-north-silhouette');
+    northSilhouette.setAttribute('aria-hidden', 'true');
+    northSilhouette.dataset.decorativeNorthSilhouette = 'true';
+    vectorLayer.append(northSilhouette);
+
     const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {
       const feature = featureById(id);
@@ -520,13 +548,13 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       }
       vectorLayer.append(polygon);
 
-      const shouldPinSelectedLabel = isSelected && !selectedNode.next.length && !selectedNode.households?.length;
+      const shouldPinSelectedLabel = isSelected && selectedRegion !== 'kr-korea-overview';
       if (shouldPinSelectedLabel || isNext) {
         const [x, y] = feature.centroid;
         const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         label.setAttribute('x', String(x));
         label.setAttribute('y', String(y));
-        label.setAttribute('class', ['korea-map-label', shouldPinSelectedLabel ? 'is-selected-label' : 'is-next-label'].filter(Boolean).join(' '));
+        label.setAttribute('class', ['korea-map-label', shouldPinSelectedLabel ? 'is-selected-label' : 'is-next-label', shouldPinSelectedLabel ? 'is-parent-label' : ''].filter(Boolean).join(' '));
         label.dataset.regionId = id;
         label.textContent = feature.nameKo;
         vectorLayer.append(label);

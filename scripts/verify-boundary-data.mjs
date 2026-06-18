@@ -221,13 +221,14 @@ for (const island of boundaries.islandReferences) {
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
 assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
 assert(!koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must render 제주도 label instead of hiding it');
+assert(koreaOverlaySource.includes('decorativeNorthSilhouettePath') && koreaOverlaySource.includes('dataset.decorativeNorthSilhouette'), 'Korea overlay must render a non-interactive decorative northern peninsula silhouette');
 assert(koreaOverlaySource.includes('KOREA_MAP_SOURCE_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named normalized source SVG viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124'"), 'Korea overlay must keep a named rectangular render viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_HEIGHT') && koreaOverlaySource.includes('KOREA_MAP_RENDER_WIDTH'), 'Korea overlay must size render background layers from render constants');
-for (const requiredAlignmentFragment of ['translateX: 0', 'translateY: 12', 'originX: 50', 'originY: 50', 'scale: 1']) {
-  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve ${requiredAlignmentFragment}`);
+for (const requiredAlignmentFragment of ['translateX: 0', 'translateY: 11', 'originX: 50', 'originY: 51', 'scale: 1.12']) {
+  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve zoomed composition ${requiredAlignmentFragment}`);
 }
-assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('rectangular sea frame'), 'Korea overlay alignment comment must document source-vs-render contract');
+assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('zoomed peninsula composition'), 'Korea overlay alignment comment must document source-vs-render zoomed composition contract');
 assert(koreaOverlaySource.includes('korea-island-hit-target') && koreaOverlaySource.includes('dataset.islandHitTarget'), 'Korea overlay must render explicit island click/touch targets');
 assert(koreaOverlaySource.includes("island.nameKo === '울릉도' || island.nameKo === '독도' ? 'kr-gyeongbuk'"), 'Ulleungdo/Dokdo island hit targets must select Gyeongbuk');
 
@@ -328,6 +329,8 @@ assert(!koreaOverlaySource.includes('dataset.imageryState') && !koreaOverlaySour
 assert(!assetsPolicySource.includes('KOREA_GIBS_BLUE_MARBLE'), 'Korea-specific GIBS raster constants must be removed while global Earth imagery remains');
 assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after') && stylesSource.includes('aspect-ratio: 5 / 6.2'), 'Korea CSS must provide vector-only blue-ocean/green-land rectangular texture hooks');
 assert(stylesSource.includes('.korea-island-hit-target') && stylesSource.includes('pointer-events: auto'), 'Korea CSS must make island hit targets touchable');
+assert(stylesSource.includes('.korea-north-silhouette') && stylesSource.includes('pointer-events: none'), 'Korea CSS must style decorative north silhouette as non-interactive');
+assert(stylesSource.includes('.korea-island-label') && stylesSource.includes('opacity: 0') && stylesSource.includes('.korea-island-reference:hover .korea-island-label'), 'Korea CSS must hide island labels until hover/focus');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');
