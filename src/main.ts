@@ -41,6 +41,8 @@ app.innerHTML = `
       <article class="city-card" data-empty="true" aria-live="polite"></article>
       <div class="region-list" data-region-list></div>
     </aside>
+
+    <section class="top100-bottom-list" data-top100-bottom-list hidden aria-label="TOP 100 인기 도시 목록"></section>
   </main>
 `;
 
@@ -113,6 +115,7 @@ function ensureExplorationOverlay() {
         tierCopy: document.querySelector<HTMLElement>('[data-tier-copy]')!,
         visibleCount: document.querySelector<HTMLElement>('[data-visible-count]')!,
         regionList: document.querySelector<HTMLElement>('[data-region-list]')!,
+        top100BottomList: document.querySelector<HTMLElement>('[data-top100-bottom-list]')!,
       });
       overlay.updateState(globe.getState());
       updateQaState();

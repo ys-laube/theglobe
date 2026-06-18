@@ -259,7 +259,63 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
 .rank-group button.is-selected .rank-country { color: #fef3c7; }
 .asset-note { margin-top: 1rem; font-size: 0.76rem; color: #94a3b8; }
 
+.top100-bottom-list {
+  grid-column: 1 / -1;
+  display: none;
+  border: 1px solid rgba(226, 232, 240, 0.16);
+  border-radius: 1.7rem;
+  padding: clamp(0.95rem, 1.6vw, 1.35rem);
+  background:
+    radial-gradient(circle at 16% 0%, rgba(96, 165, 250, 0.18), transparent 19rem),
+    linear-gradient(145deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.48));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+}
+.top100-bottom-list:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+.top100-bottom-list .top100-page-controls {
+  flex: 0 0 100%;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  padding: 0.72rem;
+  background: rgba(2, 6, 23, 0.32);
+}
+.top100-bottom-list .rank-group {
+  flex: 1 1 100%;
+  padding: 0.95rem;
+  background: rgba(2, 6, 23, 0.24);
+}
+.top100-bottom-list .rank-group h3 { margin-bottom: 0.75rem; }
+.top100-bottom-list .rank-group ol {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.68rem;
+}
+.top100-bottom-list .rank-group button {
+  min-height: 76px;
+  padding: 0.82rem 0.9rem;
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.22rem;
+  background: linear-gradient(145deg, rgba(255,255,255,0.085), rgba(15,23,42,0.42));
+  border: 1px solid rgba(226, 232, 240, 0.10);
+}
+.top100-bottom-list .rank-city { font-size: 0.98rem; font-weight: 850; }
+.top100-bottom-list .rank-country { color: #93c5fd; font-size: 0.8rem; }
+
+/* Desktop TOP100 contract: 1081px+ shows the wide bottom list and visually
+   hides the panel copy, while <=1080px keeps the existing panel/mobile list. */
+@media (min-width: 1081px) {
+  .region-list[data-top100-list-surface="panel"] {
+    display: none;
+  }
+}
+
 @media (max-width: 1080px) {
+  .top100-bottom-list { display: none !important; }
   .shell { grid-template-columns: 1fr; grid-template-rows: auto; align-items: stretch; }
   .globe-stage { order: 2; height: 68vh; min-height: 540px; }
   .hero { order: 1; }

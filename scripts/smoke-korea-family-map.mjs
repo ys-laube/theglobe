@@ -199,13 +199,17 @@ try {
         const top100Title = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const toggleLabelAfter = top100Toggle?.textContent?.trim();
         const top100Count = document.querySelector('[data-visible-count]')?.textContent?.trim();
-        const top100GroupCount = document.querySelectorAll('[data-rank-group]').length;
-        const top100ListEntryCount = document.querySelectorAll('[data-rank-group] li[data-city-id]').length;
-        const top100RankGroups = [...document.querySelectorAll('[data-rank-group]')].map((group) => group.getAttribute('data-rank-group'));
-        const top100PageControlCount = document.querySelectorAll('[data-action="top100-page"]').length;
-        const top100PageLabels = [...document.querySelectorAll('[data-action="top100-page"]')].map((button) => button.textContent?.trim()).filter(Boolean);
+        const top100BottomList = document.querySelector('[data-top100-bottom-list]');
+        const top100PanelList = document.querySelector('[data-region-list]');
+        const top100BottomListVisible = Boolean(top100BottomList && !top100BottomList.hidden && getComputedStyle(top100BottomList).display !== 'none');
+        const top100PanelListHidden = Boolean(top100PanelList && getComputedStyle(top100PanelList).display === 'none');
+        const top100GroupCount = top100BottomList?.querySelectorAll('[data-rank-group]').length ?? 0;
+        const top100ListEntryCount = top100BottomList?.querySelectorAll('[data-rank-group] li[data-city-id]').length ?? 0;
+        const top100RankGroups = [...(top100BottomList?.querySelectorAll('[data-rank-group]') ?? [])].map((group) => group.getAttribute('data-rank-group'));
+        const top100PageControlCount = top100BottomList?.querySelectorAll('[data-action="top100-page"]').length ?? 0;
+        const top100PageLabels = [...(top100BottomList?.querySelectorAll('[data-action="top100-page"]') ?? [])].map((button) => button.textContent?.trim()).filter(Boolean);
         const rotationBeforeCityFocus = window.__GLOBE_QA__?.globeRotation ?? { x: initialRotationX, y: initialRotationY, z: 0 };
-        const top100HongKongButton = document.querySelector('[data-action="focus-city"][data-city-id="top100-hong-kong"]');
+        const top100HongKongButton = top100BottomList?.querySelector('[data-action="focus-city"][data-city-id="top100-hong-kong"]') ?? document.querySelector('[data-action="focus-city"][data-city-id="top100-hong-kong"]');
         top100HongKongButton?.click();
         await waitFor(() => window.__GLOBE_QA__?.selectedCityId === 'top100-hong-kong', 'TOP100 Hong Kong selected from list');
         await waitFor(() => window.__GLOBE_QA__?.selectedCityMarkerGlowVisible, 'TOP100 Hong Kong selected marker glow');
@@ -224,7 +228,8 @@ try {
         const canvas = document.querySelector('#globe');
         const clickProjectedCity = async (cityId, lat, lng, label) => {
           await window.__GLOBE_QA_FOCUS_CITY__?.(cityId, 'top100');
-          const button = document.querySelector('[data-action=\"focus-city\"][data-city-id=\"' + cityId + '\"]');
+          const bottomList = document.querySelector('[data-top100-bottom-list]');
+          const button = bottomList?.querySelector('[data-action=\"focus-city\"][data-city-id=\"' + cityId + '\"]') ?? document.querySelector('[data-action=\"focus-city\"][data-city-id=\"' + cityId + '\"]');
           button?.click();
           await waitFor(() => window.__GLOBE_QA__?.selectedCityId === cityId, label + ' selected from list');
           let point = null;
@@ -260,6 +265,8 @@ try {
           top100Title,
           toggleLabelAfter,
           count: top100Count,
+          top100BottomListVisible,
+          top100PanelListHidden,
           top100GroupCount,
           top100ListEntryCount,
           top100RankGroups,
@@ -661,7 +668,9 @@ try {
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);
   if (result.count !== '10') throw new Error(`Expected 10 visible TOP100 cities on active page, found ${result.count}`);
   if (result.top100GroupCount !== 1) throw new Error(`Expected 1 active TOP100 rank group, found ${result.top100GroupCount}`);
-  if (result.top100ListEntryCount !== 10) throw new Error(`Expected 10 active TOP100 list entries, found ${result.top100ListEntryCount}`);
+  if (!result.top100BottomListVisible) throw new Error('Expected desktop TOP100 bottom list to be visible');
+  if (!result.top100PanelListHidden) throw new Error('Expected desktop TOP100 right-panel list to be hidden/detail-only');
+  if (result.top100ListEntryCount !== 10) throw new Error(`Expected 10 active TOP100 bottom-list entries, found ${result.top100ListEntryCount}`);
   const expectedRankGroups = ['1-10'];
   const expectedPageLabels = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
   if (result.top100PageControlCount !== 10) throw new Error(`Expected 10 TOP100 page controls, found ${result.top100PageControlCount}`);

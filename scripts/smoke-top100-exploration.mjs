@@ -38,6 +38,12 @@ assert(!overlaySource.includes("appendText(button, 'span', `${capital.rank}. ${c
 assert(overlaySource.includes('`#${capital.rank} ${capital.city}`'), 'TOP100 rows must expose one explicit #rank city label');
 assert(stylesSource.includes('.top100-page-controls'), 'TOP100 page controls must be styled');
 assert(stylesSource.includes('.top100-page-button.is-active'), 'TOP100 active page control must be visually distinct');
+
+assert(mainSource.includes('data-top100-bottom-list'), 'main must expose a dedicated desktop TOP100 bottom-list host');
+assert(overlaySource.includes('renderTop100Surface'), 'overlay must render TOP100 list surfaces through a shared renderer');
+assert(overlaySource.includes('top100ListSurface = surface') && overlaySource.includes("renderTop100Surface(elements.top100BottomList, 'bottom', data)"), 'overlay must mark and render the desktop bottom TOP100 surface');
+assert(stylesSource.includes('.top100-bottom-list .rank-group ol') && stylesSource.includes('repeat(5, minmax(0, 1fr))'), 'desktop TOP100 bottom list must use a wide 5-column card grid');
+assert(stylesSource.includes('.region-list[data-top100-list-surface="panel"]') && stylesSource.includes('display: none'), 'desktop TOP100 mode must hide the cramped right-panel duplicate list');
 assert(stylesSource.includes('.rank-group ol') && stylesSource.includes('list-style: none'), 'TOP100 ordered-list native markers must be disabled');
 assert(stylesSource.includes('padding-left: 0'), 'TOP100 rows must not reserve native marker indentation');
 assert(overlaySource.includes('focusCity(capital)'), 'overlay list/marker selection must focus and open the card');

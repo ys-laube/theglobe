@@ -39,6 +39,7 @@ type OverlayElements = {
   tierCopy: HTMLElement;
   visibleCount: HTMLElement;
   regionList: HTMLElement;
+  top100BottomList?: HTMLElement;
 };
 
 const readyStates: GlobeRuntimeState[] = ['earth-ready', 'fallback-earth', 'asset-enhancement-ready'];
@@ -237,6 +238,74 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     emitSelectionChange();
   }
 
+  // TOP100 intentionally renders the same 10-city page into two hosts:
+  // - panel: the mobile/tablet list surface
+  // - bottom: the desktop wide-list surface
+  // Keep this helper as the single source of truth so pagination, selected state,
+  // and focus behavior cannot drift between responsive layouts.
+  function renderTop100Surface(container: HTMLElement, surface: 'panel' | 'bottom', data: Capital[]) {
+    container.dataset.top100ListSurface = surface;
+    const controls = document.createElement('div');
+    controls.className = 'top100-page-controls';
+    controls.dataset.top100PageControls = 'true';
+    controls.setAttribute('aria-label', 'TOP 100 rank pages');
+    Array.from({ length: top100PageCount }, (_value, index) => {
+      const startRank = index * top100BucketSize + 1;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'top100-page-button';
+      button.dataset.action = 'top100-page';
+      button.dataset.top100PageIndex = String(index);
+      button.dataset.rankRange = top100BucketLabel(startRank);
+      button.textContent = top100BucketLabel(startRank);
+      if (index === top100PageIndex) {
+        button.classList.add('is-active');
+        button.setAttribute('aria-current', 'page');
+      }
+      button.addEventListener('click', () => {
+        top100PageIndex = index;
+        syncUi();
+      });
+      controls.append(button);
+    });
+
+    const { startRank } = top100RankRange();
+    const groupElement = document.createElement('section');
+    groupElement.className = 'rank-group';
+    groupElement.dataset.rankGroup = top100BucketLabel(startRank);
+    groupElement.dataset.activeTop100Page = String(top100PageIndex);
+    appendText(groupElement, 'h3', `Ranks ${top100BucketLabel(startRank)}`);
+    const list = document.createElement('ol');
+    data.forEach((capital) => {
+      const item = document.createElement('li');
+      item.dataset.cityId = capital.id;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'rank-city-button';
+      button.dataset.action = 'focus-city';
+      button.dataset.cityId = capital.id;
+      if (selected?.id === capital.id) {
+        item.classList.add('is-selected');
+        button.classList.add('is-selected');
+        button.setAttribute('aria-current', 'true');
+      }
+      appendText(button, 'span', `#${capital.rank} ${capital.city}`, 'rank-city');
+      appendText(button, 'span', capital.country, 'rank-country');
+      button.addEventListener('click', () => focusCity(capital));
+      item.append(button);
+      list.append(item);
+    });
+    groupElement.append(list);
+    container.replaceChildren(controls, groupElement);
+  }
+
+  function clearTop100BottomList() {
+    if (!elements.top100BottomList) return;
+    elements.top100BottomList.hidden = true;
+    elements.top100BottomList.replaceChildren();
+    delete elements.top100BottomList.dataset.top100ListSurface;
+  }
+
   function syncUi() {
     const canShowMarkers = explorationMode && earthReady;
     globe.setMarkerLayerVisible(canShowMarkers);
@@ -267,59 +336,15 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.tierButton.textContent = cityMode === 'top100' ? '수도 보기' : 'TOP 100 인기 도시 보기';
     elements.tierButton.disabled = !canShowMarkers;
     if (cityMode === 'top100') {
-      const controls = document.createElement('div');
-      controls.className = 'top100-page-controls';
-      controls.dataset.top100PageControls = 'true';
-      controls.setAttribute('aria-label', 'TOP 100 rank pages');
-      Array.from({ length: top100PageCount }, (_value, index) => {
-        const startRank = index * top100BucketSize + 1;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'top100-page-button';
-        button.dataset.action = 'top100-page';
-        button.dataset.top100PageIndex = String(index);
-        button.dataset.rankRange = top100BucketLabel(startRank);
-        button.textContent = top100BucketLabel(startRank);
-        if (index === top100PageIndex) {
-          button.classList.add('is-active');
-          button.setAttribute('aria-current', 'page');
-        }
-        button.addEventListener('click', () => {
-          top100PageIndex = index;
-          syncUi();
-        });
-        controls.append(button);
-      });
-
-      const { startRank } = top100RankRange();
-      const groupElement = document.createElement('section');
-      groupElement.className = 'rank-group';
-      groupElement.dataset.rankGroup = top100BucketLabel(startRank);
-      groupElement.dataset.activeTop100Page = String(top100PageIndex);
-      appendText(groupElement, 'h3', `Ranks ${top100BucketLabel(startRank)}`);
-      const list = document.createElement('ol');
-      data.forEach((capital) => {
-        const item = document.createElement('li');
-        item.dataset.cityId = capital.id;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'rank-city-button';
-        button.dataset.action = 'focus-city';
-        button.dataset.cityId = capital.id;
-        if (selected?.id === capital.id) {
-          item.classList.add('is-selected');
-          button.classList.add('is-selected');
-          button.setAttribute('aria-current', 'true');
-        }
-        appendText(button, 'span', `#${capital.rank} ${capital.city}`, 'rank-city');
-        appendText(button, 'span', capital.country, 'rank-country');
-        button.addEventListener('click', () => focusCity(capital));
-        item.append(button);
-        list.append(item);
-      });
-      groupElement.append(list);
-      elements.regionList.replaceChildren(controls, groupElement);
+      renderTop100Surface(elements.regionList, 'panel', data);
+      if (elements.top100BottomList) {
+        elements.top100BottomList.hidden = !canShowMarkers;
+        if (canShowMarkers) renderTop100Surface(elements.top100BottomList, 'bottom', data);
+        else elements.top100BottomList.replaceChildren();
+      }
     } else {
+      clearTop100BottomList();
+      delete elements.regionList.dataset.top100ListSurface;
       const byRegion = [...new Set(data.map((c) => c.region))];
       elements.regionList.replaceChildren(...byRegion.map((region) => {
         const chip = document.createElement('span');
@@ -409,17 +434,17 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     getQaState: () => ({
       cityMode,
       visibleCityCount: visibleData().length,
-      top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
+      top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? (elements.top100BottomList ?? elements.regionList).querySelectorAll('[data-rank-group]').length : 0,
       top100PageIndex,
       top100PageCount,
       top100ActiveRange: cityMode === 'top100' && explorationMode && earthReady ? top100BucketLabel(top100RankRange().startRank) : null,
-      top100ActiveEntryCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-action="focus-city"]').length : 0,
-      top100PageControlCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-action="top100-page"]').length : 0,
+      top100ActiveEntryCount: cityMode === 'top100' && explorationMode && earthReady ? (elements.top100BottomList ?? elements.regionList).querySelectorAll('[data-action="focus-city"]').length : 0,
+      top100PageControlCount: cityMode === 'top100' && explorationMode && earthReady ? (elements.top100BottomList ?? elements.regionList).querySelectorAll('[data-action="top100-page"]').length : 0,
       selectedCityId: selected?.id ?? null,
       focusedCityId: lastFocus?.cityId ?? null,
       selectedCityMarkerGlowVisible: Boolean(selected && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible)),
       selectedMarkerGlowCityId: selected?.id && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible) ? selected.id : null,
-      selectedCityListHighlighted: Boolean(selected && elements.regionList.querySelector(`[data-action="focus-city"][data-city-id="${CSS.escape(selected?.id ?? '')}"].is-selected[aria-current="true"]`)),
+      selectedCityListHighlighted: Boolean(selected && (elements.top100BottomList ?? elements.regionList).querySelector(`[data-action="focus-city"][data-city-id="${CSS.escape(selected?.id ?? '')}"].is-selected[aria-current="true"]`)),
     }),
   };
 }
