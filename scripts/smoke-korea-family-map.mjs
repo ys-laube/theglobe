@@ -188,16 +188,22 @@ try {
         const capitalCardTitle = document.querySelector('.city-card h2')?.textContent?.trim();
         const capitalCardDetails = [...document.querySelectorAll('.city-card dd')].map((node) => node.textContent?.trim()).filter(Boolean);
         const approvedFirstScreenCopyPresent = bodyText.includes('where are you? where do you want to go?');
-        const top100Toggle = document.querySelector('[data-action="toggle-tier"]');
+        const top100Toggle = await waitFor(() => document.querySelector('[data-action="toggle-tier"]:not(:disabled)'), 'TOP100 tier toggle enabled');
         const toggleLabelBefore = top100Toggle?.textContent?.trim();
-        top100Toggle.click();
-        await waitFor(() => document.querySelector('[data-visible-count]')?.textContent?.trim() === '100', 'TOP100 visible');
+        top100Toggle.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        if (document.querySelector('[data-tier-title]')?.textContent?.trim() !== 'TOP 100 인기 도시') {
+          await window.__GLOBE_QA_FOCUS_CITY__?.('top100-hong-kong', 'top100');
+        }
+        await waitFor(() => document.querySelector('[data-tier-title]')?.textContent?.trim() === 'TOP 100 인기 도시' && document.querySelector('[data-visible-count]')?.textContent?.trim() === '10', 'TOP100 visible');
         const top100Title = document.querySelector('[data-tier-title]')?.textContent?.trim();
         const toggleLabelAfter = top100Toggle?.textContent?.trim();
         const top100Count = document.querySelector('[data-visible-count]')?.textContent?.trim();
         const top100GroupCount = document.querySelectorAll('[data-rank-group]').length;
         const top100ListEntryCount = document.querySelectorAll('[data-rank-group] li[data-city-id]').length;
         const top100RankGroups = [...document.querySelectorAll('[data-rank-group]')].map((group) => group.getAttribute('data-rank-group'));
+        const top100PageControlCount = document.querySelectorAll('[data-action="top100-page"]').length;
+        const top100PageLabels = [...document.querySelectorAll('[data-action="top100-page"]')].map((button) => button.textContent?.trim()).filter(Boolean);
         const rotationBeforeCityFocus = window.__GLOBE_QA__?.globeRotation ?? { x: initialRotationX, y: initialRotationY, z: 0 };
         const top100HongKongButton = document.querySelector('[data-action="focus-city"][data-city-id="top100-hong-kong"]');
         top100HongKongButton?.click();
@@ -217,6 +223,7 @@ try {
 
         const canvas = document.querySelector('#globe');
         const clickProjectedCity = async (cityId, lat, lng, label) => {
+          await window.__GLOBE_QA_FOCUS_CITY__?.(cityId, 'top100');
           const button = document.querySelector('[data-action=\"focus-city\"][data-city-id=\"' + cityId + '\"]');
           button?.click();
           await waitFor(() => window.__GLOBE_QA__?.selectedCityId === cityId, label + ' selected from list');
@@ -256,6 +263,8 @@ try {
           top100GroupCount,
           top100ListEntryCount,
           top100RankGroups,
+          top100PageControlCount,
+          top100PageLabels,
           focusedCityCardTitle,
           focusedCityCardKicker,
           focusedCityCardOpen,
@@ -384,7 +393,7 @@ try {
             panel,
             overlayOverflowY: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).overflowY : null,
             overlayGridColumns: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).gridTemplateColumns : null,
-            canvasAspectDelta: canvasRect ? Math.abs(canvasRect.width - canvasRect.height) : null,
+            canvasAspectRatio: canvasRect ? canvasRect.width / canvasRect.height : null,
             canvasPanelGap: canvasRect && panel ? panel.top - canvasRect.bottom : null,
             panelOverlayBottomGap: overlay && panel ? overlay.bottom - panel.bottom : null,
             routePanelBottomGap: overlay && panel ? overlay.bottom - panel.bottom : null,
@@ -475,6 +484,11 @@ try {
         const overviewHouseholdMarkerLabels = [...document.querySelectorAll('.household-marker-label')].map((node) => node.textContent?.trim()).filter(Boolean);
         const islandReferenceCount = document.querySelectorAll('.korea-island-reference').length;
         const islandReferenceLabels = [...document.querySelectorAll('.korea-island-label')].map((node) => node.textContent?.trim()).filter(Boolean);
+        const islandHitTargets = [...document.querySelectorAll('[data-island-hit-target="true"]')].map((node) => ({ islandId: node.getAttribute('data-island-id'), regionId: node.getAttribute('data-region-id'), label: node.getAttribute('aria-label') }));
+        const dokdoHit = document.querySelector('[data-island-hit-target="true"][data-island-id*="dokdo"], [data-island-hit-target="true"][aria-label*="독도"]');
+        dokdoHit?.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+        const dokdoHighlightsGyeongbuk = document.querySelector('.korea-region[data-region-id="kr-gyeongbuk"]')?.classList.contains('is-highlighted') ?? false;
+        dokdoHit?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const vectorTextureLayerPresent = Boolean(
           document.querySelector('.korea-static-texture')
           && document.querySelector('.korea-map-vignette')
@@ -483,6 +497,7 @@ try {
         const vectorPremiumStyle = {
           palette: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-palette'),
           canvasPalette: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-palette'),
+          mapContract: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-contract'),
           islandCoverage: document.querySelector('.korea-map-overlay')?.getAttribute('data-island-coverage'),
           terrainGradientPresent: Boolean(document.querySelector('#korea-land-terrain') && document.querySelector('#korea-selected-terrain')),
           terrainContoursPresent: Boolean(document.querySelector('.korea-terrain-contours') && document.querySelector('#korea-terrain-contours')),
@@ -604,6 +619,8 @@ try {
           overviewHouseholdMarkerLabels,
           islandReferenceCount,
           islandReferenceLabels,
+          islandHitTargets,
+          dokdoHighlightsGyeongbuk,
           vectorTextureLayerPresent,
           vectorPremiumStyle,
           removedSatelliteCopyAbsent,
@@ -642,11 +659,14 @@ try {
   if (result.toggleLabelBefore !== 'TOP 100 인기 도시 보기') throw new Error(`Expected TOP100 toggle label, found ${result.toggleLabelBefore}`);
   if (result.top100Title !== 'TOP 100 인기 도시') throw new Error(`Expected TOP100 title, found ${result.top100Title}`);
   if (result.toggleLabelAfter !== '수도 보기') throw new Error(`Expected return-to-capitals toggle label, found ${result.toggleLabelAfter}`);
-  if (result.count !== '100') throw new Error(`Expected 100 TOP100 cities, found ${result.count}`);
-  if (result.top100GroupCount !== 10) throw new Error(`Expected 10 TOP100 rank groups, found ${result.top100GroupCount}`);
-  if (result.top100ListEntryCount !== 100) throw new Error(`Expected 100 TOP100 list entries, found ${result.top100ListEntryCount}`);
-  const expectedRankGroups = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
-  if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected TOP100 rank groups ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
+  if (result.count !== '10') throw new Error(`Expected 10 visible TOP100 cities on active page, found ${result.count}`);
+  if (result.top100GroupCount !== 1) throw new Error(`Expected 1 active TOP100 rank group, found ${result.top100GroupCount}`);
+  if (result.top100ListEntryCount !== 10) throw new Error(`Expected 10 active TOP100 list entries, found ${result.top100ListEntryCount}`);
+  const expectedRankGroups = ['1-10'];
+  const expectedPageLabels = ['1-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100'];
+  if (result.top100PageControlCount !== 10) throw new Error(`Expected 10 TOP100 page controls, found ${result.top100PageControlCount}`);
+  if (JSON.stringify(result.top100PageLabels) !== JSON.stringify(expectedPageLabels)) throw new Error(`Expected TOP100 page labels ${expectedPageLabels.join(', ')}, found ${result.top100PageLabels?.join(', ')}`);
+  if (JSON.stringify(result.top100RankGroups) !== JSON.stringify(expectedRankGroups)) throw new Error(`Expected active TOP100 rank group ${expectedRankGroups.join(', ')}, found ${result.top100RankGroups?.join(', ')}`);
   if (result.selectedCityFromQa?.id !== 'top100-hong-kong' || result.selectedCityFromQa?.rank !== 1) throw new Error(`Expected QA selected TOP100 Hong Kong rank 1, found ${JSON.stringify(result.selectedCityFromQa)}`);
   if (!result.listSelectedGlowVisible) throw new Error('Expected TOP100 list selection to show selected city marker glow');
   if (!result.listSelectedHighlighted) throw new Error('Expected TOP100 list selection to highlight selected list row');
@@ -669,7 +689,7 @@ try {
   if (!result.mobileLayout?.overlay || result.mobileLayout.overlay.left < -1 || result.mobileLayout.overlay.right > 391 || result.mobileLayout.overlay.width > 390) throw new Error(`Expected Korea overlay to fit within 390px viewport, found ${JSON.stringify(result.mobileLayout?.overlay)}`);
   if (!/auto|scroll/.test(result.mobileLayout?.overlayOverflowY ?? '')) throw new Error(`Expected mobile Korea overlay to allow vertical scrolling, found overflow-y=${result.mobileLayout?.overlayOverflowY}`);
   if (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' ')) throw new Error(`Expected single-column Korea overlay grid at 390px, found ${result.mobileLayout?.overlayGridColumns}`);
-  if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 260 || (result.mobileLayout.canvasAspectDelta ?? Infinity) > 1) throw new Error(`Expected square Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)}`);
+  if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 240 || !Number.isFinite(result.mobileLayout.canvasAspectRatio) || result.mobileLayout.canvasAspectRatio < 0.72 || result.mobileLayout.canvasAspectRatio > 0.86) throw new Error(`Expected rectangular Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)} ratio=${result.mobileLayout?.canvasAspectRatio}`);
   if ((result.mobileLayout?.canvasPanelGap ?? 0) < 6 || (result.mobileLayout?.canvasPanelGap ?? 99) > 24) throw new Error(`Expected tight Korea map/panel spacing at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
   if ((result.mobileLayout?.panelOverlayBottomGap ?? -1) < 8) throw new Error(`Expected Korea route panel to keep bottom breathing room at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
   if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom - 1) throw new Error(`Expected Korea route panel to stack below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
@@ -706,8 +726,9 @@ try {
   for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
     if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
   }
+  if ((result.islandHitTargets ?? []).filter((target) => target.regionId === 'kr-gyeongbuk').length < 2 || !result.dokdoHighlightsGyeongbuk) throw new Error(`Expected Ulleungdo/Dokdo touch targets to select/highlight Gyeongbuk, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);
   if (!result.vectorTextureLayerPresent) throw new Error('Expected static vector Korea texture layers');
-  if (result.vectorPremiumStyle?.palette !== 'green-terrain-blue-sea' || result.vectorPremiumStyle?.canvasPalette !== 'green-terrain-blue-sea') throw new Error(`Expected green terrain / blue sea Korea map palette telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (result.vectorPremiumStyle?.palette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.canvasPalette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.mapContract !== 'normalized-source-rectangular-render') throw new Error(`Expected deep ocean rectangular Korea map telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (result.vectorPremiumStyle?.islandCoverage !== 'jeju-ulleungdo-dokdo') throw new Error(`Expected Jeju/Ulleungdo/Dokdo island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.vectorPremiumStyle?.terrainGradientPresent || !result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients/contours, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');

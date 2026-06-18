@@ -221,11 +221,15 @@ for (const island of boundaries.islandReferences) {
 assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
 assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
 assert(!koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must render 제주도 label instead of hiding it');
-assert(koreaOverlaySource.includes('KOREA_MAP_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named square SVG viewBox contract');
-for (const requiredAlignmentFragment of ['translateX: -0.2', 'translateY: 0', 'originX: 50', 'originY: 50', 'scale: 0.99']) {
+assert(koreaOverlaySource.includes('KOREA_MAP_SOURCE_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named normalized source SVG viewBox contract');
+assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124'"), 'Korea overlay must keep a named rectangular render viewBox contract');
+assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_HEIGHT') && koreaOverlaySource.includes('KOREA_MAP_RENDER_WIDTH'), 'Korea overlay must size render background layers from render constants');
+for (const requiredAlignmentFragment of ['translateX: 0', 'translateY: 12', 'originX: 50', 'originY: 50', 'scale: 1']) {
   assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve ${requiredAlignmentFragment}`);
 }
-assert(koreaOverlaySource.includes('single visual source of truth'), 'Korea overlay alignment comment must document vector-only source-of-truth contract');
+assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('rectangular sea frame'), 'Korea overlay alignment comment must document source-vs-render contract');
+assert(koreaOverlaySource.includes('korea-island-hit-target') && koreaOverlaySource.includes('dataset.islandHitTarget'), 'Korea overlay must render explicit island click/touch targets');
+assert(koreaOverlaySource.includes("island.nameKo === '울릉도' || island.nameKo === '독도' ? 'kr-gyeongbuk'"), 'Ulleungdo/Dokdo island hit targets must select Gyeongbuk');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
@@ -322,7 +326,8 @@ assert(koreaOverlaySource.includes("dataset.mapStyle = 'vector-satellite-inspire
 assert(!koreaOverlaySource.includes('korea-raster-layer') && !koreaOverlaySource.includes('korea-raster-image'), 'Korea overlay must not render raster layers or images');
 assert(!koreaOverlaySource.includes('dataset.imageryState') && !koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea overlay must not retain raster imagery telemetry or fallback hooks');
 assert(!assetsPolicySource.includes('KOREA_GIBS_BLUE_MARBLE'), 'Korea-specific GIBS raster constants must be removed while global Earth imagery remains');
-assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after'), 'Korea CSS must provide vector-only blue-ocean/green-land texture hooks');
+assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after') && stylesSource.includes('aspect-ratio: 5 / 6.2'), 'Korea CSS must provide vector-only blue-ocean/green-land rectangular texture hooks');
+assert(stylesSource.includes('.korea-island-hit-target') && stylesSource.includes('pointer-events: auto'), 'Korea CSS must make island hit targets touchable');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');

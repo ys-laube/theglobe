@@ -7,6 +7,7 @@ export type ExplorationOverlay = {
   setExplorationMode: (enabled: boolean) => void;
   getExplorationMode: () => boolean;
   setCityMode: (mode: CityExplorationMode) => void;
+  toggleCityMode: () => void;
   focusCityById: (cityId: string) => boolean;
   getSelectedCity: () => Capital | null;
   getLastFocus: () => { cityId: string; delta: number } | null;
@@ -369,13 +370,14 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   }
 
   elements.explorationButton.addEventListener('click', () => setExplorationMode(!explorationMode));
-  elements.tierButton.addEventListener('click', () => {
+  function toggleCityMode() {
     cityMode = cityMode === 'top100' ? 'capitals' : 'top100';
     top100PageIndex = 0;
     showCard(null);
     lastFocus = null;
     syncUi();
-  });
+  }
+  elements.tierButton.addEventListener('click', toggleCityMode);
   showCard(null);
   syncUi();
 
@@ -384,6 +386,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     getExplorationMode: () => explorationMode,
     getSelectedCity: () => selected,
     getLastFocus: () => lastFocus,
+    toggleCityMode,
     focusCityById,
     setCityMode: (mode) => {
       cityMode = mode;

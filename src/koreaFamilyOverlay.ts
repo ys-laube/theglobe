@@ -35,18 +35,19 @@ type OverlayData = {
   readonly islandReferences: readonly IslandReference[];
 };
 
-const KOREA_MAP_VIEWBOX = '0 0 100 100';
-// Vector-only contract: the decorative SVG boundary set is authored in a
-// normalized square viewBox and is the single visual source of truth for the
-// Korea family map. These constants are intentionally named and locked by
-// verify-boundary-data plus the 390x844 Korea smoke so future vector retunes
-// are explicit rather than breakpoint-specific drift.
+const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100';
+const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124';
+const KOREA_MAP_RENDER_WIDTH = 100;
+const KOREA_MAP_RENDER_HEIGHT = 124;
+// Vector-only contract: boundary coordinates stay normalized in the 0..100
+// static source space while the render viewBox is taller, giving mobile and PC
+// a stable rectangular sea frame without breakpoint-specific manual offsets.
 const KOREA_VECTOR_ALIGNMENT = {
-  translateX: -0.2,
-  translateY: 0,
+  translateX: 0,
+  translateY: 12,
   originX: 50,
   originY: 50,
-  scale: 0.99,
+  scale: 1,
 } as const;
 
 function koreaVectorTransform() {
@@ -312,7 +313,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
   host.classList.add('korea-map-overlay');
   host.dataset.mapStyle = 'vector-satellite-inspired';
-  host.dataset.mapPalette = 'green-terrain-blue-sea';
+  host.dataset.mapPalette = 'deep-ocean-vector';
+  host.dataset.mapContract = 'normalized-source-rectangular-render';
   host.dataset.islandCoverage = 'jeju-ulleungdo-dokdo';
   host.dataset.familyTraces = 'hidden';
   mapMount.dataset.mapStyle = 'vector-satellite-inspired';
@@ -410,7 +412,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   function renderMap() {
     mapMount.replaceChildren();
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', KOREA_MAP_VIEWBOX);
+    svg.setAttribute('viewBox', KOREA_MAP_RENDER_VIEWBOX);
+    svg.dataset.sourceViewbox = KOREA_MAP_SOURCE_VIEWBOX;
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', '가족 경로 중심의 한국 지도');
 
@@ -454,15 +457,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const oceanGlow = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     oceanGlow.setAttribute('x', '0');
     oceanGlow.setAttribute('y', '0');
-    oceanGlow.setAttribute('width', '100');
-    oceanGlow.setAttribute('height', '100');
+    oceanGlow.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
+    oceanGlow.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
     oceanGlow.setAttribute('fill', 'url(#korea-map-glow)');
     svg.append(oceanGlow);
     const staticTexture = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     staticTexture.setAttribute('x', '0');
     staticTexture.setAttribute('y', '0');
-    staticTexture.setAttribute('width', '100');
-    staticTexture.setAttribute('height', '100');
+    staticTexture.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
+    staticTexture.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
     staticTexture.setAttribute('class', 'korea-static-texture');
     staticTexture.setAttribute('fill', 'url(#korea-static-grain)');
     staticTexture.setAttribute('aria-hidden', 'true');
@@ -470,8 +473,8 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const terrainContours = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     terrainContours.setAttribute('x', '0');
     terrainContours.setAttribute('y', '0');
-    terrainContours.setAttribute('width', '100');
-    terrainContours.setAttribute('height', '100');
+    terrainContours.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
+    terrainContours.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
     terrainContours.setAttribute('class', 'korea-terrain-contours');
     terrainContours.setAttribute('fill', 'url(#korea-terrain-contours)');
     terrainContours.setAttribute('aria-hidden', 'true');
@@ -552,6 +555,32 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
       dot.setAttribute('r', String(island.radius));
       dot.setAttribute('class', 'korea-island-dot');
       group.append(halo, dot);
+      const islandRegionId = island.nameKo === '울릉도' || island.nameKo === '독도' ? 'kr-gyeongbuk' : island.nameKo === '제주도' ? 'kr-jeju' : null;
+      if (islandRegionId) {
+        const hitTarget = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        hitTarget.setAttribute('cx', String(x));
+        hitTarget.setAttribute('cy', String(y));
+        hitTarget.setAttribute('r', String(Math.max(island.radius + 2.6, 3.2)));
+        hitTarget.setAttribute('class', 'korea-island-hit-target');
+        hitTarget.dataset.islandHitTarget = 'true';
+        hitTarget.dataset.islandId = island.id;
+        hitTarget.dataset.regionId = islandRegionId;
+        hitTarget.setAttribute('tabindex', '0');
+        hitTarget.setAttribute('role', 'button');
+        hitTarget.setAttribute('aria-label', `${island.nameKo} — ${routeNodes[islandRegionId].label} 선택`);
+        hitTarget.addEventListener('pointerenter', () => setHighlightedRegion(islandRegionId));
+        hitTarget.addEventListener('pointerleave', () => setHighlightedRegion(null));
+        hitTarget.addEventListener('focus', () => setHighlightedRegion(islandRegionId));
+        hitTarget.addEventListener('blur', () => setHighlightedRegion(null));
+        hitTarget.addEventListener('click', () => activateRegion(islandRegionId));
+        hitTarget.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            activateRegion(islandRegionId);
+          }
+        });
+        group.append(hitTarget);
+      }
       const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       label.setAttribute('x', String(x + dx));
       label.setAttribute('y', String(y + dy));
@@ -611,14 +640,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     const vignette = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
     vignette.setAttribute('x', '0');
     vignette.setAttribute('y', '0');
-    vignette.setAttribute('width', '100');
-    vignette.setAttribute('height', '100');
+    vignette.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
+    vignette.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
     vignette.setAttribute('class', 'korea-map-vignette');
     vignette.setAttribute('fill', 'url(#korea-map-vignette)');
     vignette.setAttribute('aria-hidden', 'true');
     svg.append(vignette);
 
-    mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'green-terrain-blue-sea';
+    mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'deep-ocean-vector';
+    mapMount.dataset.mapContract = host.dataset.mapContract ?? 'normalized-source-rectangular-render';
     mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'jeju-ulleungdo-dokdo';
     mapMount.append(svg);
   }

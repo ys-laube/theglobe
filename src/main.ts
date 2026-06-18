@@ -147,6 +147,13 @@ function ensureKoreaFamilyOverlay() {
   loadedOverlay.setExplorationMode(true);
   return loadedOverlay.focusCityById(cityId);
 };
+(window as Window & { __GLOBE_QA_SET_CITY_MODE__?: (mode: 'capitals' | 'top100') => Promise<boolean> }).__GLOBE_QA_SET_CITY_MODE__ = async (mode) => {
+  const loadedOverlay = await ensureExplorationOverlay();
+  loadedOverlay.setCityMode(mode);
+  loadedOverlay.setExplorationMode(true);
+  updateQaState();
+  return true;
+};
 
 globe.onViewChange(updateQaState);
 
