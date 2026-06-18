@@ -217,6 +217,34 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   -webkit-overflow-scrolling: touch;
 }
 .region-list span { padding: 0.45rem 0.65rem; border-radius: 999px; background: rgba(125, 211, 252, 0.10); color: #bfdbfe; font-size: 0.8rem; }
+
+.top100-page-controls {
+  flex: 1 1 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.45rem;
+  padding: 0.62rem;
+  border: 1px solid rgba(125, 211, 252, 0.14);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.34);
+}
+.top100-page-button {
+  min-height: 38px;
+  padding: 0.4rem 0.35rem;
+  border-radius: 0.72rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(226, 232, 240, 0.10);
+  color: #bfdbfe;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-align: center;
+}
+.top100-page-button.is-active {
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.34), rgba(192, 132, 252, 0.24));
+  border-color: rgba(191, 219, 254, 0.52);
+  color: #f8fafc;
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.22), 0 0 1rem rgba(96, 165, 250, 0.18);
+}
 .rank-group { flex: 1 1 100%; border: 1px solid rgba(125, 211, 252, 0.12); border-radius: 1rem; padding: 0.7rem; background: rgba(15, 23, 42, 0.38); }
 .rank-group h3 { margin: 0 0 0.5rem; color: #bfdbfe; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; }
 .rank-group ol { display: grid; gap: 0.35rem; margin: 0; padding-left: 0; list-style: none; }
@@ -237,6 +265,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   .hero { order: 1; }
   .panel { order: 3; margin-top: 0; max-height: none; overflow: visible; }
   .region-list { overflow: visible; }
+  .top100-page-controls { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 }
 
 @media (max-width: 640px) {
@@ -258,6 +287,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   }
   .city-card[data-empty="true"] { grid-template-columns: 1fr; }
   .card-art { min-height: 86px; }
+  .top100-page-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   dl { grid-template-columns: 1fr; }
   .earth-status, .hint { width: calc(100% - 2rem); justify-content: center; text-align: center; white-space: normal; }
 }

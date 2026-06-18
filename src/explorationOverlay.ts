@@ -17,6 +17,11 @@ export type ExplorationOverlay = {
     cityMode: CityExplorationMode;
     visibleCityCount: number;
     top100GroupCount: number;
+    top100PageIndex: number;
+    top100PageCount: number;
+    top100ActiveRange: string | null;
+    top100ActiveEntryCount: number;
+    top100PageControlCount: number;
     selectedCityId: string | null;
     focusedCityId: string | null;
     selectedCityMarkerGlowVisible: boolean;
@@ -49,6 +54,7 @@ function safeExternalUrl(url: string) {
 }
 
 const top100BucketSize = 10;
+const top100PageCount = 10;
 const markerBaseScale = 1;
 const selectedMarkerScale = 1.45;
 const selectedRingScale = 1.9;
@@ -142,10 +148,29 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   let earthReady = false;
   let selected: Capital | null = null;
   let lastFocus: { cityId: string; delta: number } | null = null;
+  let top100PageIndex = 0;
+
+  function top100RankRange(pageIndex = top100PageIndex) {
+    const startRank = pageIndex * top100BucketSize + 1;
+    return { startRank, endRank: startRank + top100BucketSize - 1 };
+  }
+
+  function isCapitalOnTop100Page(capital: Capital, pageIndex = top100PageIndex) {
+    if (capital.mode !== 'top100' || !capital.rank) return false;
+    const { startRank, endRank } = top100RankRange(pageIndex);
+    return capital.rank >= startRank && capital.rank <= endRank;
+  }
+
+  function pageIndexForTop100Capital(capital: Capital) {
+    if (capital.mode !== 'top100' || !capital.rank) return null;
+    return Math.max(0, Math.min(top100PageCount - 1, Math.floor((capital.rank - 1) / top100BucketSize)));
+  }
 
   function visibleData() {
     if (!explorationMode || !earthReady) return [];
-    return markerObjects.filter(({ capital }) => capital.mode === cityMode).map(({ capital }) => capital);
+    return markerObjects
+      .filter(({ capital }) => capital.mode === cityMode && (cityMode !== 'top100' || isCapitalOnTop100Page(capital)))
+      .map(({ capital }) => capital);
   }
 
   function emitSelectionChange() {
@@ -234,46 +259,65 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     elements.tierCopy.textContent = !earthReady
       ? '지구 표면 또는 의도된 폴백이 준비될 때까지 핀과 카드는 숨겨둡니다.'
       : explorationMode
-        ? (cityMode === 'top100' ? '여행 인기 도시 100곳을 순위와 함께 보여줍니다.' : '전 세계 UN가입국의 수도를 보여줍니다')
+        ? (cityMode === 'top100' ? `여행 인기 도시 100곳을 10개씩 나누어 보여줍니다. 현재 ${top100BucketLabel(top100RankRange().startRank)}위입니다.` : '전 세계 UN가입국의 수도를 보여줍니다')
         : '탐험 모드를 켜면 세계의 수도부터 차분히 펼쳐집니다.';
     elements.explorationButton.textContent = explorationMode ? '탐험 모드 닫기' : '탐험 모드 열기';
     elements.explorationButton.disabled = !earthReady;
     elements.tierButton.textContent = cityMode === 'top100' ? '수도 보기' : 'TOP 100 인기 도시 보기';
     elements.tierButton.disabled = !canShowMarkers;
     if (cityMode === 'top100') {
-      const groups = Array.from({ length: 10 }, (_value, index) => {
+      const controls = document.createElement('div');
+      controls.className = 'top100-page-controls';
+      controls.dataset.top100PageControls = 'true';
+      controls.setAttribute('aria-label', 'TOP 100 rank pages');
+      Array.from({ length: top100PageCount }, (_value, index) => {
         const startRank = index * top100BucketSize + 1;
-        return data.filter((capital) => capital.rank && capital.rank >= startRank && capital.rank < startRank + top100BucketSize);
-      });
-      elements.regionList.replaceChildren(...groups.map((group, index) => {
-        const startRank = index * top100BucketSize + 1;
-        const groupElement = document.createElement('section');
-        groupElement.className = 'rank-group';
-        groupElement.dataset.rankGroup = top100BucketLabel(startRank);
-        appendText(groupElement, 'h3', `Ranks ${top100BucketLabel(startRank)}`);
-        const list = document.createElement('ol');
-        group.forEach((capital) => {
-          const item = document.createElement('li');
-          item.dataset.cityId = capital.id;
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.className = 'rank-city-button';
-          button.dataset.action = 'focus-city';
-          button.dataset.cityId = capital.id;
-          if (selected?.id === capital.id) {
-            item.classList.add('is-selected');
-            button.classList.add('is-selected');
-            button.setAttribute('aria-current', 'true');
-          }
-          appendText(button, 'span', `#${capital.rank} ${capital.city}`, 'rank-city');
-          appendText(button, 'span', capital.country, 'rank-country');
-          button.addEventListener('click', () => focusCity(capital));
-          item.append(button);
-          list.append(item);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'top100-page-button';
+        button.dataset.action = 'top100-page';
+        button.dataset.top100PageIndex = String(index);
+        button.dataset.rankRange = top100BucketLabel(startRank);
+        button.textContent = top100BucketLabel(startRank);
+        if (index === top100PageIndex) {
+          button.classList.add('is-active');
+          button.setAttribute('aria-current', 'page');
+        }
+        button.addEventListener('click', () => {
+          top100PageIndex = index;
+          syncUi();
         });
-        groupElement.append(list);
-        return groupElement;
-      }));
+        controls.append(button);
+      });
+
+      const { startRank } = top100RankRange();
+      const groupElement = document.createElement('section');
+      groupElement.className = 'rank-group';
+      groupElement.dataset.rankGroup = top100BucketLabel(startRank);
+      groupElement.dataset.activeTop100Page = String(top100PageIndex);
+      appendText(groupElement, 'h3', `Ranks ${top100BucketLabel(startRank)}`);
+      const list = document.createElement('ol');
+      data.forEach((capital) => {
+        const item = document.createElement('li');
+        item.dataset.cityId = capital.id;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'rank-city-button';
+        button.dataset.action = 'focus-city';
+        button.dataset.cityId = capital.id;
+        if (selected?.id === capital.id) {
+          item.classList.add('is-selected');
+          button.classList.add('is-selected');
+          button.setAttribute('aria-current', 'true');
+        }
+        appendText(button, 'span', `#${capital.rank} ${capital.city}`, 'rank-city');
+        appendText(button, 'span', capital.country, 'rank-country');
+        button.addEventListener('click', () => focusCity(capital));
+        item.append(button);
+        list.append(item);
+      });
+      groupElement.append(list);
+      elements.regionList.replaceChildren(controls, groupElement);
     } else {
       const byRegion = [...new Set(data.map((c) => c.region))];
       elements.regionList.replaceChildren(...byRegion.map((region) => {
@@ -282,7 +326,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
         return chip;
       }));
     }
-    if ((!canShowMarkers || (selected && !data.includes(selected))) && selected) showCard(null);
+    if ((!canShowMarkers || (selected && selected.mode !== cityMode)) && selected) showCard(null);
   }
 
   function pick(event: PointerEvent, commit = false) {
@@ -318,6 +362,8 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   function focusCityById(cityId: string) {
     const match = markerObjects.find(({ capital }) => capital.id === cityId && capital.mode === cityMode);
     if (!match) return false;
+    const pageIndex = pageIndexForTop100Capital(match.capital);
+    if (pageIndex !== null) top100PageIndex = pageIndex;
     focusCity(match.capital);
     return true;
   }
@@ -325,6 +371,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
   elements.explorationButton.addEventListener('click', () => setExplorationMode(!explorationMode));
   elements.tierButton.addEventListener('click', () => {
     cityMode = cityMode === 'top100' ? 'capitals' : 'top100';
+    top100PageIndex = 0;
     showCard(null);
     lastFocus = null;
     syncUi();
@@ -340,6 +387,7 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
     focusCityById,
     setCityMode: (mode) => {
       cityMode = mode;
+      top100PageIndex = 0;
       showCard(null);
       lastFocus = null;
       syncUi();
@@ -359,6 +407,11 @@ export function createExplorationOverlay(globe: GlobeRenderer, elements: Overlay
       cityMode,
       visibleCityCount: visibleData().length,
       top100GroupCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-rank-group]').length : 0,
+      top100PageIndex,
+      top100PageCount,
+      top100ActiveRange: cityMode === 'top100' && explorationMode && earthReady ? top100BucketLabel(top100RankRange().startRank) : null,
+      top100ActiveEntryCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-action="focus-city"]').length : 0,
+      top100PageControlCount: cityMode === 'top100' && explorationMode && earthReady ? elements.regionList.querySelectorAll('[data-action="top100-page"]').length : 0,
       selectedCityId: selected?.id ?? null,
       focusedCityId: lastFocus?.cityId ?? null,
       selectedCityMarkerGlowVisible: Boolean(selected && markerObjects.some(({ capital, selectedGlow }) => capital.id === selected?.id && selectedGlow.visible)),
