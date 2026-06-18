@@ -415,6 +415,9 @@ try {
           rasterLayerPresent: Boolean(document.querySelector('.korea-raster-layer')),
           rasterImagePresent: Boolean(document.querySelector('.korea-raster-image')),
           imageryStatePresent: document.querySelector('.korea-map-canvas')?.hasAttribute('data-imagery-state') ?? false,
+          fitStrategy: document.querySelector('.korea-map-canvas')?.getAttribute('data-fit-strategy'),
+          fitScale: Number.parseFloat(document.querySelector('.korea-map-canvas')?.getAttribute('data-fit-scale') || '0'),
+          fitBounds: (document.querySelector('.korea-map-canvas')?.getAttribute('data-fit-bounds') || '').split(',').map(Number),
         };
         const officialFirstLevelLabels = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시','세종특별자치시','경기도','강원특별자치도','충청북도','충청남도','전북특별자치도','전라남도','경상북도','경상남도','제주특별자치도'];
         const officialFirstLevelRegions = [
@@ -484,6 +487,16 @@ try {
         const koreaRegionIds = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('data-region-id')).filter(Boolean);
         const overviewFamilyTargetRegionIds = koreaRegionIds.filter((id) => ['kr-seoul-mapo', 'kr-busan-haeundae', 'kr-gyeongnam-gimhae', 'kr-gimhae-bonghwang'].includes(id));
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
+        const renderedRegionRects = [...document.querySelectorAll('.korea-region')].map((node) => node.getBoundingClientRect());
+        const currentCanvasRect = document.querySelector('.korea-map-canvas')?.getBoundingClientRect();
+        const renderedFootprint = currentCanvasRect && renderedRegionRects.length ? {
+          left: Math.min(...renderedRegionRects.map((rect) => rect.left)) - currentCanvasRect.left,
+          right: Math.max(...renderedRegionRects.map((rect) => rect.right)) - currentCanvasRect.left,
+          top: Math.min(...renderedRegionRects.map((rect) => rect.top)) - currentCanvasRect.top,
+          bottom: Math.max(...renderedRegionRects.map((rect) => rect.bottom)) - currentCanvasRect.top,
+          canvasWidth: currentCanvasRect.width,
+          canvasHeight: currentCanvasRect.height,
+        } : null;
         await clickButtonByStrong('대구광역시');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-daegu', 'Daegu non-family region tier');
         const daeguInfoText = document.querySelector('.korea-route-panel')?.textContent ?? '';
@@ -519,6 +532,7 @@ try {
           palette: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-palette'),
           canvasPalette: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-palette'),
           mapContract: document.querySelector('.korea-map-canvas')?.getAttribute('data-map-contract'),
+          hostMapContract: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-contract'),
           islandCoverage: document.querySelector('.korea-map-overlay')?.getAttribute('data-island-coverage'),
           terrainGradientPresent: Boolean(document.querySelector('#korea-land-terrain') && document.querySelector('#korea-selected-terrain')),
           terrainContoursPresent: Boolean(document.querySelector('.korea-terrain-contours') && document.querySelector('#korea-terrain-contours')),
@@ -669,6 +683,7 @@ try {
           koreaRegionIds,
           overviewFamilyTargetRegionIds,
           koreaRegionLabels,
+          renderedFootprint,
           daeguInfoText,
           daeguInfoHref,
           selectedRegionToggleUpOk,
@@ -798,7 +813,15 @@ try {
   if ((result.islandHitTargets ?? []).length !== 0 || result.dokdoHighlightsGyeongbuk) throw new Error(`Expected no decorative island hit targets, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);
   if (result.koreaRegionLabels?.some((label) => label.includes('제주도'))) throw new Error(`Expected no extra 제주도 label; keep only 제주특별자치도, found ${result.koreaRegionLabels?.join(', ')}`);
   if (result.vectorTextureLayerPresent) throw new Error('Expected static Korea grain/wave texture layers to be removed');
-  if (result.vectorPremiumStyle?.palette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.canvasPalette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.mapContract !== 'normalized-source-rectangular-render') throw new Error(`Expected deep ocean rectangular Korea map telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (result.vectorPremiumStyle?.palette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.canvasPalette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.mapContract !== 'geometry-auto-fit' || result.vectorPremiumStyle?.hostMapContract !== 'geometry-auto-fit') throw new Error(`Expected deep ocean geometry auto-fit Korea map telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (result.vectorMapTelemetry?.fitStrategy !== 'geometry-auto-fit') throw new Error(`Expected Korea vector geometry auto-fit strategy, found ${JSON.stringify(result.vectorMapTelemetry)}`);
+  if (!Number.isFinite(result.vectorMapTelemetry?.fitScale) || result.vectorMapTelemetry.fitScale < 1.1 || result.vectorMapTelemetry.fitScale > 1.25) throw new Error(`Expected balanced Korea fit scale, found ${JSON.stringify(result.vectorMapTelemetry)}`);
+  const rendered = result.renderedFootprint;
+  const renderedCenterX = rendered ? (rendered.left + rendered.right) / 2 : Number.NaN;
+  const canvasCenterX = rendered ? rendered.canvasWidth / 2 : Number.NaN;
+  const renderedTopPadding = rendered?.top ?? Number.NaN;
+  const renderedHeightRatio = rendered ? (rendered.bottom - rendered.top) / rendered.canvasHeight : 0;
+  if (!rendered || Math.abs(renderedCenterX - canvasCenterX) > 4 || renderedTopPadding < 35 || renderedHeightRatio < 0.84) throw new Error(`Expected actual rendered Korea regions to be centered with visible north safe padding, found ${JSON.stringify(rendered)}`);
   if (result.vectorPremiumStyle?.islandCoverage !== 'none') throw new Error(`Expected no decorative island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.vectorPremiumStyle?.terrainGradientPresent || result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients without contour texture layer, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');

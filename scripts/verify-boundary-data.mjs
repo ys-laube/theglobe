@@ -226,9 +226,9 @@ assert(!koreaOverlaySource.includes('decorativeNorthSilhouettePath') && !koreaOv
 assert(koreaOverlaySource.includes('KOREA_MAP_SOURCE_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named normalized source SVG viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124'"), 'Korea overlay must keep a named rectangular render viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_HEIGHT') && koreaOverlaySource.includes('KOREA_MAP_RENDER_WIDTH'), 'Korea overlay must size render background layers from render constants');
-assert(koreaOverlaySource.includes('const KOREA_VECTOR_ALIGNMENT') && koreaOverlaySource.includes('scale:'), 'Korea overlay must keep a named shared vector alignment transform');
+assert(koreaOverlaySource.includes('KOREA_VECTOR_FIT_CONFIG') && koreaOverlaySource.includes('geometry-auto-fit') && koreaOverlaySource.includes('bboxForFeatures') && koreaOverlaySource.includes('renderedFeaturePoints'), 'Korea overlay must keep a named shared geometry-derived vector fit transform from rendered geometry');
 assert(koreaOverlaySource.includes('return closedRingPath(feature.polygon)'), 'Korea overlay must render the structurally verified primary landmass polygon only to suppress tiny detached island-ring clutter');
-assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('zoomed peninsula composition'), 'Korea overlay alignment comment must document source-vs-render zoomed composition contract');
+assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('geometry-derived fit'), 'Korea overlay alignment comment must document source-vs-render geometry auto-fit composition contract');
 assert(!koreaOverlaySource.includes('korea-static-grain') && !koreaOverlaySource.includes('korea-terrain-contours'), 'Korea overlay must not render grain/wave texture layers over the ocean');
 assert(!stylesSource.includes('.korea-island-reference') && !stylesSource.includes('.korea-island-hit-target'), 'Korea styles must not retain decorative island marker styling');
 assert(!stylesSource.includes('.korea-north-silhouette'), 'Korea styles must remove the deleted north silhouette styling');

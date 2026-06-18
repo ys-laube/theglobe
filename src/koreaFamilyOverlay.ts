@@ -29,20 +29,36 @@ const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124';
 const KOREA_MAP_RENDER_WIDTH = 100;
 const KOREA_MAP_RENDER_HEIGHT = 124;
 // Vector-only contract: boundary coordinates stay normalized in the 0..100
-// static source space while the render viewBox is taller. The visual layer may
-// apply one shared zoomed peninsula composition transform, but not
-// breakpoint-specific manual offsets or live map alignment.
-const KOREA_VECTOR_ALIGNMENT = {
-  translateX: 0.8,
-  translateY: 6.9,
-  originX: 50,
-  originY: 54,
-  scale: 1.30,
+// static source space while the render viewBox is taller. The visual layer uses
+// a geometry-derived fit from the official overview regions instead of breakpoint
+// specific manual offsets, so PC and mobile share one stable composition.
+type BBox = { minX: number; minY: number; maxX: number; maxY: number };
+
+const KOREA_VECTOR_FIT_CONFIG = {
+  paddingLeft: 3,
+  paddingRight: 3,
+  paddingTop: 13,
+  paddingBottom: 3,
 } as const;
 
+type KoreaVectorFit = {
+  readonly strategy: 'geometry-auto-fit';
+  readonly scale: number;
+  readonly translateX: number;
+  readonly translateY: number;
+  readonly bounds: BBox;
+  readonly fittedBounds: BBox;
+};
+
+let cachedKoreaVectorFit: KoreaVectorFit | null = null;
+
+function roundFitValue(value: number) {
+  return Math.round(value * 1000) / 1000;
+}
+
 function koreaVectorTransform() {
-  const { translateX, translateY, originX, originY, scale } = KOREA_VECTOR_ALIGNMENT;
-  return `translate(${translateX} ${translateY}) translate(${originX} ${originY}) scale(${scale}) translate(${-originX} ${-originY})`;
+  const { translateX, translateY, scale } = getKoreaVectorFit();
+  return `translate(${translateX} ${translateY}) scale(${scale})`;
 }
 
 type RegionId =
@@ -277,6 +293,89 @@ function featureById(id: RegionId) {
   return feature;
 }
 
+function renderedFeaturePoints(feature: BoundaryFeature) {
+  // Keep fit geometry identical to `featurePath()`: the visible gift map draws
+  // the verified primary landmass polygon and suppresses tiny detached rings.
+  return feature.polygon;
+}
+
+function bboxForFeatures(regionIds: readonly RegionId[]): BBox {
+  const points = regionIds.flatMap((id) => [...renderedFeaturePoints(featureById(id))]);
+  if (points.length === 0) throw new Error('Cannot fit Korea map without boundary points');
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  return {
+    minX: Math.min(...xs),
+    minY: Math.min(...ys),
+    maxX: Math.max(...xs),
+    maxY: Math.max(...ys),
+  };
+}
+
+function fitBounds(bounds: BBox): KoreaVectorFit {
+  const availableWidth = KOREA_MAP_RENDER_WIDTH - KOREA_VECTOR_FIT_CONFIG.paddingLeft - KOREA_VECTOR_FIT_CONFIG.paddingRight;
+  const availableHeight = KOREA_MAP_RENDER_HEIGHT - KOREA_VECTOR_FIT_CONFIG.paddingTop - KOREA_VECTOR_FIT_CONFIG.paddingBottom;
+  const width = bounds.maxX - bounds.minX;
+  const height = bounds.maxY - bounds.minY;
+  const scale = Math.min(availableWidth / width, availableHeight / height);
+  const targetCenterX = KOREA_VECTOR_FIT_CONFIG.paddingLeft + availableWidth / 2;
+  const targetCenterY = KOREA_VECTOR_FIT_CONFIG.paddingTop + availableHeight / 2;
+  const sourceCenterX = bounds.minX + width / 2;
+  const sourceCenterY = bounds.minY + height / 2;
+  const translateX = targetCenterX - scale * sourceCenterX;
+  const translateY = targetCenterY - scale * sourceCenterY;
+  return {
+    strategy: 'geometry-auto-fit',
+    scale: roundFitValue(scale),
+    translateX: roundFitValue(translateX),
+    translateY: roundFitValue(translateY),
+    bounds,
+    fittedBounds: {
+      minX: roundFitValue(translateX + scale * bounds.minX),
+      minY: roundFitValue(translateY + scale * bounds.minY),
+      maxX: roundFitValue(translateX + scale * bounds.maxX),
+      maxY: roundFitValue(translateY + scale * bounds.maxY),
+    },
+  };
+}
+
+function getKoreaVectorFit() {
+  cachedKoreaVectorFit ??= fitBounds(bboxForFeatures(firstLevelRegionOrder));
+  return cachedKoreaVectorFit;
+}
+
+function balanceRenderedVectorLayer(vectorLayer: SVGGElement, mapCanvas: HTMLElement, fit: KoreaVectorFit) {
+  const canvasRect = mapCanvas.getBoundingClientRect();
+  const regionRects = [...vectorLayer.querySelectorAll<SVGPathElement>('.korea-region')].map((region) => region.getBoundingClientRect());
+  if (!canvasRect.width || !canvasRect.height || regionRects.length === 0) return fit;
+
+  const rendered = {
+    left: Math.min(...regionRects.map((rect) => rect.left)),
+    right: Math.max(...regionRects.map((rect) => rect.right)),
+    top: Math.min(...regionRects.map((rect) => rect.top)),
+  };
+  const renderedCenterX = (rendered.left + rendered.right) / 2;
+  const targetCenterX = canvasRect.left + canvasRect.width / 2;
+  const targetTop = canvasRect.top + canvasRect.height * (KOREA_VECTOR_FIT_CONFIG.paddingTop / KOREA_MAP_RENDER_HEIGHT);
+  const xUnitsPerPixel = KOREA_MAP_RENDER_WIDTH / canvasRect.width;
+  const yUnitsPerPixel = KOREA_MAP_RENDER_HEIGHT / canvasRect.height;
+  const translateX = roundFitValue(fit.translateX + (targetCenterX - renderedCenterX) * xUnitsPerPixel);
+  const translateY = roundFitValue(fit.translateY + (targetTop - rendered.top) * yUnitsPerPixel);
+  const balancedFit = {
+    ...fit,
+    translateX,
+    translateY,
+    fittedBounds: {
+      minX: roundFitValue(translateX + fit.scale * fit.bounds.minX),
+      minY: roundFitValue(translateY + fit.scale * fit.bounds.minY),
+      maxX: roundFitValue(translateX + fit.scale * fit.bounds.maxX),
+      maxY: roundFitValue(translateY + fit.scale * fit.bounds.maxY),
+    },
+  };
+  vectorLayer.setAttribute('transform', `translate(${balancedFit.translateX} ${balancedFit.translateY}) scale(${balancedFit.scale})`);
+  return balancedFit;
+}
+
 function centroidOf(id: RegionId) {
   if (id === 'kr-korea-overview') return [52, 50] as const;
   return featureById(id).centroid;
@@ -321,7 +420,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   host.classList.add('korea-map-overlay');
   host.dataset.mapStyle = 'vector-satellite-inspired';
   host.dataset.mapPalette = 'deep-ocean-vector';
-  host.dataset.mapContract = 'normalized-source-rectangular-render';
+  host.dataset.mapContract = 'geometry-auto-fit';
   host.dataset.islandCoverage = 'none';
   host.dataset.familyTraces = 'hidden';
   mapMount.dataset.mapStyle = 'vector-satellite-inspired';
@@ -433,10 +532,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     defs.innerHTML = `
-      <radialGradient id="korea-map-glow" cx="52%" cy="46%" r="62%">
-        <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.34"/>
-        <stop offset="54%" stop-color="#0284c7" stop-opacity="0.24"/>
-        <stop offset="100%" stop-color="#082f49" stop-opacity="0.10"/>
+      <radialGradient id="korea-map-glow" cx="50%" cy="45%" r="70%">
+        <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.12"/>
+        <stop offset="64%" stop-color="#075985" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#03152f" stop-opacity="0.06"/>
       </radialGradient>
       <linearGradient id="korea-land-terrain" x1="18%" y1="10%" x2="86%" y2="92%">
         <stop offset="0%" stop-color="#bbf7d0" stop-opacity="0.64"/>
@@ -577,10 +676,15 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vignette.setAttribute('aria-hidden', 'true');
     svg.append(vignette);
 
-    mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'deep-ocean-vector';
-    mapMount.dataset.mapContract = host.dataset.mapContract ?? 'normalized-source-rectangular-render';
-    mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'none';
+    const fit = getKoreaVectorFit();
     mapMount.append(svg);
+    const balancedFit = balanceRenderedVectorLayer(vectorLayer, mapMount, fit);
+    mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'deep-ocean-vector';
+    mapMount.dataset.mapContract = host.dataset.mapContract ?? 'geometry-auto-fit';
+    mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'none';
+    mapMount.dataset.fitStrategy = balancedFit.strategy;
+    mapMount.dataset.fitScale = String(balancedFit.scale);
+    mapMount.dataset.fitBounds = `${balancedFit.fittedBounds.minX},${balancedFit.fittedBounds.minY},${balancedFit.fittedBounds.maxX},${balancedFit.fittedBounds.maxY}`;
   }
 
   function renderRegionInfo(node: RouteNode, regionInfo: RegionInfo) {

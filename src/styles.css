@@ -423,19 +423,15 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   border-radius: 1.5rem;
   border: 1px solid rgba(226, 232, 240, 0.14);
   background:
-    radial-gradient(circle at 30% 24%, rgba(125, 211, 252, 0.08), transparent 15rem),
-    radial-gradient(circle at 70% 70%, rgba(14, 116, 144, 0.16), transparent 19rem),
-    linear-gradient(180deg, rgba(186, 230, 253, 0.04), transparent 32%),
-    linear-gradient(160deg, rgba(8, 47, 73, 0.94), rgba(2, 18, 43, 0.97));
+    radial-gradient(circle at 50% 44%, rgba(14, 116, 144, 0.16), transparent 23rem),
+    linear-gradient(145deg, #082f49 0%, #062744 48%, #03152f 100%);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -1.2rem 3.2rem rgba(2, 6, 23, 0.32);
   overflow: hidden;
 }
 .korea-map-overlay[data-map-style="vector-satellite-inspired"] .korea-map-canvas {
   background:
-    radial-gradient(circle at 29% 22%, rgba(125, 211, 252, 0.10), transparent 13rem),
-    radial-gradient(circle at 64% 70%, rgba(14, 116, 144, 0.18), transparent 19rem),
-    linear-gradient(180deg, rgba(224, 242, 254, 0.06), transparent 34%),
-    linear-gradient(145deg, rgba(7, 47, 76, 0.96), rgba(3, 37, 71, 0.94) 48%, rgba(2, 18, 43, 0.98));
+    radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.12), transparent 22rem),
+    linear-gradient(145deg, #082f49 0%, #06233f 52%, #03152f 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.16),
     inset 0 -1.4rem 3.4rem rgba(2, 6, 23, 0.38),
@@ -447,9 +443,7 @@ dd { margin: 0.2rem 0 0; color: #f8fafc; }
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(circle at 44% 31%, rgba(59, 130, 246, 0.10), transparent 13rem),
-    radial-gradient(circle at 57% 67%, rgba(14, 165, 233, 0.10), transparent 15rem),
-    linear-gradient(145deg, rgba(15, 23, 42, 0.08), rgba(12, 74, 110, 0.14) 48%, rgba(2, 6, 23, 0.22));
+    radial-gradient(circle at 50% 45%, rgba(125, 211, 252, 0.08), transparent 20rem);
   pointer-events: none;
 }
 .korea-map-canvas::after {
