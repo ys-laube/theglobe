@@ -481,6 +481,8 @@ try {
         const mapHoverHighlightsList = busanChoice?.classList.contains('is-highlighted');
         busanRegion?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const koreaRegionCount = document.querySelectorAll('.korea-region').length;
+        const koreaRegionIds = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('data-region-id')).filter(Boolean);
+        const overviewFamilyTargetRegionIds = koreaRegionIds.filter((id) => ['kr-seoul-mapo', 'kr-busan-haeundae', 'kr-gyeongnam-gimhae', 'kr-gimhae-bonghwang'].includes(id));
         const koreaRegionLabels = [...document.querySelectorAll('.korea-region')].map((node) => node.getAttribute('aria-label') || node.textContent?.trim() || '').filter(Boolean);
         await clickButtonByStrong('대구광역시');
         await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-daegu', 'Daegu non-family region tier');
@@ -664,6 +666,8 @@ try {
           vectorMapTelemetry,
           mapCanvasPresent: Boolean(document.querySelector('.korea-map-canvas svg')),
           koreaRegionCount,
+          koreaRegionIds,
+          overviewFamilyTargetRegionIds,
           koreaRegionLabels,
           daeguInfoText,
           daeguInfoHref,
@@ -775,7 +779,8 @@ try {
   } else if (result.mobileLayout?.viewport?.width !== 390) {
     throw new Error(`Expected coordinate hit-test skip only for mandatory 390px mobile smoke, found ${JSON.stringify(result.mobileLayout?.viewport)}`);
   }
-  if (result.koreaRegionCount !== 21) throw new Error(`Expected 21 Korea region polygons (17 first-level + 4 family drilldowns), found ${result.koreaRegionCount}`);
+  if (result.koreaRegionCount !== 17) throw new Error(`Expected overview to render exactly 17 first-level Korea region polygons, found ${result.koreaRegionCount}: ${result.koreaRegionIds?.join(', ')}`);
+  if ((result.overviewFamilyTargetRegionIds ?? []).length !== 0) throw new Error(`Expected no family/drilldown polygons in overview render set, found ${result.overviewFamilyTargetRegionIds?.join(', ')}`);
   if (!result.listHoverHighlightsMap || !result.mapHoverHighlightsList) throw new Error('Expected Korea list/map cross-highlight in both directions');
   if (result.vectorMapTelemetry?.style !== 'vector-satellite-inspired' || result.vectorMapTelemetry?.hostStyle !== 'vector-satellite-inspired') throw new Error(`Expected vector-only Korea map style marker, found ${JSON.stringify(result.vectorMapTelemetry)}`);
   if (result.vectorMapTelemetry?.rasterLayerPresent || result.vectorMapTelemetry?.rasterImagePresent || result.vectorMapTelemetry?.imageryStatePresent) throw new Error(`Expected no Korea raster layer/image/imagery telemetry, found ${JSON.stringify(result.vectorMapTelemetry)}`);
@@ -783,8 +788,7 @@ try {
   if (!result.daeguInfoText?.includes('Landmark') || !result.daeguInfoText?.includes('Food') || !result.daeguInfoText?.includes('서문시장') || !result.daeguInfoText?.includes('막창구이')) throw new Error(`Expected non-family region Landmark/Food panel, found ${result.daeguInfoText}`);
   if (!result.daeguInfoHref?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected non-family region Namuwiki link, found ${result.daeguInfoHref}`);
   if (!result.selectedRegionToggleUpOk) throw new Error('Expected selected active Korea region to toggle back to its parent tier');
-  if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
-  for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동', '제주특별자치도']) {
+  for (const requiredRegionLabel of ['서울특별시', '부산광역시', '경상남도', '제주특별자치도']) {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);

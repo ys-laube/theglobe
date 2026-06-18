@@ -33,11 +33,11 @@ const KOREA_MAP_RENDER_HEIGHT = 124;
 // apply one shared zoomed peninsula composition transform, but not
 // breakpoint-specific manual offsets or live map alignment.
 const KOREA_VECTOR_ALIGNMENT = {
-  translateX: 0.6,
-  translateY: 9.2,
+  translateX: 0.8,
+  translateY: 6.9,
   originX: 50,
   originY: 54,
-  scale: 1.24,
+  scale: 1.30,
 } as const;
 
 function koreaVectorTransform() {
@@ -199,13 +199,6 @@ const familyRouteSegments: readonly FamilyRouteSegment[] = [
   { id: 'route-gimhae-bonghwang', from: 'kr-gyeongnam-gimhae', to: 'kr-gimhae-bonghwang', label: '김해시에서 봉황동 가족 자리로 확대' },
 ];
 
-const familyTargetRegionOrder = [
-  'kr-seoul-mapo',
-  'kr-busan-haeundae',
-  'kr-gyeongnam-gimhae',
-  'kr-gimhae-bonghwang',
-] as const satisfies readonly RegionId[];
-
 function buildActiveRouteSegmentIdsByRegion() {
   const segmentByTarget = new Map<RegionId, FamilyRouteSegment>(familyRouteSegments.map((segment) => [segment.to, segment]));
   const activeEntries = (Object.keys(routeNodes) as RegionId[]).map((region) => {
@@ -223,7 +216,27 @@ function buildActiveRouteSegmentIdsByRegion() {
 }
 
 const activeRouteSegmentIdsByRegion = buildActiveRouteSegmentIdsByRegion();
-const regionOrder: RegionId[] = [...firstLevelRegionOrder, ...familyTargetRegionOrder];
+const renderableRegionSet = new Set<RegionId>(
+  (Object.keys(routeNodes) as RegionId[]).filter((id) => id !== 'kr-korea-overview')
+);
+
+function visibleRegionIdsFor(region: RegionId): readonly RegionId[] {
+  const ids = new Set<RegionId>(firstLevelRegionOrder);
+  if (region === 'kr-korea-overview') return [...ids];
+
+  ids.add(region);
+  routeNodes[region].next.forEach((nextId) => ids.add(nextId));
+
+  // Keep the active ancestor path available for context/toggle behavior, but
+  // never leak unrelated family drilldown polygons into the first overview.
+  let parent = routeNodes[region].parent;
+  while (parent && parent !== 'kr-korea-overview') {
+    ids.add(parent);
+    parent = routeNodes[parent].parent;
+  }
+
+  return [...ids].filter((id) => renderableRegionSet.has(id));
+}
 
 function polygonArea(points: readonly (readonly [number, number])[]) {
   const doubledArea = points.reduce((sum, point, index) => {
@@ -464,7 +477,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     vectorLayer.setAttribute('transform', koreaVectorTransform());
     svg.append(vectorLayer);
 
-    const paintOrder = [...regionOrder].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
+    const paintOrder = [...visibleRegionIdsFor(selectedRegion)].sort((a, b) => polygonArea(featureById(b).polygon) - polygonArea(featureById(a).polygon));
     for (const id of paintOrder) {
       const feature = featureById(id);
       const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'path');

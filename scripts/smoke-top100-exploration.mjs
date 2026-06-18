@@ -46,6 +46,9 @@ assert(stylesSource.includes('.top100-bottom-list .rank-group ol') && stylesSour
 assert(stylesSource.includes('.region-list[data-top100-list-surface="panel"]') && stylesSource.includes('display: none'), 'desktop TOP100 mode must hide the cramped right-panel duplicate list');
 assert(stylesSource.includes('.rank-group ol') && stylesSource.includes('list-style: none'), 'TOP100 ordered-list native markers must be disabled');
 assert(stylesSource.includes('padding-left: 0'), 'TOP100 rows must not reserve native marker indentation');
+assert(stylesSource.includes('.globe-stage') && stylesSource.includes('height: min(76vh, 820px)'), 'desktop globe stage must use the shared responsive height contract');
+assert(stylesSource.includes('.panel') && stylesSource.includes('height: min(76vh, 820px)') && stylesSource.includes('overflow-y: auto'), 'desktop discovery panel must match globe height and allow long detail scrolling');
+assert(stylesSource.includes('.panel { order: 3; height: auto; min-height: 0; margin-top: 0; max-height: none; overflow: visible; scrollbar-gutter: auto; }'), 'mobile discovery panel must keep the existing visible flow override');
 assert(overlaySource.includes('focusCity(capital)'), 'overlay list/marker selection must focus and open the card');
 assert(overlaySource.includes('selectedCityGlow'), 'overlay must add a selected city marker glow mesh');
 assert(overlaySource.includes("button.setAttribute('aria-current', 'true')"), 'overlay must mark the selected TOP100 list city');
