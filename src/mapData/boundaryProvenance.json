@@ -32,13 +32,9 @@
       "currentException": "Static overlay now uses real WGS84 province/municipality rings normalized to the vector-only viewBox; simplified and decorative only, not raw legal-boundary coordinates."
     },
     "islandReferencePolicy": {
-      "requiredIslandReferencesKo": [
-        "제주도",
-        "울릉도",
-        "독도"
-      ],
-      "renderingDecision": "Render Jeju/Ulleungdo/Dokdo as non-region static decorative markers/labels in the vector satellite-inspired overlay so the interactive 17+4 region polygon contract remains stable.",
-      "accuracyNotice": "Island points are normalized visual anchors only and must not be described as legal, cadastral, survey, routing, emergency, or address coordinates."
+      "requiredIslandReferencesKo": [],
+      "renderingDecision": "Do not render separate decorative island markers or labels in the Korea family overlay. Jeju is represented by its 제주특별자치도 administrative polygon; Ulleungdo and Dokdo are omitted by product decision to keep the premium family navigation map uncluttered.",
+      "accuracyNotice": "This overlay is a family gift navigation surface and must not be presented as a legal boundary or sovereignty claim."
     }
   },
   "verifiedSourceCandidates": [
@@ -93,5 +89,5 @@
       "reason": "Violates the static/no-live-API requirement and adds runtime dependency risk."
     }
   ],
-  "attributionText": "Korea family overlay: static normalized vector satellite-inspired boundary-guide visualization documented from 국토교통부_일별법정구역정보 / VWorld legal-boundary metadata; includes decorative Jeju/Ulleungdo/Dokdo island references for family navigation only, no legal-boundary accuracy claim."
+  "attributionText": "Korea family overlay: static normalized vector satellite-inspired boundary-guide visualization documented from 국토교통부_일별법정구역정보 / VWorld legal-boundary metadata; decorative island marker references are intentionally removed, Jeju is represented only by 제주특별자치도, and no legal-boundary accuracy claim is made."
 }

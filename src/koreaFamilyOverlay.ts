@@ -19,20 +19,9 @@ type ReferenceLine = {
   readonly points: readonly (readonly [number, number])[];
 };
 
-type IslandReference = {
-  readonly id: string;
-  readonly nameKo: string;
-  readonly nameEn: string;
-  readonly kind: string;
-  readonly point: readonly [number, number];
-  readonly radius: number;
-  readonly labelOffset: readonly [number, number];
-};
-
 type OverlayData = {
   readonly features: readonly BoundaryFeature[];
   readonly worldReferenceLines: readonly ReferenceLine[];
-  readonly islandReferences: readonly IslandReference[];
 };
 
 const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100';
@@ -44,11 +33,11 @@ const KOREA_MAP_RENDER_HEIGHT = 124;
 // apply one shared zoomed peninsula composition transform, but not
 // breakpoint-specific manual offsets or live map alignment.
 const KOREA_VECTOR_ALIGNMENT = {
-  translateX: 0,
-  translateY: 11,
-  originX: 50,
-  originY: 51,
-  scale: 1.12,
+  translateX: 1.8,
+  translateY: 12,
+  originX: 49,
+  originY: 52,
+  scale: 1.16,
 } as const;
 
 function koreaVectorTransform() {
@@ -279,13 +268,22 @@ function centroidOf(id: RegionId) {
 
 function decorativeNorthSilhouettePath() {
   return [
-    'M 27.5 0.8',
-    'C 35.4 -3.8 49.8 -4.5 61.9 0.8',
-    'C 74.2 6.2 80.8 15.3 77.1 24.1',
-    'C 73.9 31.8 64.1 35.6 55.7 32.5',
-    'C 48.2 29.8 42.1 31.6 36.1 36.6',
-    'C 31.4 40.4 24.7 38.1 22.1 31.9',
-    'C 17.9 21.7 18.2 7.1 27.5 0.8',
+    'M 24.8 3.6',
+    'C 30.0 0.6 37.4 -0.6 44.0 1.0',
+    'C 52.7 3.1 61.7 2.8 69.7 7.7',
+    'C 76.0 11.5 79.7 17.5 78.2 23.7',
+    'C 76.9 29.0 72.8 31.9 68.6 33.2',
+    'C 63.8 34.7 59.1 34.1 55.0 31.8',
+    'C 51.1 29.7 46.9 29.4 42.9 31.2',
+    'C 38.7 33.1 35.4 36.2 31.8 39.4',
+    'L 29.8 37.5',
+    'C 33.4 34.0 36.8 30.7 41.4 28.5',
+    'C 46.0 26.3 51.3 26.5 56.0 28.8',
+    'C 60.5 31.0 65.6 31.0 69.7 28.8',
+    'C 73.1 26.9 75.4 23.5 75.1 19.6',
+    'C 74.6 13.9 68.9 9.8 62.5 7.4',
+    'C 55.3 4.7 48.0 5.5 41.4 3.8',
+    'C 34.9 2.2 29.4 3.0 25.8 6.0',
     'Z',
   ].join(' ');
 }
@@ -329,7 +327,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
   host.dataset.mapStyle = 'vector-satellite-inspired';
   host.dataset.mapPalette = 'deep-ocean-vector';
   host.dataset.mapContract = 'normalized-source-rectangular-render';
-  host.dataset.islandCoverage = 'jeju-ulleungdo-dokdo';
+  host.dataset.islandCoverage = 'none';
   host.dataset.familyTraces = 'hidden';
   mapMount.dataset.mapStyle = 'vector-satellite-inspired';
   mapMount.dataset.familyTraces = 'hidden';
@@ -438,7 +436,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     svg.setAttribute('role', 'img');
     svg.setAttribute('aria-label', '가족 경로 중심의 한국 지도');
 
-    const data = koreaFamilyBoundaries as unknown as OverlayData;
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     defs.innerHTML = `
       <radialGradient id="korea-map-glow" cx="52%" cy="46%" r="62%">
@@ -457,19 +454,10 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
         <stop offset="58%" stop-color="#86efac" stop-opacity="0.60"/>
         <stop offset="100%" stop-color="#22c55e" stop-opacity="0.46"/>
       </linearGradient>
-      <pattern id="korea-terrain-contours" width="7" height="7" patternUnits="userSpaceOnUse">
-        <path d="M-1 5.6C1.2 4.4 3.2 4.4 5.2 5.6S9.2 6.8 11 5.5" fill="none" stroke="#dcfce7" stroke-opacity="0.10" stroke-width="0.28"/>
-        <path d="M0.8 1.6C2.4 0.9 4 0.9 5.8 1.7" fill="none" stroke="#052e16" stroke-opacity="0.08" stroke-width="0.22"/>
-      </pattern>
       <radialGradient id="korea-map-vignette" cx="50%" cy="48%" r="68%">
         <stop offset="58%" stop-color="#0f172a" stop-opacity="0"/>
         <stop offset="100%" stop-color="#020617" stop-opacity="0.74"/>
       </radialGradient>
-      <pattern id="korea-static-grain" width="6" height="6" patternUnits="userSpaceOnUse">
-        <circle cx="1.2" cy="1.4" r="0.22" fill="#fef3c7" fill-opacity="0.12"/>
-        <circle cx="4.6" cy="3.8" r="0.18" fill="#67e8f9" fill-opacity="0.10"/>
-        <circle cx="2.9" cy="5.1" r="0.14" fill="#bbf7d0" fill-opacity="0.11"/>
-      </pattern>
       <filter id="korea-land-soft-shadow" x="-18%" y="-18%" width="136%" height="136%">
         <feDropShadow dx="0" dy="0.35" stdDeviation="0.42" flood-color="#020617" flood-opacity="0.55"/>
         <feDropShadow dx="0" dy="-0.12" stdDeviation="0.18" flood-color="#dcfce7" flood-opacity="0.16"/>
@@ -482,24 +470,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     oceanGlow.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
     oceanGlow.setAttribute('fill', 'url(#korea-map-glow)');
     svg.append(oceanGlow);
-    const staticTexture = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    staticTexture.setAttribute('x', '0');
-    staticTexture.setAttribute('y', '0');
-    staticTexture.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
-    staticTexture.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
-    staticTexture.setAttribute('class', 'korea-static-texture');
-    staticTexture.setAttribute('fill', 'url(#korea-static-grain)');
-    staticTexture.setAttribute('aria-hidden', 'true');
-    svg.append(staticTexture);
-    const terrainContours = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    terrainContours.setAttribute('x', '0');
-    terrainContours.setAttribute('y', '0');
-    terrainContours.setAttribute('width', String(KOREA_MAP_RENDER_WIDTH));
-    terrainContours.setAttribute('height', String(KOREA_MAP_RENDER_HEIGHT));
-    terrainContours.setAttribute('class', 'korea-terrain-contours');
-    terrainContours.setAttribute('fill', 'url(#korea-terrain-contours)');
-    terrainContours.setAttribute('aria-hidden', 'true');
-    svg.append(terrainContours);
     const selectedNode = routeNodes[selectedRegion];
     const nextIds = new Set(selectedNode.next);
     const householdTarget = new Set<RegionId>(selectedNode.households ? [selectedRegion] : []);
@@ -562,62 +532,6 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     }
 
 
-    const islandLayer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    islandLayer.setAttribute('class', 'korea-island-reference-layer');
-    islandLayer.setAttribute('aria-label', '제주 울릉도 독도 정적 섬 기준점');
-    data.islandReferences.forEach((island) => {
-      const [x, y] = island.point;
-      const [dx, dy] = island.labelOffset;
-      const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-      group.setAttribute('class', 'korea-island-reference');
-      group.dataset.islandId = island.id;
-      group.setAttribute('aria-label', `${island.nameKo} 정적 섬 기준점`);
-      const halo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      halo.setAttribute('cx', String(x));
-      halo.setAttribute('cy', String(y));
-      halo.setAttribute('r', String(island.radius + 1.25));
-      halo.setAttribute('class', 'korea-island-halo');
-      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      dot.setAttribute('cx', String(x));
-      dot.setAttribute('cy', String(y));
-      dot.setAttribute('r', String(island.radius));
-      dot.setAttribute('class', 'korea-island-dot');
-      group.append(halo, dot);
-      const islandRegionId = island.nameKo === '울릉도' || island.nameKo === '독도' ? 'kr-gyeongbuk' : island.nameKo === '제주도' ? 'kr-jeju' : null;
-      if (islandRegionId) {
-        const hitTarget = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        hitTarget.setAttribute('cx', String(x));
-        hitTarget.setAttribute('cy', String(y));
-        hitTarget.setAttribute('r', String(Math.max(island.radius + 2.6, 3.2)));
-        hitTarget.setAttribute('class', 'korea-island-hit-target');
-        hitTarget.dataset.islandHitTarget = 'true';
-        hitTarget.dataset.islandId = island.id;
-        hitTarget.dataset.regionId = islandRegionId;
-        hitTarget.setAttribute('tabindex', '0');
-        hitTarget.setAttribute('role', 'button');
-        hitTarget.setAttribute('aria-label', `${island.nameKo} — ${routeNodes[islandRegionId].label} 선택`);
-        hitTarget.addEventListener('pointerenter', () => setHighlightedRegion(islandRegionId));
-        hitTarget.addEventListener('pointerleave', () => setHighlightedRegion(null));
-        hitTarget.addEventListener('focus', () => setHighlightedRegion(islandRegionId));
-        hitTarget.addEventListener('blur', () => setHighlightedRegion(null));
-        hitTarget.addEventListener('click', () => activateRegion(islandRegionId));
-        hitTarget.addEventListener('keydown', (event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            activateRegion(islandRegionId);
-          }
-        });
-        group.append(hitTarget);
-      }
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', String(x + dx));
-      label.setAttribute('y', String(y + dy));
-      label.setAttribute('class', 'korea-island-label');
-      label.textContent = island.nameKo;
-      group.append(label);
-      islandLayer.append(group);
-    });
-    vectorLayer.append(islandLayer);
 
     if (familyTraceState === 'terminal') {
       householdMarkers.forEach((markerModel) => {
@@ -677,7 +591,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
 
     mapMount.dataset.mapPalette = host.dataset.mapPalette ?? 'deep-ocean-vector';
     mapMount.dataset.mapContract = host.dataset.mapContract ?? 'normalized-source-rectangular-render';
-    mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'jeju-ulleungdo-dokdo';
+    mapMount.dataset.islandCoverage = host.dataset.islandCoverage ?? 'none';
     mapMount.append(svg);
   }
 

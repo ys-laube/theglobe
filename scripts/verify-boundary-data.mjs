@@ -116,7 +116,6 @@ const firstLevelIds = new Set([
   'kr-gyeonggi', 'kr-gangwon', 'kr-chungbuk', 'kr-chungnam', 'kr-jeonbuk', 'kr-jeonnam', 'kr-gyeongbuk', 'kr-gyeongnam', 'kr-jeju',
 ]);
 const familyTargetIds = new Set(['kr-seoul-mapo', 'kr-busan-haeundae', 'kr-gyeongnam-gimhae', 'kr-gimhae-bonghwang']);
-const expectedIslandReferencesKo = ['제주도', '울릉도', '독도'];
 const requiredIds = new Set([...firstLevelIds, ...familyTargetIds]);
 const expectedTiers = new Map([
   ['kr-seoul', 'special-city'], ['kr-busan', 'metropolitan-city'], ['kr-daegu', 'metropolitan-city'], ['kr-incheon', 'metropolitan-city'],
@@ -192,45 +191,27 @@ for (let leftIndex = 0; leftIndex < firstLevelFeatures.length; leftIndex += 1) {
   }
 }
 
-assert(Array.isArray(boundaries.islandReferences), 'boundary data must declare Jeju/Ulleungdo/Dokdo island references');
-assert(boundaries.islandReferences.length === expectedIslandReferencesKo.length, 'boundary data must declare exactly 3 static island references');
-sameMembers(boundaries.islandReferences.map((island) => island.nameKo), expectedIslandReferencesKo, 'static island reference names');
-sameMembers(dataProvenance.koreaBoundaries.requiredIslandReferencesKo, expectedIslandReferencesKo, 'data provenance static island reference names');
-sameMembers(provenance.committedAssetStrategy.islandReferencePolicy?.requiredIslandReferencesKo, expectedIslandReferencesKo, 'boundary provenance island reference names');
-const expectedIslandContexts = new Map([
-  ['제주도', { relatedFeatureId: 'kr-jeju', adminContextKo: ['제주특별자치도'] }],
-  ['울릉도', { relatedFeatureId: 'kr-gyeongbuk', adminContextKo: ['경상북도', '울릉군', '울릉읍'] }],
-  ['독도', { relatedFeatureId: 'kr-gyeongbuk', adminContextKo: ['경상북도', '울릉군', '울릉읍', '독도리'] }],
-]);
-for (const island of boundaries.islandReferences) {
-  assert(island.kind === 'decorative-island-reference', `${island.nameKo} must be decorative island reference data`);
-  assert(Array.isArray(island.point) && island.point.length === 2, `${island.nameKo} needs a static normalized point`);
-  assert(Array.isArray(island.labelOffset) && island.labelOffset.length === 2, `${island.nameKo} needs a static label offset`);
-  assert(Number.isFinite(island.radius) && island.radius > 0 && island.radius <= 2, `${island.nameKo} radius must stay decorative and bounded`);
-  for (const [x, y] of [island.point, island.labelOffset]) {
-    assert(Number.isFinite(x) && Number.isFinite(y), `${island.nameKo} island coordinate must be finite`);
-  }
-  assert(/static|정적/i.test(island.sourceNote ?? ''), `${island.nameKo} must document static source treatment`);
-  assert(/not a legal coordinate/i.test(island.sourceNote ?? '') || island.nameKo === '제주도', `${island.nameKo} must reject legal-coordinate use`);
-  const expectedContext = expectedIslandContexts.get(island.nameKo);
-  assert(expectedContext, `${island.nameKo} must have an expected administrative context`);
-  assert(island.relatedFeatureId === expectedContext.relatedFeatureId, `${island.nameKo} must be associated with ${expectedContext.relatedFeatureId}`);
-  sameMembers(island.adminContextKo, expectedContext.adminContextKo, `${island.nameKo} administrative context`);
-  sameMembers(dataProvenance.koreaBoundaries.islandAdministrativeContext?.[island.nameKo], expectedContext.adminContextKo, `${island.nameKo} data provenance administrative context`);
-}
-assert(koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must render static island references');
-assert(koreaOverlaySource.includes('korea-island-label') && koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must render island reference labels from static data');
-assert(!koreaOverlaySource.includes("island.id !== 'jeju-reference'"), 'Korea overlay must render 제주도 label instead of hiding it');
+assert(Array.isArray(boundaries.islandReferences), 'boundary data must declare an islandReferences array for explicit removal policy');
+assert(boundaries.islandReferences.length === 0, 'boundary data must not render decorative 제주도/울릉도/독도 island references');
+assert(Array.isArray(dataProvenance.koreaBoundaries.requiredIslandReferencesKo) && dataProvenance.koreaBoundaries.requiredIslandReferencesKo.length === 0, 'data provenance must lock decorative island references as removed');
+assert(Object.keys(dataProvenance.koreaBoundaries.islandAdministrativeContext ?? {}).length === 0, 'data provenance must not keep decorative island administrative contexts');
+assert((provenance.committedAssetStrategy.islandReferencePolicy?.requiredIslandReferencesKo ?? []).length === 0, 'boundary provenance must lock decorative island references as removed');
+assert(/Do not render separate decorative island markers/i.test(provenance.committedAssetStrategy.islandReferencePolicy?.renderingDecision ?? ''), 'boundary provenance must document removed decorative island marker policy');
+assert(!koreaOverlaySource.includes('korea-island-reference'), 'Korea overlay must not render decorative island reference groups');
+assert(!koreaOverlaySource.includes('korea-island-label') && !koreaOverlaySource.includes('island.nameKo'), 'Korea overlay must not render decorative island reference labels');
+assert(!koreaOverlaySource.includes('data-island-hit-target') && !koreaOverlaySource.includes('dataset.islandHitTarget'), 'Korea overlay must not render island click/touch targets');
+assert(!koreaOverlaySource.includes('울릉도') && !koreaOverlaySource.includes('독도') && !koreaOverlaySource.includes('제주도 정적'), 'Korea overlay must remove Ulleungdo/Dokdo and extra Jeju decorative copy');
 assert(koreaOverlaySource.includes('decorativeNorthSilhouettePath') && koreaOverlaySource.includes('dataset.decorativeNorthSilhouette'), 'Korea overlay must render a non-interactive decorative northern peninsula silhouette');
 assert(koreaOverlaySource.includes('KOREA_MAP_SOURCE_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_SOURCE_VIEWBOX = '0 0 100 100'"), 'Korea overlay must keep a named normalized source SVG viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_VIEWBOX') && koreaOverlaySource.includes("const KOREA_MAP_RENDER_VIEWBOX = '0 0 100 124'"), 'Korea overlay must keep a named rectangular render viewBox contract');
 assert(koreaOverlaySource.includes('KOREA_MAP_RENDER_HEIGHT') && koreaOverlaySource.includes('KOREA_MAP_RENDER_WIDTH'), 'Korea overlay must size render background layers from render constants');
-for (const requiredAlignmentFragment of ['translateX: 0', 'translateY: 11', 'originX: 50', 'originY: 51', 'scale: 1.12']) {
-  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve zoomed composition ${requiredAlignmentFragment}`);
+for (const requiredAlignmentFragment of ['translateX: 1.8', 'translateY: 12', 'originX: 49', 'originY: 52', 'scale: 1.16']) {
+  assert(koreaOverlaySource.includes(requiredAlignmentFragment), `Korea vector alignment contract must preserve centered peninsula composition ${requiredAlignmentFragment}`);
 }
 assert(koreaOverlaySource.includes('normalized in the 0..100') && koreaOverlaySource.includes('zoomed peninsula composition'), 'Korea overlay alignment comment must document source-vs-render zoomed composition contract');
-assert(koreaOverlaySource.includes('korea-island-hit-target') && koreaOverlaySource.includes('dataset.islandHitTarget'), 'Korea overlay must render explicit island click/touch targets');
-assert(koreaOverlaySource.includes("island.nameKo === '울릉도' || island.nameKo === '독도' ? 'kr-gyeongbuk'"), 'Ulleungdo/Dokdo island hit targets must select Gyeongbuk');
+assert(!koreaOverlaySource.includes('korea-static-grain') && !koreaOverlaySource.includes('korea-terrain-contours'), 'Korea overlay must not render grain/wave texture layers over the ocean');
+assert(!stylesSource.includes('.korea-island-reference') && !stylesSource.includes('.korea-island-hit-target'), 'Korea styles must not retain decorative island marker styling');
+assert(stylesSource.includes('.korea-north-silhouette') && stylesSource.includes('pointer-events: none'), 'Korea styles must keep the north silhouette non-interactive');
 
 const pathEnds = boundaries.familyPathOrder.map((path) => path.at(-1)).sort();
 sameMembers(pathEnds, ['kr-busan-haeundae', 'kr-gimhae-bonghwang', 'kr-seoul-mapo'], 'family path terminal regions');
@@ -328,9 +309,7 @@ assert(!koreaOverlaySource.includes('korea-raster-layer') && !koreaOverlaySource
 assert(!koreaOverlaySource.includes('dataset.imageryState') && !koreaOverlaySource.includes('__KOREA_IMAGERY_FORCE_FALLBACK__'), 'Korea overlay must not retain raster imagery telemetry or fallback hooks');
 assert(!assetsPolicySource.includes('KOREA_GIBS_BLUE_MARBLE'), 'Korea-specific GIBS raster constants must be removed while global Earth imagery remains');
 assert(stylesSource.includes('vector-satellite-inspired') && stylesSource.includes('.korea-map-canvas::before') && stylesSource.includes('.korea-map-canvas::after') && stylesSource.includes('aspect-ratio: 5 / 6.2'), 'Korea CSS must provide vector-only blue-ocean/green-land rectangular texture hooks');
-assert(stylesSource.includes('.korea-island-hit-target') && stylesSource.includes('pointer-events: auto'), 'Korea CSS must make island hit targets touchable');
 assert(stylesSource.includes('.korea-north-silhouette') && stylesSource.includes('pointer-events: none'), 'Korea CSS must style decorative north silhouette as non-interactive');
-assert(stylesSource.includes('.korea-island-label') && stylesSource.includes('opacity: 0') && stylesSource.includes('.korea-island-reference:hover .korea-island-label'), 'Korea CSS must hide island labels until hover/focus');
 const declaredSlotIds = householdConfigSource.match(/\{ id: '[^']+-band-\d+'/g) ?? [];
 assert(declaredSlotIds.length === 7, 'household config must declare exactly 7 Band slot ids');
 assert(new Set(declaredSlotIds).size === declaredSlotIds.length, 'declared household Band slot ids must be unique');

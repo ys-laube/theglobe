@@ -398,7 +398,10 @@ try {
             header,
             canvas: canvasRect,
             panel,
+            overlayDisplay: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).display : null,
             overlayOverflowY: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).overflowY : null,
+            overlayScrollHeight: document.querySelector('.korea-map-overlay')?.scrollHeight ?? null,
+            overlayClientHeight: document.querySelector('.korea-map-overlay')?.clientHeight ?? null,
             overlayGridColumns: document.querySelector('.korea-map-overlay') ? getComputedStyle(document.querySelector('.korea-map-overlay')).gridTemplateColumns : null,
             canvasAspectRatio: canvasRect ? canvasRect.width / canvasRect.height : null,
             canvasPanelGap: canvasRect && panel ? panel.top - canvasRect.bottom : null,
@@ -510,8 +513,9 @@ try {
         dokdoHit?.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
         const vectorTextureLayerPresent = Boolean(
           document.querySelector('.korea-static-texture')
-          && document.querySelector('.korea-map-vignette')
-          && document.querySelector('#korea-static-grain')
+          || document.querySelector('#korea-static-grain')
+          || document.querySelector('.korea-terrain-contours')
+          || document.querySelector('#korea-terrain-contours')
         );
         const vectorPremiumStyle = {
           palette: document.querySelector('.korea-map-overlay')?.getAttribute('data-map-palette'),
@@ -583,6 +587,10 @@ try {
           const householdCard = document.querySelector('.household-card[data-household-id="' + householdId + '"]');
           const householdMarker = document.querySelector('.household-marker[data-household-id="' + householdId + '"]');
           if (!householdCard || !householdMarker) throw new Error('Missing household card/marker data-household-id pair for ' + householdId);
+          const householdMarkerDot = householdMarker.querySelector('.household-marker-dot');
+          const householdMarkerLabel = householdMarker.querySelector('.household-marker-label');
+          const markerLabelOpacityBeforeHover = Number.parseFloat(getComputedStyle(householdMarkerLabel).opacity || '1');
+          const markerDotOpacityBeforeHover = Number.parseFloat(getComputedStyle(householdMarkerDot).opacity || '1');
           householdCard.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
           await waitFor(() => householdMarker.classList.contains('is-highlighted') && window.__GLOBE_QA__?.highlightedHouseholdId === householdId, householdLabel + ' card highlights map marker');
           const cardHoverHighlightsMarker = householdMarker.classList.contains('is-highlighted');
@@ -591,6 +599,9 @@ try {
           householdMarker.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
           await waitFor(() => householdCard.classList.contains('is-highlighted') && window.__GLOBE_QA__?.highlightedHouseholdId === householdId, householdLabel + ' map marker highlights card');
           const markerHoverHighlightsCard = householdCard.classList.contains('is-highlighted');
+          await new Promise((resolve) => setTimeout(resolve, 420));
+          const markerLabelOpacityOnHover = Number.parseFloat(getComputedStyle(householdMarkerLabel).opacity || '0');
+          const markerDotOpacityOnHover = Number.parseFloat(getComputedStyle(householdMarkerDot).opacity || '0');
           householdMarker.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
           await clickButtonByStrong(householdLabel);
           await waitFor(() => window.__GLOBE_QA__?.selectedHousehold === householdId, householdLabel + ' household');
@@ -622,6 +633,10 @@ try {
             cardHoverHighlightsMarker,
             markerHoverHighlightsCard,
             selectedMarkerHighlighted,
+            markerLabelOpacityBeforeHover,
+            markerLabelOpacityOnHover,
+            markerDotOpacityBeforeHover,
+            markerDotOpacityOnHover,
             routeChoiceLabels,
             terminalHouseholdMarkerCount,
             terminalHouseholdMarkerLabels,
@@ -741,12 +756,13 @@ try {
   if (!result.mobileLayout?.stage || result.mobileLayout.stage.width > 390 || result.mobileLayout.stage.height < 480) throw new Error(`Expected mobile globe stage to fit 390px width with usable height, found ${JSON.stringify(result.mobileLayout?.stage)}`);
   if (!result.mobileLayout?.overlay || result.mobileLayout.overlay.left < -1 || result.mobileLayout.overlay.right > 391 || result.mobileLayout.overlay.width > 390) throw new Error(`Expected Korea overlay to fit within 390px viewport, found ${JSON.stringify(result.mobileLayout?.overlay)}`);
   if (!/auto|scroll/.test(result.mobileLayout?.overlayOverflowY ?? '')) throw new Error(`Expected mobile Korea overlay to allow vertical scrolling, found overflow-y=${result.mobileLayout?.overlayOverflowY}`);
-  if (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' ')) throw new Error(`Expected single-column Korea overlay grid at 390px, found ${result.mobileLayout?.overlayGridColumns}`);
+  if (result.mobileLayout?.overlayDisplay !== 'flex' && (!result.mobileLayout?.overlayGridColumns || result.mobileLayout.overlayGridColumns.trim().includes(' '))) throw new Error(`Expected one-column or flex-stacked Korea overlay at 390px, found display=${result.mobileLayout?.overlayDisplay} grid=${result.mobileLayout?.overlayGridColumns}`);
   if (!result.mobileLayout?.canvas || result.mobileLayout.canvas.width > 390 || result.mobileLayout.canvas.width < 240 || !Number.isFinite(result.mobileLayout.canvasAspectRatio) || result.mobileLayout.canvasAspectRatio < 0.72 || result.mobileLayout.canvasAspectRatio > 0.86) throw new Error(`Expected rectangular Korea map canvas sized for 390px mobile viewport, found ${JSON.stringify(result.mobileLayout?.canvas)} ratio=${result.mobileLayout?.canvasAspectRatio}`);
-  if ((result.mobileLayout?.canvasPanelGap ?? 0) < 6 || (result.mobileLayout?.canvasPanelGap ?? 99) > 24) throw new Error(`Expected tight Korea map/panel spacing at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
-  if ((result.mobileLayout?.panelOverlayBottomGap ?? -1) < 8) throw new Error(`Expected Korea route panel to keep bottom breathing room at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
-  if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom - 1) throw new Error(`Expected Korea route panel to stack below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
-  if (!Number.isFinite(result.mobileLayout?.routePanelBottomGap) || result.mobileLayout.routePanelBottomGap < 14) throw new Error(`Expected Korea route panel bottom spacing inside mobile overlay, found ${JSON.stringify(result.mobileLayout)}`);
+  if ((result.mobileLayout?.canvasPanelGap ?? 0) < 24) throw new Error(`Expected clearly separated Korea map/panel spacing at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
+  if (result.mobileLayout?.overlayDisplay !== 'flex' && (result.mobileLayout?.panelOverlayBottomGap ?? -1) < 8) throw new Error(`Expected Korea route panel to keep bottom breathing room at 390x844, found ${JSON.stringify(result.mobileLayout)}`);
+  if (!result.mobileLayout?.panel || result.mobileLayout.panel.top < result.mobileLayout.canvas.bottom + 20) throw new Error(`Expected Korea route panel to be a distinct card below the map canvas on mobile, found panel=${JSON.stringify(result.mobileLayout?.panel)}, canvas=${JSON.stringify(result.mobileLayout?.canvas)}`);
+  if (result.mobileLayout?.overlayDisplay !== 'flex' && (!Number.isFinite(result.mobileLayout?.routePanelBottomGap) || result.mobileLayout.routePanelBottomGap < 14)) throw new Error(`Expected Korea route panel bottom spacing inside mobile overlay, found ${JSON.stringify(result.mobileLayout)}`);
+  if (result.mobileLayout?.overlayDisplay === 'flex' && !((result.mobileLayout?.overlayScrollHeight ?? 0) >= (result.mobileLayout?.overlayClientHeight ?? 0))) throw new Error(`Expected flex-stacked Korea overlay to own vertical scrolling for tall panel content, found ${JSON.stringify(result.mobileLayout)}`);
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
@@ -771,23 +787,19 @@ try {
   if (!result.daeguInfoHref?.startsWith('https://namu.wiki/w/')) throw new Error(`Expected non-family region Namuwiki link, found ${result.daeguInfoHref}`);
   if (!result.selectedRegionToggleUpOk) throw new Error('Expected selected active Korea region to toggle back to its parent tier');
   if (result.koreaRegionCount < 21) throw new Error(`Expected Korea boundary layer to render at least 21 regions (17 first-level plus family targets), found ${result.koreaRegionCount}`);
-  for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동']) {
+  for (const requiredRegionLabel of ['서울특별시', '부산광역시', '해운대구', '마포구', '경상남도', '김해시', '봉황동', '제주특별자치도']) {
     if (!result.koreaRegionLabels?.some((label) => label.includes(requiredRegionLabel))) throw new Error(`Expected Korea boundary aria label for ${requiredRegionLabel}, found ${result.koreaRegionLabels?.join(', ')}`);
   }
   if (result.overviewHouseholdMarkerCount !== 0) throw new Error(`Expected no household markers before terminal tier, found ${result.overviewHouseholdMarkerCount}: ${result.overviewHouseholdMarkerLabels?.join(', ')}`);
   if (!result.decorativeNorthSilhouette?.present || !result.decorativeNorthSilhouette?.ariaHidden || result.decorativeNorthSilhouette?.pointerEvents !== 'none' || result.decorativeNorthSilhouette?.hasRegionId) throw new Error(`Expected non-interactive decorative north peninsula silhouette, found ${JSON.stringify(result.decorativeNorthSilhouette)}`);
-  if (result.islandReferenceCount !== 3) throw new Error(`Expected 3 Jeju/Ulleungdo/Dokdo island references, found ${result.islandReferenceCount}`);
-  for (const requiredIslandLabel of ['제주도', '울릉도', '독도']) {
-    if (!result.islandReferenceLabels?.includes(requiredIslandLabel)) throw new Error(`Expected island reference label ${requiredIslandLabel}, found ${result.islandReferenceLabels?.join(', ')}`);
-  }
-  for (const islandVisibility of result.islandLabelDefaultVisibility ?? []) {
-    if (!(islandVisibility.opacity <= 0.08)) throw new Error(`Expected island label ${islandVisibility.label} to be hidden until hover/focus, found opacity=${islandVisibility.opacity}`);
-  }
-  if ((result.islandHitTargets ?? []).filter((target) => target.regionId === 'kr-gyeongbuk').length < 2 || !result.dokdoHighlightsGyeongbuk) throw new Error(`Expected Ulleungdo/Dokdo touch targets to select/highlight Gyeongbuk, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);
-  if (!result.vectorTextureLayerPresent) throw new Error('Expected static vector Korea texture layers');
+  if (result.islandReferenceCount !== 0) throw new Error(`Expected no decorative island references after Ulleungdo/Dokdo removal, found ${result.islandReferenceCount}`);
+  if ((result.islandReferenceLabels ?? []).length !== 0) throw new Error(`Expected no decorative island labels, found ${result.islandReferenceLabels?.join(', ')}`);
+  if ((result.islandHitTargets ?? []).length !== 0 || result.dokdoHighlightsGyeongbuk) throw new Error(`Expected no decorative island hit targets, found ${JSON.stringify({ islandHitTargets: result.islandHitTargets, dokdoHighlightsGyeongbuk: result.dokdoHighlightsGyeongbuk })}`);
+  if (result.koreaRegionLabels?.some((label) => label.includes('제주도'))) throw new Error(`Expected no extra 제주도 label; keep only 제주특별자치도, found ${result.koreaRegionLabels?.join(', ')}`);
+  if (result.vectorTextureLayerPresent) throw new Error('Expected static Korea grain/wave texture layers to be removed');
   if (result.vectorPremiumStyle?.palette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.canvasPalette !== 'deep-ocean-vector' || result.vectorPremiumStyle?.mapContract !== 'normalized-source-rectangular-render') throw new Error(`Expected deep ocean rectangular Korea map telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
-  if (result.vectorPremiumStyle?.islandCoverage !== 'jeju-ulleungdo-dokdo') throw new Error(`Expected Jeju/Ulleungdo/Dokdo island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
-  if (!result.vectorPremiumStyle?.terrainGradientPresent || !result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients/contours, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (result.vectorPremiumStyle?.islandCoverage !== 'none') throw new Error(`Expected no decorative island coverage telemetry, found ${JSON.stringify(result.vectorPremiumStyle)}`);
+  if (!result.vectorPremiumStyle?.terrainGradientPresent || result.vectorPremiumStyle?.terrainContoursPresent) throw new Error(`Expected premium terrain gradients without contour texture layer, found ${JSON.stringify(result.vectorPremiumStyle)}`);
   if (!result.removedSatelliteCopyAbsent) throw new Error('Expected old static satellite/public-data Korea copy to be removed');
   const expectedFirstLevelInfos = [
     { key: 'busanFirstLevelInfo', label: '부산광역시', region: 'kr-busan', nextLabel: '해운대구' },
@@ -816,6 +828,7 @@ try {
     if (actualPath?.nameGateState !== 'unlocked') throw new Error(`Expected ${expectedPath.householdLabel} name gate unlocked, found ${actualPath?.nameGateState}`);
     if (actualPath?.highlightedHouseholdId !== expectedPath.householdId) throw new Error(`Expected ${expectedPath.householdLabel} highlightedHouseholdId ${expectedPath.householdId}, found ${actualPath?.highlightedHouseholdId}`);
     if (!actualPath?.cardHoverHighlightsMarker || !actualPath?.markerHoverHighlightsCard || !actualPath?.selectedMarkerHighlighted) throw new Error(`Expected ${expectedPath.householdLabel} bidirectional household card/marker highlight, found ${JSON.stringify({ cardHoverHighlightsMarker: actualPath?.cardHoverHighlightsMarker, markerHoverHighlightsCard: actualPath?.markerHoverHighlightsCard, selectedMarkerHighlighted: actualPath?.selectedMarkerHighlighted })}`);
+    if (!(actualPath?.markerLabelOpacityBeforeHover <= 0.08) || !(actualPath?.markerLabelOpacityOnHover >= 0.9) || !(actualPath?.markerDotOpacityBeforeHover < actualPath?.markerDotOpacityOnHover)) throw new Error(`Expected ${expectedPath.householdLabel} marker label/dot CSS to stay subtle until hover, found ${JSON.stringify({ markerLabelOpacityBeforeHover: actualPath?.markerLabelOpacityBeforeHover, markerLabelOpacityOnHover: actualPath?.markerLabelOpacityOnHover, markerDotOpacityBeforeHover: actualPath?.markerDotOpacityBeforeHover, markerDotOpacityOnHover: actualPath?.markerDotOpacityOnHover })}`);
     if (actualPath?.invalidFeedback !== '암구호 틀림') throw new Error(`Expected ${expectedPath.householdLabel} invalid gate copy, found ${actualPath?.invalidFeedback}`);
     if (actualPath?.linksBeforeUnlock !== 0) throw new Error(`Expected ${expectedPath.householdLabel} links hidden before unlock, found ${actualPath?.linksBeforeUnlock}`);
     if (!actualPath?.gateBeforeUnlockCopy?.includes('암구호를 대시오!') || !actualPath?.gateBeforeUnlockCopy?.includes('암구호 확인')) throw new Error(`Expected ${expectedPath.householdLabel} passphrase gate copy, found ${actualPath?.gateBeforeUnlockCopy}`);

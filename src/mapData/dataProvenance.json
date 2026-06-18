@@ -71,26 +71,11 @@
         "제주특별자치도"
       ]
     },
-    "requiredIslandReferencesKo": [
-      "제주도",
-      "울릉도",
-      "독도"
-    ],
-    "islandAdministrativeContext": {
-      "제주도": [
-        "제주특별자치도"
-      ],
-      "울릉도": [
-        "경상북도",
-        "울릉군",
-        "울릉읍"
-      ],
-      "독도": [
-        "경상북도",
-        "울릉군",
-        "울릉읍",
-        "독도리"
-      ]
+    "requiredIslandReferencesKo": [],
+    "islandAdministrativeContext": {},
+    "decorativeIslandReferencePolicy": {
+      "status": "removed",
+      "reason": "Product decision: no separate decorative island markers or labels are rendered. Jeju remains represented only by the 제주특별자치도 administrative polygon; Ulleungdo and Dokdo are omitted from the family navigation overlay to keep the premium map uncluttered."
     }
   },
   "capitals": {
