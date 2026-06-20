@@ -842,12 +842,7 @@ export function createKoreaFamilyOverlay({ host, onStateChange, onClose }: Creat
     back.className = 'ghost wide';
     back.textContent = '다른 가족 카드 보기';
     back.addEventListener('click', () => {
-      selectedHousehold = null;
-      highlightedHouseholdId = null;
-      nameGateState = 'closed';
-      unlockedHousehold = null;
-      renderRoutePanel();
-      onStateChange();
+      setRegion('kr-korea-overview');
     });
     routePanel.append(back);
   }

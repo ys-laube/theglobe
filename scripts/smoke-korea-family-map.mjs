@@ -670,6 +670,16 @@ try {
         const busanSisterPath = await unlockFamilyPath({ labels: ['부산광역시', '해운대구'], terminalRegion: 'kr-busan-haeundae', householdLabel: '건희민하찬희네', householdId: 'sister', acceptedName: '박건희' });
         const routeChoiceLabels = busanSisterPath.routeChoiceLabels;
         const links = busanSisterPath.links;
+        await clickButtonByStrong('다른 가족 카드 보기');
+        await waitFor(() => window.__GLOBE_QA__?.selectedRegion === 'kr-korea-overview' && window.__GLOBE_QA__?.selectedHousehold === null, 'family detail back returns to Korea overview');
+        const familyBackReturnsToOverview = {
+          selectedRegion: window.__GLOBE_QA__?.selectedRegion,
+          selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
+          nameGateState: window.__GLOBE_QA__?.nameGateState,
+          panelKicker: document.querySelector('.korea-route-panel .map-kicker')?.textContent?.trim(),
+          panelTitle: document.querySelector('.korea-route-panel h3')?.textContent?.trim(),
+          regionCount: document.querySelectorAll('.korea-region').length,
+        };
 
         return {
           stageKoreaMode: document.querySelector('.globe-stage')?.getAttribute('data-korea-mode'),
@@ -713,6 +723,7 @@ try {
           gyeongnamFamilyPath,
           busanParentsPath,
           busanSisterPath,
+          familyBackReturnsToOverview,
           selectedHousehold: window.__GLOBE_QA__?.selectedHousehold,
           nameGateState: window.__GLOBE_QA__?.nameGateState,
           linkCount: links.length,
@@ -782,7 +793,7 @@ try {
   if (result.viewMode !== 'korea-focus') throw new Error(`Expected renderer Korea focus mode, found ${result.viewMode}`);
   if (result.stageKoreaMode !== 'map') throw new Error(`Expected same-stage data-korea-mode=map, found ${result.stageKoreaMode}`);
   if (!result.koreaOverlayOpen) throw new Error('Expected Korea overlay to open inside globe stage');
-  if (result.selectedRegion !== 'kr-busan-haeundae') throw new Error(`Expected Haeundae drilldown, found ${result.selectedRegion}`);
+  if (result.selectedRegion !== 'kr-korea-overview') throw new Error(`Expected Korea overview after family back action, found ${result.selectedRegion}`);
   if (result.renderedFirstLevelCount !== 17) throw new Error(`Expected 17 first-level Korea labels, found ${result.renderedFirstLevelCount}`);
   if (result.overviewTraceState?.overlay !== 'hidden' || result.overviewTraceState?.canvas !== 'hidden' || result.overviewTraceState?.routeLayerPresent || result.overviewTraceState?.activeRouteCount !== 0) throw new Error(`Expected overview family traces hidden, found ${JSON.stringify(result.overviewTraceState)}`);
   if (result.coordinateHitTestSkippedForMobile !== true) {
@@ -864,9 +875,13 @@ try {
     if (actualPath?.linkCount !== expectedPath.linkCount) throw new Error(`Expected ${expectedPath.householdLabel} ${expectedPath.linkCount} Band links, found ${actualPath?.linkCount}`);
     if (JSON.stringify(actualPath?.links) !== JSON.stringify(expectedPath.links)) throw new Error(`Expected exact band.us links for ${expectedPath.householdLabel}, found ${actualPath?.links?.join(', ')}`);
   }
-  if (result.selectedHousehold !== 'sister') throw new Error(`Expected sister household, found ${result.selectedHousehold}`);
-  if (result.nameGateState !== 'unlocked') throw new Error(`Expected unlocked name gate, found ${result.nameGateState}`);
-  if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links, found ${result.linkCount}`);
+  if (result.familyBackReturnsToOverview?.selectedRegion !== 'kr-korea-overview') throw new Error(`Expected family back button to return to Korea overview, found ${JSON.stringify(result.familyBackReturnsToOverview)}`);
+  if (result.familyBackReturnsToOverview?.selectedHousehold !== null) throw new Error(`Expected family back button to clear selected household, found ${JSON.stringify(result.familyBackReturnsToOverview)}`);
+  if (result.familyBackReturnsToOverview?.nameGateState !== 'closed') throw new Error(`Expected family back button to close name gate, found ${JSON.stringify(result.familyBackReturnsToOverview)}`);
+  if (result.familyBackReturnsToOverview?.panelKicker !== '17 광역자치단체' || result.familyBackReturnsToOverview?.panelTitle !== '대한민국 17개 광역 행정구역' || result.familyBackReturnsToOverview?.regionCount !== 17) throw new Error(`Expected family back button to render 17-region overview panel, found ${JSON.stringify(result.familyBackReturnsToOverview)}`);
+  if (result.selectedHousehold !== null) throw new Error(`Expected selected household cleared after family back, found ${result.selectedHousehold}`);
+  if (result.nameGateState !== 'closed') throw new Error(`Expected closed name gate after family back, found ${result.nameGateState}`);
+  if (result.linkCount !== 3) throw new Error(`Expected 3 건희민하찬희네 Band links before family back, found ${result.linkCount}`);
   if (JSON.stringify(result.links) !== JSON.stringify(['https://band.us/band/7751923', 'https://band.us/band/60060244', 'https://band.us/band/85496439'])) throw new Error(`Expected 건희민하찬희네 real band.us links, found ${result.links.join(', ')}`);
   console.log('PASS layout, exploration, Korea family paths, and Korea morph headless smoke', JSON.stringify(result));
 } finally {
